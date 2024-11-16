@@ -1,0 +1,22 @@
+.kmap-cell,
+.truth-table-cell {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    user-select: none;
+}
+
+.card-header {
+    display: flex;
+    justify-content: center;
+    background-color: #007BFF;
+    color: white;
+}
+
+.container {
+    margin-top: 20px;
+}
