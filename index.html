@@ -35,40 +35,52 @@
             <div class="tab-pane fade show active" id="kmap" role="tabpanel" aria-labelledby="kmap-tab">
                 <div class="card">
                     <div class="card-header">
-                        Karnaugh Map
-                    </div>
-                    <div class="card-body">
-                        <div id="kmap-grid"></div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        Simplified Expression
+                        Simplified SOP
                     </div>
                     <div class="card-body">
                         <div id="kmap-output"></div>
                     </div>
                 </div>
+                <div class="card">
+                    <div class="card-header">
+                        Karnaugh Map
+                    </div>
+                    <div class="card-body" style="display: block;">
+                        <div id="kmap-grid"></div>
+                        <div style="margin: 1rem; align-items: center; text-align: center;">
+                            <button class="btn btn-sm btn-danger set-all" data-value="0" data-target="kmap">All = 0</button>
+                            <span style="margin: 0 0.5rem;"></span>
+                            <button class="btn btn-sm btn-success set-all" data-value="1" data-target="kmap">All = 1</button>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
             <div class="tab-pane fade" id="truthtable" role="tabpanel" aria-labelledby="truthtable-tab">
                 <div class="card">
                     <div class="card-header">
-                        Truth Table
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-bordered">
-                            <tbody id="truth-table-grid"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                      Simplified Expression
+                        Simplified SOP
                     </div>
                     <div class="card-body">
                         <div id="truth-table-output"></div>
                     </div>
                 </div>
+                <div class="card">
+                    <div class="card-header">
+                        Truth Table
+                    </div>
+                    <div class="card-body" style="display: block;">
+                        <table class="table table-bordered">
+                            <tbody id="truth-table-grid"></tbody>
+                        </table>
+                        <div style="margin: 1rem; align-items: center; text-align: center;">
+                            <button class="btn btn-sm btn-danger set-all" data-value="0" data-target="truthtable">All = 0</button>
+                            <span style="margin: 0 0.5rem;"></span>
+                            <button class="btn btn-sm btn-success set-all" data-value="1" data-target="truthtable">All = 1</button>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>

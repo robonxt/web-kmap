@@ -6,7 +6,10 @@ let globalState = []; // Global state to track all cell values
 
 function initializeGlobalState(size) {
     const numCells = Math.pow(2, size);
+    // console.log(`Initializing global state with size: ${size}`);
+    // console.log(`Number of cells: ${numCells}`);
     globalState = new Array(numCells).fill('0');
+    // console.log(`Global state initialized: ${globalState}`);
 }
 
 function updateGlobalState(index, value) {
@@ -23,6 +26,7 @@ function updateKMapFromState() {
         cell.innerText = globalState[index];
         cell.parentElement.setAttribute('data-state', globalState[index]);
     });
+    // console.log('K-map updated from global state:', globalState);
 }
 
 function updateTruthTableFromState() {
@@ -121,21 +125,6 @@ function createKMapGrid() {
     // Create column headers
     const colHeaderRow = document.createElement('div');
     colHeaderRow.classList.add('kmap-header-row');
-
-    // This section doesn't work properly, implement later
-    /*//
-        // Create corner spacer
-        const cornerSpacer = document.createElement('div');
-        cornerSpacer.classList.add('kmap-corner');
-        if (numVars === 2) {
-            cornerSpacer.innerText = 'AB\\';
-        } else if (numVars === 3) {
-            cornerSpacer.innerText = 'AB\\C';
-        } else {
-            cornerSpacer.innerText = 'AB\\CD';
-        }
-        colHeaderRow.appendChild(cornerSpacer);
-    //*/
 
     const colHeaders = getColumnHeaders(numVars);
     colHeaders.forEach(header => {
@@ -250,13 +239,17 @@ function findGroups(kmap, rows, cols) {
     const groups = [];
     const covered = new Set();
     
-    // Check for groups of size 1, 2, 4, 8
     for (let size of [8, 4, 2, 1]) {
         const sizeRows = size === 8 ? 4 : (size === 4 ? 2 : 1);
         const sizeCols = size / sizeRows;
-        
-        for (let i = 0; i < rows; i++) {
-            for (let j = 0; j < cols; j++) {
+
+        // Prevent checking groups that exceed the KMap bounds
+        if (sizeRows > rows || sizeCols > cols) {
+            continue;
+        }
+
+        for (let i = 0; i <= rows - sizeRows; i++) {
+            for (let j = 0; j <= cols - sizeCols; j++) {
                 if (isValidGroup(i, j, sizeRows, sizeCols, kmap, rows, cols, covered)) {
                     const group = {
                         startRow: i,
@@ -282,8 +275,8 @@ function isValidGroup(startRow, startCol, numRows, numCols, kmap, totalRows, tot
             const col = (startCol + j) % totalCols;
             const index = row * totalCols + col;
             
-            // Check if the cell is already covered or not '1' or 'X'
             if (covered.has(index) || (kmap[index] !== '1' && kmap[index] !== 'X')) {
+                // console.log(`Invalid cell at (${row}, ${col}) - Index: ${index}`);
                 return false;
             }
         }
@@ -307,7 +300,6 @@ function getBinaryForCell(cellIndex, numVars, rows, cols) {
     const row = Math.floor(cellIndex / cols);
     const col = cellIndex % cols;
     
-    // Convert row and column to Gray code for better adjacency representation
     const grayRow = row ^ (row >> 1);
     const grayCol = col ^ (col >> 1);
     
@@ -330,7 +322,6 @@ function generateTermForGroup(group, variables, rows, cols) {
     const numVars = variables.length;
     const binaryCells = group.cells.map(cell => getBinaryForCell(cell, numVars, rows, cols));
     
-    // Find which bits stay constant in the group
     const term = [];
     for (let i = 0; i < numVars; i++) {
         const bit = binaryCells[0][i];
@@ -343,27 +334,18 @@ function generateTermForGroup(group, variables, rows, cols) {
     
     return term.length > 0 ? term.join('') : '1';
 }
-
 function generateSOP(minterms, variables) {
     if (!minterms.length) return '0';
     if (minterms.length === Math.pow(2, variables.length)) return '1';
     
-    const numVars = variables.length;
-    let rows = 2, cols = 2;
+    const rows = Math.pow(2, Math.floor(variables.length / 2));
+    const cols = Math.pow(2, Math.ceil(variables.length / 2));
     
-    if (numVars === 3) {
-        rows = 2;
-        cols = 4;
-    } else if (numVars === 4) {
-        rows = 4;
-        cols = 4;
-    }
-    
-    // Create a temporary kmap array for the findGroups function
     const tempKmap = new Array(rows * cols).fill('0');
     minterms.forEach(index => {
         tempKmap[index] = '1';
     });
+    // console.log('K-map after population:', tempKmap);
     
     const groups = findGroups(tempKmap, rows, cols);
     if (groups.length === 0) return '0';
@@ -397,14 +379,12 @@ function updateOutputs() {
     const numVars = Math.log2(globalState.length);
     const variables = Array.from({ length: numVars }, (_, i) => String.fromCharCode(65 + i));
     
-    // Create kmap array from current state
     kmap = kmapCells.map(cell => cell.querySelector('.kmap-cell-value').innerText);
     
-    // Generate SOP expression
     const minterms = kmap
         .map((value, i) => value === '1' || value === 'X' ? i : null)
         .filter(i => i !== null);
-    
+
     const expression = generateSOP(minterms, variables);
     
     const kmapOutput = document.getElementById('kmap-output');
@@ -430,14 +410,54 @@ function updateCellColors() {
     });
 }
 
+function setAllValues(value) {
+    const numCells = Math.pow(2, currentSize);
+    let maxCells;
+    switch (currentSize) {
+        case 2:
+            maxCells = 4;
+            break;
+        case 3:
+            maxCells = 8;
+            break;
+        case 4:
+            maxCells = 16;
+            break;
+        default:
+            console.warn(`Unsupported variable size: ${currentSize}`);
+            return;
+    }
+    if (numCells > maxCells) {
+        console.warn(`Attempting to set values for ${numCells} cells, but KMap only supports up to ${maxCells} cells.`);
+        return;
+    }
+    globalState = new Array(numCells).fill(value);
+    updateKMapFromState();
+    updateTruthTableFromState();
+    updateOutputs();
+    updateCellColors();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const variableSelect = document.getElementById('variableSelect');
     variableSelect.addEventListener('change', function() {
-        updateGridSize(this.value);
+        currentSize = parseInt(this.value);
+        initializeGlobalState(currentSize);
+        updateGridSize(currentSize);
+        updateKMapFromState(); // Ensure KMap is refreshed
     });
 
-    // Initialize with default size (2 variables)
-    updateGridSize(2);
+    document.querySelectorAll('.set-all').forEach(button => {
+        button.addEventListener('click', function() {
+            const value = this.getAttribute('data-value');
+            setAllValues(value);
+        });
+    });
+
+    currentSize = parseInt(variableSelect.value);
+    initializeGlobalState(currentSize);
+    updateGridSize(currentSize);
+    updateKMapFromState(); // Ensure K-map is updated from global state after initialization
     updateCellColors();
     updateOutputs();
 });
