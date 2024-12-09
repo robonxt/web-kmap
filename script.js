@@ -2,6 +2,7 @@ let currentSize = 4;
 let kmap = [];
 let sopExpression = [];
 let posExpression = [];
+
 function solveExpression(selector, outputId, variables) {
     const minterms = [...document.querySelectorAll(selector)]
         .map((el, i) => el.getAttribute('data-state') === '1' ? i : null)
@@ -99,37 +100,55 @@ function createTruthTable() {
     return truthTable;
 }
 
+function updateGridSize(size) {
+    currentSize = Math.pow(2, Math.ceil(size / 2));
+    kmap = new Array(Math.pow(2, size)).fill('0');
+
+    // Clear existing grids
+    document.getElementById('kmap-grid').innerHTML = '';
+    document.getElementById('truth-table-grid').innerHTML = '';
+
+    // Recreate grids with new size
+    document.getElementById('kmap-grid').appendChild(createKMapGrid());
+    document.getElementById('truth-table-grid').appendChild(createTruthTable());
+
+    // Update event listeners for new cells
+    attachCellListeners();
+}
+
 document.addEventListener('DOMContentLoaded', function () {
-    document.querySelector('#kmap .card-body').prepend(createKMapGrid());
+    const variableSelect = document.getElementById('variableSelect');
+    variableSelect.addEventListener('change', function () {
+        updateGridSize(parseInt(this.value));
+    });
 
+    // Initialize with default size (2 variables)
+    updateGridSize(2);
+
+    // Move existing event listener setup to a separate function
+    attachCellListeners();
+});
+
+function attachCellListeners() {
     const kmapCells = document.querySelectorAll('.kmap-cell');
-
-    kmapCells.forEach((cell, index) => {
-        cell.addEventListener('click', () => {
-            const states = ['0', '1', 'X'];
-            let currentState = cell.getAttribute('data-state');
-            let nextStateIndex = (states.indexOf(currentState) + 1) % states.length;
-            cell.setAttribute('data-state', states[nextStateIndex]);
-            cell.textContent = states[nextStateIndex];
-            kmap[index] = states[nextStateIndex];
+    kmapCells.forEach(cell => {
+        cell.addEventListener('click', function () {
+            const currentState = this.getAttribute('data-state');
+            const newState = currentState === '1' ? '0' : '1';
+            this.setAttribute('data-state', newState);
+            this.innerText = newState;
             solveKMap();
         });
     });
 
-    document.querySelector('#truthtable .card-body').prepend(createTruthTable());
-
     const truthTableCells = document.querySelectorAll('.truth-table-cell[data-state]');
-
-    truthTableCells.forEach((cell, index) => {
-        cell.addEventListener('click', () => {
-            const states = ['0', '1', 'X'];
-            let currentState = cell.getAttribute('data-state');
-            let nextStateIndex = (states.indexOf(currentState) + 1) % states.length;
-            cell.setAttribute('data-state', states[nextStateIndex]);
-            cell.textContent = states[nextStateIndex];
-            sopExpression[index] = states[nextStateIndex];
+    truthTableCells.forEach(cell => {
+        cell.addEventListener('click', function () {
+            const currentState = this.getAttribute('data-state');
+            const newState = currentState === '1' ? '0' : '1';
+            this.setAttribute('data-state', newState);
+            this.innerText = newState;
             solveTruthTable();
         });
     });
-});
-
+}
