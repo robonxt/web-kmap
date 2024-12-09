@@ -14,6 +14,7 @@ function updateGlobalState(index, value) {
     updateKMapFromState();
     updateTruthTableFromState();
     updateOutputs();
+    updateCellColors();
 }
 
 function updateKMapFromState() {
@@ -120,19 +121,22 @@ function createKMapGrid() {
     // Create column headers
     const colHeaderRow = document.createElement('div');
     colHeaderRow.classList.add('kmap-header-row');
-    
-    // Create corner spacer
-    const cornerSpacer = document.createElement('div');
-    cornerSpacer.classList.add('kmap-corner');
-    if (numVars === 2) {
-        cornerSpacer.innerText = 'AB\\';
-    } else if (numVars === 3) {
-        cornerSpacer.innerText = 'AB\\C';
-    } else {
-        cornerSpacer.innerText = 'AB\\CD';
-    }
-    colHeaderRow.appendChild(cornerSpacer);
-    
+
+    // This section doesn't work properly, implement later
+    /*//
+        // Create corner spacer
+        const cornerSpacer = document.createElement('div');
+        cornerSpacer.classList.add('kmap-corner');
+        if (numVars === 2) {
+            cornerSpacer.innerText = 'AB\\';
+        } else if (numVars === 3) {
+            cornerSpacer.innerText = 'AB\\C';
+        } else {
+            cornerSpacer.innerText = 'AB\\CD';
+        }
+        colHeaderRow.appendChild(cornerSpacer);
+    //*/
+
     const colHeaders = getColumnHeaders(numVars);
     colHeaders.forEach(header => {
         const headerCell = document.createElement('div');
@@ -210,6 +214,7 @@ function updateGridSize(size) {
     // Recreate grids with new size
     document.getElementById('kmap-grid').appendChild(createKMapGrid());
     document.getElementById('truth-table-grid').appendChild(createTruthTable());
+    updateCellColors();
 }
 
 function solveExpression(selector, outputId, variables) {
@@ -411,6 +416,20 @@ function updateOutputs() {
     truthTableOutput.innerHTML = outputContent;
 }
 
+function updateCellColors() {
+    const cells = document.querySelectorAll('.kmap-cell, .truth-table-output');
+    cells.forEach(cell => {
+        const value = cell.querySelector('.kmap-cell-value') ? cell.querySelector('.kmap-cell-value').textContent.trim() : cell.textContent.trim();
+        if (value === '0') {
+            cell.style.backgroundColor = '#ffecec';
+        } else if (value === '1') {
+            cell.style.backgroundColor = '#e6ffe6';
+        } else if (value === 'X') {
+            cell.style.backgroundColor = '#fff2cc';
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const variableSelect = document.getElementById('variableSelect');
     variableSelect.addEventListener('change', function() {
@@ -419,4 +438,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize with default size (2 variables)
     updateGridSize(2);
+    updateCellColors();
+    updateOutputs();
 });

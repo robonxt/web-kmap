@@ -7,7 +7,7 @@
     --text-primary: #212121;
     --text-secondary: #757575;
     --border-color: #E0E0E0;
-    --cell-size: min(50px, 12vw);
+    --cell-size: calc(min(12vh, 12vw) - 2px);
 }
 
 body {
@@ -108,8 +108,8 @@ body {
 }
 
 .kmap-cell {
-    width: 60px; /* Increase width */
-    height: 60px; /* Increase height */
+    width: var(--cell-size);
+    height: var(--cell-size);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -159,20 +159,20 @@ body {
     margin: 0;
 }
 
-.table th {
-    background-color: var(--primary-color);
-    color: white;
+.table th, .table td {
     padding: 0.75rem;
-    font-weight: 500;
     text-align: center;
     border-radius: 4px;
 }
 
+.table th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 500;
+}
+
 .table td {
-    padding: 0.75rem;
-    text-align: center;
     background-color: var(--surface-color);
-    border-radius: 4px;
 }
 
 .truth-table-cell {
@@ -252,11 +252,11 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--secondary-color);
 }
-
-/* Responsive adjustments */
+/* 
+// Responsive adjustments 
 @media (max-width: 768px) {
     :root {
-        --cell-size: min(35px, 8vw);
+        // --cell-size: min(35px, 12vw); 
     }
     
     .container {
@@ -275,6 +275,8 @@ body {
     .card-body {
         padding: 0.5rem;
         min-height: 100px;
+        max-height: 80vh;
+        overflow: scroll;
     }
     
     .kmap-header-cell {
@@ -294,7 +296,7 @@ body {
     .kmap-cell-value {
         font-size: 1.2rem;
     }
-}
+} */
 
 /* Tab styling */
 .nav-tabs {
@@ -320,6 +322,12 @@ body {
     background-color: var(--surface-color);
     border: none;
     font-weight: 500;
+}
+
+.dropdown, .tabs {
+    height: 40px; /* Set a consistent height */
+    display: flex;
+    align-items: center; /* Center vertically */
 }
 
 /* Variable selector styling */
