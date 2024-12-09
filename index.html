@@ -2,71 +2,80 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KMap Solver</title>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-  <script src="script.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMap Solver</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <div class="container">
-    <div class="d-flex align-items-center">
-      <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item">
-          <a class="nav-link active" id="kmap-tab" data-toggle="tab" href="#kmap" role="tab" aria-controls="kmap"
-            aria-selected="true">KMap</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="truthtable-tab" data-toggle="tab" href="#truthtable" role="tab"
-            aria-controls="truthtable" aria-selected="false">Truth Table</a>
-        </li>
-      </ul>
-      <div class="d-flex align-items-center ml-3">
-        <label for="variableSelect" class="mr-2 mb-0">Number of Variables:</label>
-        <select id="variableSelect" class="form-control" style="width: auto;">
-          <option value="2">2 Variables</option>
-          <option value="3">3 Variables</option>
-          <option value="4">4 Variables</option>
-        </select>
-      </div>
+    <div class="container">
+        <div class="d-flex align-items-center flex-wrap mb-3">
+            <ul class="nav nav-tabs flex-grow-1 mb-2 mb-sm-0" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="kmap-tab" data-toggle="tab" href="#kmap" role="tab"
+                        aria-controls="kmap" aria-selected="true">KMap</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="truthtable-tab" data-toggle="tab" href="#truthtable" role="tab"
+                        aria-controls="truthtable" aria-selected="false">Truth Table</a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center ml-0 ml-sm-3">
+                <select id="variableSelect" class="form-control">
+                    <option value="2">2 Variables</option>
+                    <option value="3">3 Variables</option>
+                    <option value="4">4 Variables</option>
+                </select>
+            </div>
+        </div>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="kmap" role="tabpanel" aria-labelledby="kmap-tab">
+                <div class="card">
+                    <div class="card-header">
+                        Karnaugh Map
+                    </div>
+                    <div class="card-body">
+                        <div id="kmap-grid"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        Simplified Expression
+                    </div>
+                    <div class="card-body">
+                        <div id="kmap-output"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="truthtable" role="tabpanel" aria-labelledby="truthtable-tab">
+                <div class="card">
+                    <div class="card-header">
+                        Truth Table
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tbody id="truth-table-grid"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                      Simplified Expression
+                    </div>
+                    <div class="card-body">
+                        <div id="truth-table-output"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="tab-content">
-      <div class="tab-pane fade show active" id="kmap" role="tabpanel" aria-labelledby="kmap-tab">
-        <div class="card mt-3">
-          <div class="card-header">
-            KMap
-          </div>
-          <div class="card-body">
-            <div id="kmap-grid"></div>
-          </div>
-        </div>
-        <div class="card mt-3">
-          <div class="card-body">
-            <div><strong id="kmap-output"></strong></div>
-          </div>
-        </div>
-      </div>
-      <div class="tab-pane fade" id="truthtable" role="tabpanel" aria-labelledby="truthtable-tab">
-        <div class="card mt-3">
-          <div class="card-header">
-            Truth Table
-          </div>
-          <div class="card-body">
-            <div id="truth-table-grid"></div>
-          </div>
-        </div>
-        <div class="card mt-3">
-          <div class="card-body">
-            <div><strong id="truth-table-output"></strong></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>

@@ -1,22 +1,345 @@
-.kmap-cell,
-.truth-table-cell {
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    user-select: none;
+/* Global styles */
+:root {
+    --primary-color: #2196F3;
+    --secondary-color: #1976D2;
+    --background-color: #FFFFFF;
+    --surface-color: #F5F5F5;
+    --text-primary: #212121;
+    --text-secondary: #757575;
+    --border-color: #E0E0E0;
+    --cell-size: min(50px, 12vw);
 }
 
-.card-header {
-    display: flex;
-    justify-content: center;
-    background-color: #007BFF;
-    color: white;
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-primary);
 }
 
 .container {
-    margin-top: 20px;
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.card {
+    background: var(--background-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 0.5rem 0;
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem;
+    font-weight: 500;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.card-body {
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px;
+}
+
+/* KMap specific styles */
+.kmap-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+.kmap-header-row {
+    display: flex;
+    margin-left: var(--cell-size);
+}
+
+.kmap-row-container {
+    display: flex;
+    justify-content: center;
+}
+
+.kmap-row {
+    display: flex;
+}
+
+.kmap-corner {
+    width: var(--cell-size);
+    height: calc(var(--cell-size) * 0.6);
+    font-weight: 500;
+    color: var(--primary-color);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--surface-color);
+    border-radius: 4px;
+    margin: 2px;
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+}
+
+.kmap-header-cell {
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    width: var(--cell-size);
+    height: calc(var(--cell-size) * 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    background-color: var(--surface-color);
+    border-radius: 4px;
+    margin: 2px;
+}
+
+.kmap-cell {
+    width: 60px; /* Increase width */
+    height: 60px; /* Increase height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    background-color: var(--background-color);
+    border-radius: 4px;
+    margin: 2px;
+    transition: all 0.2s ease;
+    font-size: 1.5rem; /* Increase font size for better visibility */
+}
+
+.kmap-cell:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.kmap-cell-value {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.kmap-cell-index {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.kmap-card {
+    padding: 3px; /* Reduce padding */
+}
+
+/* Truth Table styles */
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 2px;
+    margin: 0;
+}
+
+.table th {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+    border-radius: 4px;
+}
+
+.table td {
+    padding: 0.75rem;
+    text-align: center;
+    background-color: var(--surface-color);
+    border-radius: 4px;
+}
+
+.truth-table-cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+    border-radius: 4px;
+    margin: 2px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.truth-table-output {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.truth-table-output:hover {
+    background-color: var(--primary-color) !important;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.truth-table-card {
+    padding: 3px; /* Reduce padding */
+}
+
+/* Output styles */
+.output-header {
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.output-expression {
+    font-family: 'Roboto Mono', monospace;
+    background-color: var(--surface-color);
+    padding: 1rem;
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    line-height: 1.5;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#kmap-output, #truth-table-output {
+    padding: 3px; /* Reduce padding for output containers */
+    margin-top: 1rem;
+    background-color: white;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    :root {
+        --cell-size: min(35px, 8vw);
+    }
+    
+    .container {
+        padding: 0.5rem;
+    }
+    
+    .card {
+        margin: 0.5rem 0;
+    }
+    
+    .card-header {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .card-body {
+        padding: 0.5rem;
+        min-height: 100px;
+    }
+    
+    .kmap-header-cell {
+        font-size: 1rem;
+    }
+    
+    .kmap-corner {
+        font-size: 0.9rem;
+        left: 0.5rem;
+        top: 0.5rem;
+    }
+    
+    .kmap-header-cell, .truth-table-cell {
+        font-size: 1.2rem;
+    }
+    
+    .kmap-cell-value {
+        font-size: 1.2rem;
+    }
+}
+
+/* Tab styling */
+.nav-tabs {
+    border-bottom: none;
+    margin-bottom: 1rem;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    background-color: var(--surface-color);
+    border: none;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    background-color: var(--surface-color);
+    border: none;
+    font-weight: 500;
+}
+
+/* Variable selector styling */
+#variableSelect {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#variableSelect:hover {
+    border-color: var(--primary-color);
+}
+
+#variableSelect:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }
