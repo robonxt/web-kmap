@@ -1,97 +1,409 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KMap Solver</title>
+    <title>4-Variable K-Map</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
+    <style>
+        :root {
+            --cell-size: 60px;
+            --border-color: #333;
+            --hover-color: #f0f0f0;
+            --text-color: #666;
+            --bg-color: #f8f9fa;
+        }
 
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: var(--border-color);
+        }
+
+        .kmap-grid {
+            display: inline-block;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .kmap-row {
+            display: flex;
+        }
+
+        .kmap-cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            background-color: #fff;
+            transition: background-color 0.2s ease;
+        }
+
+        .kmap-cell:hover {
+            background-color: var(--hover-color);
+        }
+
+        .kmap-cell-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .kmap-cell-index {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            font-size: 12px;
+            color: var(--text-color);
+        }
+
+        .sop-output {
+            width: calc(var(--cell-size) * 4 + 2px);
+            margin: 0 auto;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: 500;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            min-height: 30px;
+            line-height: 1.4;
+        }
+
+        .kmap-container {
+            position: relative;
+            margin-left: 30px;
+            margin-top: 30px;
+        }
+
+        .labels {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .col-labels, .row-labels {
+            margin: 0 10px;
+        }
+
+        .col-indices, .row-indices {
+            position: absolute;
+            display: flex;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        .col-indices {
+            top: -25px;
+            left: 0;
+            right: 0;
+        }
+
+        .col-indices span {
+            width: var(--cell-size);
+            text-align: center;
+        }
+
+        .row-indices {
+            flex-direction: column;
+            top: 0;
+            left: -30px;
+            bottom: 0;
+        }
+
+        .row-indices span {
+            height: var(--cell-size);
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
 <body>
-    <div class="container">
-        <div class="d-flex align-items-center mb-1">
-            <ul class="nav nav-tabs flex-grow-1 mb-1" id="myTab" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="kmap-tab" data-toggle="tab" href="#kmap" role="tab"
-                        aria-controls="kmap" aria-selected="true">KMap</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="truthtable-tab" data-toggle="tab" href="#truthtable" role="tab"
-                        aria-controls="truthtable" aria-selected="false">Truth Table</a>
-                </li>
-            </ul>
-            <div class="d-flex align-items-center mb-1 ml-sm-2">
-                <select id="variableSelect" class="form-control">
-                    <option value="2">2 Vars (A, B)</option>
-                    <option value="3">3 Vars (A, B, C)</option>
-                    <option value="4">4 Vars (A, B, C, D)</option>
-                </select>
-            </div>
-        </div>
-        <div class="tab-content">
-            <div class="tab-pane fade show active" id="kmap" role="tabpanel" aria-labelledby="kmap-tab">
-                <div class="card">
-                    <div class="card-header">
-                        Simplified SOP
-                    </div>
-                    <div class="card-body">
-                        <div id="kmap-output"></div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        Karnaugh Map
-                    </div>
-                    <div class="card-body" style="display: block;">
-                        <div id="kmap-grid"></div>
-                        <div style="margin: 1rem; align-items: center; text-align: center;">
-                            <button class="btn btn-sm btn-danger set-all" data-value="0" data-target="kmap">All = 0</button>
-                            <span style="margin: 0 0.5rem;"></span>
-                            <button class="btn btn-sm btn-success set-all" data-value="1" data-target="kmap">All = 1</button>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-            <div class="tab-pane fade" id="truthtable" role="tabpanel" aria-labelledby="truthtable-tab">
-                <div class="card">
-                    <div class="card-header">
-                        Simplified SOP
-                    </div>
-                    <div class="card-body">
-                        <div id="truth-table-output"></div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        Truth Table
-                    </div>
-                    <div class="card-body" style="display: block;">
-                        <table class="table table-bordered">
-                            <tbody id="truth-table-grid"></tbody>
-                        </table>
-                        <div style="margin: 1rem; align-items: center; text-align: center;">
-                            <button class="btn btn-sm btn-danger set-all" data-value="0" data-target="truthtable">All = 0</button>
-                            <span style="margin: 0 0.5rem;"></span>
-                            <button class="btn btn-sm btn-success set-all" data-value="1" data-target="truthtable">All = 1</button>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
+    <div class="header">
+        <h1>4-Variable K-Map</h1>
+        <div class="labels">
+            <div class="col-labels">AB</div>
+            <div class="row-labels">CD</div>
         </div>
     </div>
-    <footer class="text-center d-flex justify-content-between align-items-center mx-3 my-2" style="font-size: 0.75rem;">
-        <p>Version 0.1.0</p>
-        <p>Made by <a href="https://github.com/robonxt">robonxt</a></p>
-    </footer>
+    <div class="kmap-container">
+        <div class="col-indices">
+            <span>00</span>
+            <span>01</span>
+            <span>11</span>
+            <span>10</span>
+        </div>
+        <div class="row-indices">
+            <span>00</span>
+            <span>01</span>
+            <span>11</span>
+            <span>10</span>
+        </div>
+        <div id="kmap" class="kmap-grid"></div>
+    </div>
+    <div id="sop" class="sop-output">f = 0</div>
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // Grid layout with actual minterm values (not Gray code)
+        const gridLayout = [
+            [0,  4,  12,  8],    // AB=00: 00,01,11,10 (CD)
+            [1,  5,  13,  9],    // AB=01: 00,01,11,10 (CD)
+            [3,  7,  15,  11],   // AB=11: 00,01,11,10 (CD)
+            [2,  6,  14,  10]    // AB=10: 00,01,11,10 (CD)
+        ];
+
+        // Maps grid position to actual binary value (ABCD format)
+        const mintermMap = {
+            // row 0 (AB = 00)
+            "0,0": "0000", // 0
+            "0,1": "0001", // 4
+            "0,2": "0011", // 12
+            "0,3": "0010", // 8
+            // row 1 (AB = 01)
+            "1,0": "0100", // 1
+            "1,1": "0101", // 5
+            "1,2": "0111", // 13
+            "1,3": "0110", // 9
+            // row 2 (AB = 11)
+            "2,0": "1100", // 3
+            "2,1": "1101", // 7
+            "2,2": "1111", // 15
+            "2,3": "1110", // 11
+            // row 3 (AB = 10)
+            "3,0": "1000", // 2
+            "3,1": "1001", // 6
+            "3,2": "1011", // 14
+            "3,3": "1010"  // 10
+        };
+
+        function getBinaryFromMinterm(minterm) {
+            // Find the position in the grid
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (gridLayout[i][j] === minterm) {
+                        return mintermMap[`${i},${j}`];
+                    }
+                }
+            }
+            return "0000";
+        }
+
+        function getProductTerm(num) {
+            const binary = getBinaryFromMinterm(num);
+            const variables = ['A', 'B', 'C', 'D'];
+            return binary.split('')
+                .map((bit, i) => bit === '0' ? variables[i] + '\u0304' : variables[i])
+                .join('');
+        }
+
+        function getBinaryTerm(num) {
+            return getBinaryFromMinterm(num);
+        }
+
+        function getGridPosition(minterm) {
+            // Get row and column in Gray code format
+            const row = (minterm >> 2) & 0x3;  // CD bits
+            const col = minterm & 0x3;         // AB bits
+            
+            // Convert to position in grid
+            const rowIdx = [0, 1, 3, 2][row];  // Map Gray code to grid position
+            const colIdx = [0, 1, 3, 2][col];  // Map Gray code to grid position
+            
+            return { row: rowIdx, col: colIdx };
+        }
+
+        function getMintermFromPosition(row, col) {
+            // Convert grid position to Gray code
+            const rowGray = [0, 1, 3, 2].indexOf(row);  // Map grid position to Gray code
+            const colGray = [0, 1, 3, 2].indexOf(col);  // Map grid position to Gray code
+            
+            // Combine into minterm
+            return (rowGray << 2) | colGray;
+        }
+
+        function countOnes(binary) {
+            return binary.split('').filter(bit => bit === '1').length;
+        }
+
+        function differByOne(term1, term2) {
+            let diffCount = 0;
+            let diffIndex = -1;
+            
+            for (let i = 0; i < term1.length; i++) {
+                if (term1[i] !== term2[i]) {
+                    diffCount++;
+                    diffIndex = i;
+                }
+            }
+            
+            return diffCount === 1 ? diffIndex : -1;
+        }
+
+        function combine(term1, term2, diffIndex) {
+            let result = term1.split('');
+            result[diffIndex] = '-';
+            return result.join('');
+        }
+
+        function isTermCovered(minterm, implicant) {
+            for (let i = 0; i < implicant.length; i++) {
+                if (implicant[i] !== '-' && implicant[i] !== minterm[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function findPrimeImplicants(minterms) {
+            // Convert minterms to binary
+            let groups = new Map();
+            let binaryTerms = minterms.map(m => getBinaryTerm(m));
+            
+            // Group by number of ones
+            binaryTerms.forEach(term => {
+                const ones = countOnes(term);
+                if (!groups.has(ones)) groups.set(ones, new Set());
+                groups.get(ones).add(term);
+            });
+
+            let primeImplicants = new Set();
+            let newTerms = true;
+
+            while (newTerms) {
+                newTerms = false;
+                let newGroups = new Map();
+                let used = new Set();
+
+                // Compare adjacent groups
+                for (let i = 0; i < 4; i++) {
+                    if (!groups.has(i) || !groups.has(i + 1)) continue;
+
+                    for (let term1 of groups.get(i)) {
+                        for (let term2 of groups.get(i + 1)) {
+                            const diffIndex = differByOne(term1, term2);
+                            if (diffIndex !== -1) {
+                                const newTerm = combine(term1, term2, diffIndex);
+                                const ones = countOnes(newTerm);
+                                if (!newGroups.has(ones)) newGroups.set(ones, new Set());
+                                newGroups.get(ones).add(newTerm);
+                                used.add(term1);
+                                used.add(term2);
+                                newTerms = true;
+                            }
+                        }
+                    }
+                }
+
+                // Add unused terms to prime implicants
+                for (let [_, terms] of groups) {
+                    for (let term of terms) {
+                        if (!used.has(term)) {
+                            primeImplicants.add(term);
+                        }
+                    }
+                }
+
+                groups = newGroups;
+            }
+
+            // Add any remaining terms
+            for (let [_, terms] of groups) {
+                terms.forEach(term => primeImplicants.add(term));
+            }
+
+            return Array.from(primeImplicants);
+        }
+
+        function termToExpression(term) {
+            const variables = ['A', 'B', 'C', 'D'];
+            return term.split('')
+                .map((bit, i) => bit === '0' ? variables[i] + '\u0304' : 
+                                bit === '1' ? variables[i] : '')
+                .filter(v => v !== '')
+                .join('');
+        }
+
+        function updateSOP() {
+            const cells = document.querySelectorAll('.kmap-cell');
+            const minterms = Array.from(cells)
+                .map((cell, i) => cell.querySelector('.kmap-cell-value').textContent === '1' ? i : null)
+                .filter(i => i !== null);
+            
+            if (minterms.length === 0) {
+                document.getElementById('sop').textContent = 'f = 0';
+                return;
+            }
+            
+            if (minterms.length === 16) {
+                document.getElementById('sop').textContent = 'f = 1';
+                return;
+            }
+
+            // Find prime implicants
+            const primeImplicants = findPrimeImplicants(minterms);
+            
+            // Convert prime implicants to expressions
+            const expressions = primeImplicants.map(termToExpression);
+            
+            // Sort expressions by length (shorter terms first)
+            expressions.sort((a, b) => a.length - b.length);
+            
+            document.getElementById('sop').textContent = `f = ${expressions.join(' + ')}`;
+        }
+
+        function createKMap() {
+            const kmap = document.getElementById('kmap');
+            
+            for (let i = 0; i < 4; i++) {
+                const row = document.createElement('div');
+                row.className = 'kmap-row';
+                
+                for (let j = 0; j < 4; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'kmap-cell';
+                    
+                    const value = document.createElement('span');
+                    value.className = 'kmap-cell-value';
+                    value.textContent = '0';
+                    
+                    const index = document.createElement('span');
+                    index.className = 'kmap-cell-index';
+                    index.textContent = gridLayout[i][j];
+                    
+                    cell.appendChild(value);
+                    cell.appendChild(index);
+                    
+                    cell.addEventListener('click', () => {
+                        value.textContent = value.textContent === '0' ? '1' : '0';
+                        updateSOP();
+                    });
+                    
+                    row.appendChild(cell);
+                }
+                kmap.appendChild(row);
+            }
+            updateSOP();
+        }
+
+        document.addEventListener('DOMContentLoaded', createKMap);
+    </script>
 </body>
-
 </html>
