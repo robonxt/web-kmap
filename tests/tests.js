@@ -1,13 +1,13 @@
 // Import the solver if running in Node.js environment
 try {
     if (typeof window === 'undefined') {
-        global.KMapSolver = require('./kmap-solver.js');
+        global.KMapSolver = require('../kmap-solver.js');
     }
 } catch (e) {
     // Running in browser, KMapSolver is already available
 }
 
-const KMapSolver = require('./kmap-solver');
+const KMapSolver = require('../kmap-solver.js');
 
 // Constants
 const VARS = ["A", "B", "C", "D"];
