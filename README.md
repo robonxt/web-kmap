@@ -1,2 +1,2 @@
 # web-kmap
-lightweight Kmap solver webapp
+robust and lightweight Karnaugh map solver online
