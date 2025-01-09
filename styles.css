@@ -298,25 +298,61 @@ h1 {
 
 .popup-content {
     background: white;
-    padding: var(--spacing-lg);
-    border-radius: var(--radius-lg);
+    padding: 20px;
+    border-radius: 8px;
     position: relative;
-    max-width: 90%;
-    width: 400px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .popup-content h3 {
-    margin-bottom: var(--spacing-md);
-    text-align: center;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    color: #333;
+}
+
+.popup-content h3:first-child {
+    margin-top: 0;
+}
+
+.popup-content p {
+    margin-bottom: 1em;
+    line-height: 1.4;
+    color: #444;
+}
+
+.controls-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.controls-list li {
+    margin-bottom: 0.5em;
+    color: #444;
+}
+
+.legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.legend-item {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
 }
 
 .close-btn {
     position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-md);
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 2rem;
     cursor: pointer;
     color: var(--text-muted);
     padding: 0;

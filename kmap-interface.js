@@ -73,6 +73,9 @@ class KMapInterface {
         cell.dataset.state = newState;
         valueDisplay.textContent = newState;
         this.grid[parseInt(cell.dataset.index)] = newState;
+        
+        // Auto-solve when cell changes
+        this.solve();
     }
 
     getMintermsAndDontCares() {
@@ -177,9 +180,29 @@ class KMapInterface {
         document.getElementById('solution-select').style.display = 'none';
     }
 
+    setAllCells(value) {
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach(cell => {
+            const valueDisplay = cell.querySelector('.value-display');
+            valueDisplay.textContent = value;
+            cell.dataset.state = value;
+            
+            if (value === '1') {
+                cell.classList.add('selected');
+                cell.classList.remove('dont-care');
+            } else {
+                cell.classList.remove('selected', 'dont-care');
+            }
+        });
+        this.grid = Array(this.size).fill(value);
+        this.solve();
+    }
+
     setupEventListeners() {
-        document.getElementById('solve-btn').addEventListener('click', () => this.solve());
+        document.getElementById('all-one-btn').addEventListener('click', () => this.setAllCells('1'));
+        document.getElementById('all-zero-btn').addEventListener('click', () => this.setAllCells('0'));
         document.getElementById('clear-btn').addEventListener('click', () => this.clear());
+        document.getElementById('solve-btn').addEventListener('click', () => this.solve());
     }
 }
 

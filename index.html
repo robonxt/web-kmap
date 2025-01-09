@@ -14,12 +14,26 @@
         </div>
         <div class="popup-overlay" id="info-popup">
             <div class="popup-content">
+                <h3>About K-Maps</h3>
+                <p>A Karnaugh map (K-map) is a tool for simplifying Boolean algebra expressions. Each cell represents a combination of input variables, arranged so adjacent cells differ by only one bit.</p>
+                
+                <h3>How to Use</h3>
+                <p>Click any cell to cycle through values. The solution updates automatically as you modify cells.</p>
+                
                 <h3>Legend</h3>
                 <div class="legend">
-                    <span class="legend-item zero">0</span>
-                    <span class="legend-item one">1</span>
-                    <span class="legend-item dont-care">X (Don't Care)</span>
+                    <span class="legend-item zero">0: False input</span>
+                    <span class="legend-item one">1: True input</span>
+                    <span class="legend-item dont-care">X: Don't care (optional)</span>
                 </div>
+                
+                <h3>Controls</h3>
+                <ul class="controls-list">
+                    <li><strong>All 1:</strong> Set all cells to 1</li>
+                    <li><strong>All 0:</strong> Set all cells to 0</li>
+                    <li><strong>Clear:</strong> Reset the map</li>
+                </ul>
+                
                 <button class="close-btn" aria-label="Close">×</button>
             </div>
         </div>
@@ -34,7 +48,8 @@
                 <div id="solution" class="solution-container"></div>
             </div>
             <div class="controls">
-                <button id="solve-btn">Solve</button>
+                <button id="all-one-btn">All 1</button>
+                <button id="all-zero-btn">All 0</button>
                 <button id="clear-btn">Clear</button>
             </div>
         </div>
