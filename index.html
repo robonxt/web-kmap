@@ -3,19 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4-Variable K-Map Solver</title>
+    <title>K-Map Solver Webapp</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preload" href="kmap-solver.js" as="script">
+    <link rel="preload" href="kmap-interface.js" as="script">
 </head>
 <body>
     <div class="container">
         <div class="header-bar">
-            <h1>4-Variable K-Map Solver</h1>
+            <div class="tab-container">
+                <button class="tab-btn active" data-tab="kmap">K-Map</button>
+                <button class="tab-btn" data-tab="truthtable">Truth Table</button>
+                <div class="slider-bg"></div>
+            </div>
             <button class="info-btn" aria-label="Show Information">ⓘ</button>
         </div>
         <div class="popup-overlay" id="info-popup">
             <div class="popup-content">
                 <h3>About K-Maps</h3>
                 <p>A Karnaugh map (K-map) is a tool for simplifying Boolean algebra expressions. Each cell represents a combination of input variables, arranged so adjacent cells differ by only one bit.</p>
+                
+                <h3>Truth Table</h3>
+                <p>The truth table shows all possible combinations of input variables and their corresponding outputs. Each row represents one possible combination, with 0s and 1s showing the input states and the result. The K-map is derived from this truth table, but arranged in a way that makes it easier to identify patterns and simplify the Boolean expression.</p>
                 
                 <h3>How to Use</h3>
                 <p>Click any cell to cycle through values. The solution updates automatically as you modify cells.</p>
@@ -37,8 +46,29 @@
                 <button class="close-btn" aria-label="Close">×</button>
             </div>
         </div>
-        <div class="kmap-container">
-            <div class="kmap-grid" id="kmap-grid"></div>
+        <div class="tab-content active" id="kmap">
+            <div class="kmap-container">
+                <div class="kmap-grid" id="kmap-grid"></div>
+            </div>
+        </div>
+        <div class="tab-content" id="truthtable">
+            <div class="truthtable-container">
+                <table class="truth-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>Output</th>
+                        </tr>
+                    </thead>
+                    <tbody id="truth-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="shared-controls">
             <div class="solution-wrapper">
                 <div class="solution-header">
                     <h3>Solution:</h3>
@@ -54,21 +84,19 @@
             </div>
         </div>
     </div>
-    <script src="kmap-solver.js"></script>
-    <script src="kmap-interface.js"></script>
+    <script src="kmap-solver.js" defer></script>
+    <script src="kmap-interface.js" defer></script>
     <script>
-        document.querySelector('.info-btn').addEventListener('click', () => {
-            document.getElementById('info-popup').classList.add('active');
-        });
-        
-        document.querySelector('.close-btn').addEventListener('click', () => {
-            document.getElementById('info-popup').classList.remove('active');
-        });
-        
-        document.getElementById('info-popup').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) {
-                e.currentTarget.classList.remove('active');
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            const infoBtn = document.querySelector('.info-btn');
+            const closeBtn = document.querySelector('.close-btn');
+            const infoPopup = document.getElementById('info-popup');
+
+            infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
+            closeBtn.addEventListener('click', () => infoPopup.classList.remove('active'));
+            infoPopup.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+            });
         });
     </script>
 </body>

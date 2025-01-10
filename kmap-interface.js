@@ -5,7 +5,18 @@ class KMapInterface {
         this.size = 16; // 4x4 grid for 4 variables
         this.grid = Array(this.size).fill(0);
         this.initializeUI();
+        this.initializeTruthTable();
         this.setupEventListeners();
+        
+        // Initialize slider position
+        const activeTab = document.querySelector('.tab-btn.active');
+        if (activeTab) {
+            const slider = document.querySelector('.slider-bg');
+            const buttonRect = activeTab.getBoundingClientRect();
+            const containerRect = activeTab.parentElement.getBoundingClientRect();
+            slider.style.width = buttonRect.width + 'px';
+            slider.style.transform = `translateX(${buttonRect.left - containerRect.left}px)`;
+        }
     }
 
     initializeUI() {
@@ -47,6 +58,41 @@ class KMapInterface {
         }
     }
 
+    initializeTruthTable() {
+        const tbody = document.getElementById('truth-table-body');
+        tbody.innerHTML = '';
+        
+        // Create all possible combinations
+        for (let i = 0; i < 16; i++) {
+            const row = document.createElement('tr');
+            row.dataset.rowIndex = i;
+            
+            // Add row ID (using row index)
+            const idCell = document.createElement('td');
+            idCell.textContent = i;
+            idCell.classList.add('row-id');
+            row.appendChild(idCell);
+            
+            // Convert number to 4-bit binary and create input columns
+            const binary = i.toString(2).padStart(4, '0');
+            for (let j = 0; j < 4; j++) {
+                const td = document.createElement('td');
+                td.textContent = binary[j];
+                row.appendChild(td);
+            }
+            
+            // Add output column
+            const outputTd = document.createElement('td');
+            outputTd.textContent = '0';
+            outputTd.dataset.index = i;
+            outputTd.dataset.state = '0';
+            outputTd.addEventListener('click', () => this.toggleTruthTableCell(outputTd));
+            row.appendChild(outputTd);
+            
+            tbody.appendChild(row);
+        }
+    }
+
     toggleCell(cell) {
         const valueDisplay = cell.querySelector('.value-display');
         const currentState = cell.dataset.state;
@@ -72,9 +118,71 @@ class KMapInterface {
         
         cell.dataset.state = newState;
         valueDisplay.textContent = newState;
-        this.grid[parseInt(cell.dataset.index)] = newState;
         
-        // Auto-solve when cell changes
+        // Sync with Truth Table
+        const index = parseInt(cell.dataset.index);
+        const ttCell = document.querySelector(`#truth-table-body td[data-index="${index}"]`);
+        if (ttCell) {
+            ttCell.dataset.state = newState;
+            ttCell.textContent = newState;
+            if (newState === '1') {
+                ttCell.classList.add('selected');
+                ttCell.classList.remove('dont-care');
+            } else if (newState === 'X') {
+                ttCell.classList.remove('selected');
+                ttCell.classList.add('dont-care');
+            } else {
+                ttCell.classList.remove('selected', 'dont-care');
+            }
+        }
+        
+        this.grid[index] = newState;
+        this.solve();
+    }
+
+    toggleTruthTableCell(cell) {
+        const currentState = cell.dataset.state;
+        let newState;
+        
+        // Cycle through states: 0 -> 1 -> X -> 0
+        switch (currentState) {
+            case '0':
+                newState = '1';
+                cell.classList.add('selected');
+                cell.classList.remove('dont-care');
+                break;
+            case '1':
+                newState = 'X';
+                cell.classList.remove('selected');
+                cell.classList.add('dont-care');
+                break;
+            case 'X':
+                newState = '0';
+                cell.classList.remove('selected', 'dont-care');
+                break;
+        }
+        
+        cell.dataset.state = newState;
+        cell.textContent = newState;
+        
+        // Sync with K-Map
+        const index = parseInt(cell.dataset.index);
+        const kmapCell = document.querySelector(`.cell[data-index="${index}"]`);
+        if (kmapCell) {
+            kmapCell.dataset.state = newState;
+            kmapCell.querySelector('.value-display').textContent = newState;
+            if (newState === '1') {
+                kmapCell.classList.add('selected');
+                kmapCell.classList.remove('dont-care');
+            } else if (newState === 'X') {
+                kmapCell.classList.remove('selected');
+                kmapCell.classList.add('dont-care');
+            } else {
+                kmapCell.classList.remove('selected', 'dont-care');
+            }
+        }
+        
+        this.grid[index] = newState;
         this.solve();
     }
 
@@ -181,12 +289,10 @@ class KMapInterface {
     }
 
     setAllCells(value) {
-        const cells = document.querySelectorAll('.cell');
-        cells.forEach(cell => {
-            const valueDisplay = cell.querySelector('.value-display');
-            valueDisplay.textContent = value;
+        // Update K-Map
+        document.querySelectorAll('.cell').forEach(cell => {
             cell.dataset.state = value;
-            
+            cell.querySelector('.value-display').textContent = value;
             if (value === '1') {
                 cell.classList.add('selected');
                 cell.classList.remove('dont-care');
@@ -194,15 +300,56 @@ class KMapInterface {
                 cell.classList.remove('selected', 'dont-care');
             }
         });
+
+        // Update Truth Table
+        document.querySelectorAll('#truth-table-body td[data-index]').forEach(cell => {
+            cell.dataset.state = value;
+            cell.textContent = value;
+            if (value === '1') {
+                cell.classList.add('selected');
+                cell.classList.remove('dont-care');
+            } else {
+                cell.classList.remove('selected', 'dont-care');
+            }
+        });
+
         this.grid = Array(this.size).fill(value);
         this.solve();
     }
 
     setupEventListeners() {
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => 
+                    content.classList.remove('active')
+                );
+                
+                // Add active class to clicked tab and corresponding content
+                button.classList.add('active');
+                const tabId = button.dataset.tab;
+                document.getElementById(tabId).classList.add('active');
+
+                // Update slider position and width
+                const slider = document.querySelector('.slider-bg');
+                const buttonRect = button.getBoundingClientRect();
+                const containerRect = button.parentElement.getBoundingClientRect();
+                
+                // Set width to match the button
+                slider.style.width = buttonRect.width + 'px';
+                
+                // Calculate offset from left edge of container
+                const offset = buttonRect.left - containerRect.left;
+                slider.style.transform = `translateX(${offset}px)`;
+            });
+        });
+
+        // Controls
         document.getElementById('all-one-btn').addEventListener('click', () => this.setAllCells('1'));
         document.getElementById('all-zero-btn').addEventListener('click', () => this.setAllCells('0'));
-        document.getElementById('clear-btn').addEventListener('click', () => this.clear());
-        document.getElementById('solve-btn').addEventListener('click', () => this.solve());
+        document.getElementById('clear-btn').addEventListener('click', () => this.setAllCells('0'));
     }
 }
 

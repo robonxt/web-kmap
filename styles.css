@@ -14,6 +14,8 @@
     --font-md: 0.9rem;
     --font-lg: 1.2rem;
     --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --surface-color: #f8f9fa;
+    --surface-hover: #f0f0f0;
 }
 
 * {
@@ -31,8 +33,9 @@ body {
 }
 
 .container {
+    min-height: 350px;
     width: 100%;
-    max-width: 600px;
+    max-width: 550px;
     margin: var(--spacing) auto 0;
     padding: calc(var(--spacing) * 0.2);
 }
@@ -45,7 +48,60 @@ body {
     margin-bottom: calc(var(--spacing) * 0.5);
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    position: relative;
+    height: 50px;
+}
+
+.tab-container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 3px;
+    border-radius: 20px;
+    display: inline-flex;
+    position: relative;
+}
+
+.tab-btn {
+    color: rgba(255, 255, 255, 0.7);
+    padding: 6px 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: var(--font-lg);
+    position: relative;
+    z-index: 2;
+    transition: color 0.3s ease;
+    text-align: center;
+    min-width: 80px;
+    user-select: none;
+}
+
+.tab-btn:hover {
+    color: white;
+}
+
+.tab-btn.active {
+    color: #333;
+}
+
+.slider-bg {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    background: white;
+    border-radius: 17px;
+    height: calc(100% - 6px);
+    transition: all 0.3s ease;
+    z-index: 1;
+    width: 80px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
 }
 
 .header-bar h1 {
@@ -56,12 +112,13 @@ body {
 
 .info-btn {
     position: absolute;
-    right: calc(var(--spacing) * 0.3);
+    right: var(--spacing);
     background: none;
     border: none;
     color: white;
     font-size: var(--font-lg);
     cursor: pointer;
+    user-select: none;
 }
 
 .legend {
@@ -91,14 +148,26 @@ body {
     color: white;
 }
 
-.kmap-container {
+.kmap-container,
+.truthtable-container {
     background: white;
     padding: var(--spacing);
     border-radius: calc(var(--radius) * 2);
     box-shadow: var(--shadow);
-    min-height: 350px;
-    display: flex;
-    flex-direction: column;
+    min-height: 250px;
+}
+
+.shared-controls {
+    background: white;
+    padding: var(--spacing);
+    border-radius: calc(var(--radius) * 2);
+    box-shadow: var(--shadow);
+    margin-top: var(--spacing);
+}
+
+.kmap-container.active,
+.truthtable-container.active {
+    display: block;
 }
 
 .kmap-grid {
@@ -116,10 +185,11 @@ body {
     border: 2px solid var(--border-color);
     border-radius: var(--radius);
     display: flex;
+    cursor: pointer;
+    user-select: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
     background: white;
     padding: calc(var(--spacing) * 0.3);
     transition: all 0.2s ease;
@@ -145,17 +215,23 @@ body {
     color: rgba(255, 255, 255, 0.8);
 }
 
+.cell.dont-care .binary-display {
+    color: rgba(255, 255, 255, 0.8);
+}
+
 .binary-display {
     font-size: var(--font-sm);
     color: var(--text-muted);
     margin-bottom: calc(var(--spacing) * 0.3);
     font-family: monospace;
     text-align: center;
+    user-select: none;
 }
 
 .value-display {
     font-size: var(--font-lg);
     font-weight: bold;
+    user-select: none;
 }
 
 .solution-wrapper {
@@ -198,25 +274,28 @@ body {
 
 .controls {
     display: flex;
+    cursor: pointer;
     gap: var(--spacing);
     justify-content: center;
     padding: calc(var(--spacing) * 0.3) 0;
     margin-top: calc(var(--spacing) * 0.5);
 }
 
-button {
-    padding: calc(var(--spacing) * 0.7) calc(var(--spacing) * 2);
-    border: none;
+.controls button {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: var(--spacing) calc(var(--spacing) * 3);
     border-radius: var(--radius);
-    cursor: pointer;
-    font-weight: 500;
-    font-size: var(--font-md);
     transition: all 0.2s ease;
+    font-size: var(--font-md);
+    user-select: none;
 }
 
-button:hover {
+.controls button:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary-color);
     transform: translateY(-1px);
-    box-shadow: var(--shadow);
 }
 
 #clear-btn {
@@ -270,6 +349,27 @@ h1 {
     max-width: 500px;
     width: 90%;
     margin: 15px auto;
+    max-height: 80vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.popup-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.popup-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.popup-content::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 4px;
+}
+
+.popup-content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-color);
 }
 
 .popup-content h3 {
@@ -317,12 +417,68 @@ h1 {
     right: var(--spacing);
     background: none;
     border: none;
-    font-size: var(--font-lg);
+    font-size: 2rem;
     cursor: pointer;
     color: var(--text-muted);
     padding: 0;
+    user-select: none;
 }
 
 .close-btn:hover {
     color: var(--text-color);
+}
+
+.truth-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing);
+    background: var(--bg-light);
+    border-radius: var(--radius);
+}
+
+.truth-table th,
+.truth-table td {
+    padding: calc(var(--spacing) * 0.5);
+    text-align: center;
+    border: 1px solid var(--border-color);
+    user-select: none;
+}
+
+.truth-table th {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.truth-table td {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.truth-table td:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.truth-table tr td:last-child {
+    font-weight: bold;
+}
+
+.truth-table td.selected {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.truth-table td.dont-care {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+.truth-table td.row-id {
+    background-color: var(--bg-light);
+    font-weight: bold;
+    color: var(--text-muted);
+    cursor: default;
+}
+
+.truth-table td.row-id:hover {
+    background-color: var(--bg-light);
 }
