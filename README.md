@@ -39,3 +39,8 @@ The solver uses the following process:
 2. Finds essential prime implicants
 3. Solves the covering problem for remaining implicants
 4. Presents the simplified expression in SOP form
+
+## Credits
+
+Coded by Claude Sonnet 3.5 using Windsurf.
+Logic inspired by https://github.com/obsfx/kmap-solver-lib
