@@ -12,6 +12,10 @@ A Karnaugh map (K-map) is a method to simplify Boolean algebra expressions. It p
 - Auto-solving: Results update instantly as you modify the map
 - Support for don't care conditions (X)
 - Multiple solution display when available
+- One-click copy solution to clipboard
+- Synchronized Truth Table view
+- Interactive info popup with K-map usage guide
+- Modern, clean UI design
 - One-click operations:
   - Set all cells to 1
   - Set all cells to 0
@@ -22,8 +26,11 @@ A Karnaugh map (K-map) is a method to simplify Boolean algebra expressions. It p
 1. Click on cells to cycle through values:
    - 0 → 1 → X (don't care) → 0
 2. The solution updates automatically in Sum of Products (SOP) format
-3. Use "All 1" or "All 0" buttons to quickly set all cells
-4. Use "Clear" to reset the map
+3. Click the copy icon on the left of the solution box to copy the result
+4. Use "All 1" or "All 0" buttons to quickly set all cells
+5. Use "Clear" to reset the map
+6. Switch between K-map and Truth Table views
+7. Click the info icon for a quick guide on K-map usage
 
 ## Technical Details
 
@@ -31,6 +38,8 @@ A Karnaugh map (K-map) is a method to simplify Boolean algebra expressions. It p
 - No external dependencies
 - Boolean algebra simplification using Quine-McCluskey algorithm
 - Gray code implementation for optimal cell adjacency
+- Real-time synchronization between K-map and Truth Table
+- Responsive layout with CSS Grid and Flexbox
 
 ## Implementation Notes
 
@@ -39,6 +48,7 @@ The solver uses the following process:
 2. Finds essential prime implicants
 3. Solves the covering problem for remaining implicants
 4. Presents the simplified expression in SOP form
+5. Synchronizes state between K-map and Truth Table views
 
 ## Credits
 

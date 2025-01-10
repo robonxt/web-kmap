@@ -4,3 +4,7 @@ This is a lightweight Karnaugh map solver webapp.
 
 Use boolean algebra to simplify terms.
 Final answer should be a SOP (sum of products) format.
+
+
+Update the readme to include any new features included.
+Update the info popup to explain how to use the app.

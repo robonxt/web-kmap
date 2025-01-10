@@ -67,10 +67,11 @@ body {
     border: none;
     background: none;
     cursor: pointer;
+    border-radius: 17px;
     font-size: var(--font-lg);
     position: relative;
     z-index: 2;
-    transition: color 0.3s ease;
+    transition: all 0.2s ease;
     text-align: center;
     min-width: 80px;
     user-select: none;
@@ -93,7 +94,7 @@ body {
     height: calc(100% - 6px);
     transition: all 0.3s ease;
     z-index: 1;
-    width: 80px;
+    min-width: 80px;
 }
 
 .tab-content {
@@ -104,21 +105,30 @@ body {
     display: block;
 }
 
-.header-bar h1 {
-    font-size: var(--font-lg);
-    color: white;
-    font-weight: 600;
-}
-
 .info-btn {
+    padding: var(--spacing);
     position: absolute;
+    width: 32px;
+    height: 32px;
     right: var(--spacing);
-    background: none;
+    background: rgba(255, 255, 255, 0.2);
     border: none;
-    color: white;
-    font-size: var(--font-lg);
+    color: var(--text-color);
+    font-size: var(--font-lg); 
+    font-weight: 600;
     cursor: pointer;
     user-select: none;
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info-btn:hover {
+    border: 1px solid ;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
 }
 
 .legend {
@@ -196,9 +206,9 @@ body {
 }
 
 .cell:hover {
-    border-color: var(--primary-hover);
     transform: translateY(-1px);
     box-shadow: var(--shadow);
+    border-color: var(--primary-hover);
 }
 
 .cell.selected {
@@ -244,16 +254,43 @@ body {
 
 .solution-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
+    margin-bottom: var(--spacing);
+}
+
+.solution-box {
+    display: flex;
+    align-items: flex-start;
     gap: var(--spacing);
-    margin-bottom: calc(var(--spacing) * 0.5);
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    flex-shrink: 0;
+}
+
+.icon-button:hover {
+    background-color: var(--surface-hover);
 }
 
 .solution-container {
-    margin: var(--spacing) 0;
+    min-width: 50px;
+    flex-grow: 1;
     padding: var(--spacing);
+    background-color: var(--surface-color);
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
+    min-height: 2.5rem;
+    word-break: break-word;
 }
 
 .solution-select {
@@ -288,7 +325,7 @@ body {
     padding: var(--spacing) calc(var(--spacing) * 3);
     border-radius: var(--radius);
     transition: all 0.2s ease;
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     user-select: none;
 }
 
@@ -296,6 +333,7 @@ body {
     background: var(--surface-hover);
     border-color: var(--primary-color);
     transform: translateY(-1px);
+    box-shadow: var(--shadow);
 }
 
 #clear-btn {
@@ -305,6 +343,9 @@ body {
 
 #clear-btn:hover {
     background-color: var(--danger-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+    border-color: var(--primary-hover);
 }
 
 .var-not {
@@ -316,12 +357,6 @@ body {
 .title-container {
     text-align: center;
     margin-bottom: var(--spacing);
-}
-
-h1 {
-    color: var(--text-color);
-    font-size: var(--font-lg);
-    font-weight: 600;
 }
 
 .popup-overlay {
@@ -341,14 +376,17 @@ h1 {
     align-items: center;
 }
 
-.popup-content {
-    background: white;
-    padding: var(--spacing);
-    border-radius: var(--radius);
+.popup-wrapper {
     position: relative;
     max-width: 500px;
     width: 90%;
     margin: 15px auto;
+}
+
+.popup-content {
+    background: white;
+    padding: var(--spacing);
+    border-radius: var(--radius);
     max-height: 80vh;
     overflow-y: auto;
     scrollbar-width: thin;
@@ -413,19 +451,29 @@ h1 {
 
 .close-btn {
     position: absolute;
-    top: var(--spacing);
-    right: var(--spacing);
-    background: none;
-    border: none;
-    font-size: 2rem;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    font-size: 1.5rem;
+    color: var(--danger-color);
     cursor: pointer;
-    color: var(--text-muted);
-    padding: 0;
     user-select: none;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+    z-index: 1;
 }
 
 .close-btn:hover {
-    color: var(--text-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+    border-color: var(--primary-hover);
 }
 
 .truth-table {

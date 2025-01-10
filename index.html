@@ -28,31 +28,33 @@
             <button class="info-btn" aria-label="Show Information">ⓘ</button>
         </div>
         <div class="popup-overlay" id="info-popup">
-            <div class="popup-content">
-                <h3>About K-Maps</h3>
-                <p>A Karnaugh map (K-map) is a tool for simplifying Boolean algebra expressions. Each cell represents a combination of input variables, arranged so adjacent cells differ by only one bit.</p>
-                
-                <h3>Truth Table</h3>
-                <p>The truth table shows all possible combinations of input variables and their corresponding outputs. Each row represents one possible combination, with 0s and 1s showing the input states and the result. The K-map is derived from this truth table, but arranged in a way that makes it easier to identify patterns and simplify the Boolean expression.</p>
-                
-                <h3>How to Use</h3>
-                <p>Click any cell to cycle through values. The solution updates automatically as you modify cells.</p>
-                
-                <h3>Legend</h3>
-                <div class="legend">
-                    <span class="legend-item zero">0: False input</span>
-                    <span class="legend-item one">1: True input</span>
-                    <span class="legend-item dont-care">X: Don't care (optional)</span>
-                </div>
-                
-                <h3>Controls</h3>
-                <ul class="controls-list">
-                    <li><strong>All 1:</strong> Set all cells to 1</li>
-                    <li><strong>All 0:</strong> Set all cells to 0</li>
-                    <li><strong>Clear:</strong> Reset the map</li>
-                </ul>
-                
+            <div class="popup-wrapper">
                 <button class="close-btn" aria-label="Close">×</button>
+                <div class="popup-content">
+                    <h3>About K-Maps</h3>
+                    <p>A Karnaugh map (K-map) is a tool for simplifying Boolean algebra expressions. Each cell represents a combination of input variables, arranged so adjacent cells differ by only one bit.</p>
+                    
+                    <h3>Truth Table</h3>
+                    <p>The truth table shows all possible combinations of input variables and their corresponding outputs. Each row represents one possible combination, with 0s and 1s showing the input states and the result. The K-map is derived from this truth table, but arranged in a way that makes it easier to identify patterns and simplify the Boolean expression.</p>
+                    
+                    <h3>How to Use</h3>
+                    <p>Click any cell to cycle through values. The solution updates automatically as you modify cells. You can use the copy button on the left side of the solution box to copy the result to clipboard.</p>
+                    
+                    <h3>Legend</h3>
+                    <div class="legend">
+                        <span class="legend-item zero">0: False input</span>
+                        <span class="legend-item one">1: True input</span>
+                        <span class="legend-item dont-care">X: Don't care (optional)</span>
+                    </div>
+                    
+                    <h3>Controls</h3>
+                    <ul class="controls-list">
+                        <li><strong>All 1:</strong> Set all cells to 1</li>
+                        <li><strong>All 0:</strong> Set all cells to 0</li>
+                        <li><strong>Clear:</strong> Reset the map</li>
+                    </ul>
+                    
+                </div>
             </div>
         </div>
         <div class="tab-content active" id="kmap">
@@ -82,9 +84,18 @@
                 <div class="solution-header">
                     <h3>Solution:</h3>
                     <select id="solution-select" class="solution-select">
+                        <option value="sop">Sum of Products (SOP)</option>
                     </select>
                 </div>
-                <div id="solution" class="solution-container"></div>
+                <div class="solution-box">
+                    <button id="copy-solution" class="icon-button" title="Copy to clipboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                    <div id="solution" class="solution-container"></div>
+                </div>
             </div>
             <div class="controls">
                 <button id="all-one-btn">All 1</button>

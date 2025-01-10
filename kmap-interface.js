@@ -350,6 +350,20 @@ class KMapInterface {
         document.getElementById('all-one-btn').addEventListener('click', () => this.setAllCells('1'));
         document.getElementById('all-zero-btn').addEventListener('click', () => this.setAllCells('0'));
         document.getElementById('clear-btn').addEventListener('click', () => this.clear());
+
+        // Add copy to clipboard functionality
+        document.getElementById('copy-solution').addEventListener('click', function() {
+            const solutionText = document.getElementById('solution').textContent;
+            navigator.clipboard.writeText(solutionText).then(() => {
+                // Visual feedback that copy was successful
+                this.style.color = 'var(--primary-color)';
+                setTimeout(() => {
+                    this.style.color = 'var(--text-color)';
+                }, 1000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        });
     }
 }
 
