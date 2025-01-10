@@ -52,5 +52,5 @@ The solver uses the following process:
 
 ## Credits
 
-Coded by Claude Sonnet 3.5 using Windsurf.
+Assisted by Claude Sonnet 3.5 using Windsurf.
 Logic inspired by https://github.com/obsfx/kmap-solver-lib
