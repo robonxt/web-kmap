@@ -349,7 +349,7 @@ class KMapInterface {
         // Controls
         document.getElementById('all-one-btn').addEventListener('click', () => this.setAllCells('1'));
         document.getElementById('all-zero-btn').addEventListener('click', () => this.setAllCells('0'));
-        document.getElementById('clear-btn').addEventListener('click', () => this.setAllCells('0'));
+        document.getElementById('clear-btn').addEventListener('click', () => this.clear());
     }
 }
 
