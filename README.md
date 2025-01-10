@@ -20,6 +20,10 @@ A Karnaugh map (K-map) is a method to simplify Boolean algebra expressions. It p
   - Set all cells to 1
   - Set all cells to 0
   - Clear the map
+- Progressive Web App (PWA) support:
+  - Install as a standalone app on mobile devices
+  - Works offline
+  - Lightweight and fast
 
 ## How to Use
 

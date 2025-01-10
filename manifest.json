@@ -1,0 +1,17 @@
+{
+  "name": "K-Map Solver",
+  "short_name": "K-Map",
+  "description": "A lightweight Karnaugh map solver for Boolean algebra simplification",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4a90e2",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

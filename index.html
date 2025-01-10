@@ -4,17 +4,146 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-Map Solver Webapp</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <meta name="theme-color" content="#4a90e2">
     <link rel="stylesheet" href="styles.css">
     <link rel="preload" href="kmap-solver.js" as="script">
     <link rel="preload" href="kmap-interface.js" as="script">
     <script>
         // Register service worker for offline functionality
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .catch(error => console.error('Service Worker registration failed:', error));
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('./sw.js');
+                    console.log('ServiceWorker registration successful');
+                } catch (error) {
+                    console.error('Service Worker registration failed:', error);
+                }
             });
         }
+
+        // Handle PWA installation
+        let deferredPrompt;
+        let installPopupShown = false;
+
+        // Function to detect iOS
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
+        // Function to detect Android
+        function isAndroid() {
+            return /Android/.test(navigator.userAgent);
+        }
+
+        // Function to show manual installation instructions
+        function showManualInstructions() {
+            const installPopup = document.getElementById('install-popup');
+            if (installPopup && !installPopupShown) {
+                document.getElementById('pwa-install-content').style.display = 'none';
+                document.getElementById('manual-install-content').style.display = 'block';
+                
+                // Show platform-specific instructions
+                if (isIOS()) {
+                    document.getElementById('ios-instructions').style.display = 'block';
+                    document.getElementById('android-instructions').style.display = 'none';
+                } else if (isAndroid()) {
+                    document.getElementById('ios-instructions').style.display = 'none';
+                    document.getElementById('android-instructions').style.display = 'block';
+                }
+
+                installPopup.style.display = 'flex';
+                installPopupShown = true;
+
+                // Handle "Got it" button click
+                const gotItButton = installPopup.querySelector('.got-it');
+                gotItButton.addEventListener('click', () => {
+                    installPopup.style.display = 'none';
+                });
+
+                // Handle close button click
+                const closeButton = installPopup.querySelector('.close-btn');
+                closeButton.addEventListener('click', () => {
+                    installPopup.style.display = 'none';
+                });
+            }
+        }
+
+        // Function to show install popup
+        function showInstallPopup() {
+            const installPopup = document.getElementById('install-popup');
+            if (installPopup && !installPopupShown) {
+                document.getElementById('pwa-install-content').style.display = 'block';
+                document.getElementById('manual-install-content').style.display = 'none';
+                
+                installPopup.style.display = 'flex';
+                installPopupShown = true;
+                
+                // Handle install button click
+                const installButton = installPopup.querySelector('.install-button');
+                installButton.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        await deferredPrompt.prompt();
+                        const choiceResult = await deferredPrompt.userChoice;
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('PWA installation accepted');
+                        }
+                        deferredPrompt = null;
+                    }
+                    installPopup.style.display = 'none';
+                });
+
+                // Handle maybe later button click
+                const maybeLaterButton = installPopup.querySelector('.maybe-later');
+                maybeLaterButton.addEventListener('click', () => {
+                    installPopup.style.display = 'none';
+                });
+
+                // Handle close button click
+                const closeButton = installPopup.querySelector('.close-btn');
+                closeButton.addEventListener('click', () => {
+                    installPopup.style.display = 'none';
+                });
+            }
+        }
+
+        // Check if it's a mobile device
+        function isMobileDevice() {
+            return /Mobile|Android|iPhone|iPad|iPod|webOS|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Handle beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install popup for mobile devices
+            if (isMobileDevice()) {
+                setTimeout(showInstallPopup, 2000);
+            }
+        });
+
+        // Show appropriate installation prompt based on conditions
+        window.addEventListener('load', () => {
+            if (isMobileDevice()) {
+                if (deferredPrompt) {
+                    // If PWA installation is available, show that
+                    setTimeout(showInstallPopup, 2000);
+                } else if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+                    // If not on HTTPS (and not on localhost), show manual instructions
+                    setTimeout(showManualInstructions, 2000);
+                }
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            const installPopup = document.getElementById('install-popup');
+            if (installPopup) {
+                installPopup.style.display = 'none';
+            }
+        });
     </script>
 </head>
 <body>
@@ -54,6 +183,41 @@
                         <li><strong>Clear:</strong> Reset the map</li>
                     </ul>
                     
+                </div>
+            </div>
+        </div>
+        <div class="popup-overlay" id="install-popup">
+            <div class="popup-wrapper">
+                <button class="close-btn" aria-label="Close">×</button>
+                <div class="popup-content">
+                    <h3>Install K-Map Solver</h3>
+                    <div id="pwa-install-content">
+                        <p>Install this app on your device for quick access to the K-Map solver, even when offline!</p>
+                        <div class="install-actions">
+                            <button class="install-button">Install App</button>
+                            <button class="maybe-later">Maybe Later</button>
+                        </div>
+                    </div>
+                    <div id="manual-install-content" style="display: none;">
+                        <p>To add this app to your home screen:</p>
+                        <div id="ios-instructions" style="display: none;">
+                            <ol>
+                                <li>Tap the Share button <span class="icon">□↑</span> at the bottom of your browser</li>
+                                <li>Scroll down and tap "Add to Home Screen"</li>
+                                <li>Tap "Add" to confirm</li>
+                            </ol>
+                        </div>
+                        <div id="android-instructions" style="display: none;">
+                            <ol>
+                                <li>Tap the menu button (⋮) in your browser</li>
+                                <li>Tap "Add to Home screen"</li>
+                                <li>Tap "Add" to confirm</li>
+                            </ol>
+                        </div>
+                        <div class="install-actions">
+                            <button class="got-it">Got it</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,10 +1,12 @@
-const CACHE_NAME = 'kmap-solver-cache';
+const CACHE_NAME = 'kmap-solver-cache-v1';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/kmap-interface.js',
-  '/kmap-solver.js'
+  './',
+  './index.html',
+  './styles.css',
+  './kmap-interface.js',
+  './kmap-solver.js',
+  './icon.svg',
+  './manifest.json'
 ];
 
 // Install service worker and cache all assets
