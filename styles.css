@@ -128,23 +128,24 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     user-select: none;
-}
-
-/* Icon button styles */
-.icon-button,
-.svg-button {
     background: var(--surface-color);
     color: var(--text-color);
-    padding: var(--spacing);
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.icon-button,
+.svg-button,
+.close-btn {
     width: 40px;
     height: 40px;
+    padding: var(--spacing);
 }
 
 .icon-button:hover,
-.svg-button:hover {
+.svg-button:hover,
+.close-btn:hover {
     background: var(--surface-hover);
     transform: translateY(-1px);
     box-shadow: var(--shadow);
@@ -157,31 +158,20 @@ body {
     height: 24px;
 }
 
-/* Close button with border */
 .close-btn {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: var(--surface-color);
     border: 1px solid var(--border-color) !important;
     color: var(--text-color);
-    padding: var(--spacing);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
     box-shadow: var(--shadow);
     z-index: 1;
 }
 
 .close-btn:hover {
-    background: var(--surface-hover);
     border-color: var(--primary-color) !important;
-    transform: translateY(-1px);
 }
 
-/* Header info button override */
 .info-btn {
     background: none;
     color: white;
@@ -196,18 +186,9 @@ body {
     border-color: rgba(255, 255, 255, 0.5);
 }
 
-/* Control buttons */
 .controls button {
-    background: var(--surface-color);
-    color: var(--text-color);
-    padding: var(--spacing) calc(var(--spacing) * 3);
+    padding: calc(var(--spacing) * 0.5) var(--spacing);
     font-size: var(--font-lg);
-}
-
-.controls button:hover {
-    background: var(--surface-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
 }
 
 #clear-btn {
@@ -217,6 +198,22 @@ body {
 
 #clear-btn:hover {
     background-color: var(--danger-color);
+}
+
+#all-one-btn,
+#all-zero-btn {
+    background: var(--surface-color);
+    color: var(--text-color);
+}
+
+#all-one-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+#all-zero-btn:hover {
+    background: var(--text-muted);
+    color: white;
 }
 
 .kmap-container,
@@ -298,9 +295,6 @@ body {
 }
 
 .svg-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 32px;
     height: 32px;
     flex-shrink: 0;
@@ -383,11 +377,60 @@ body {
 
 .popup-content {
     background: white;
-    padding: var(--spacing);
+    padding: 20px;
     border-radius: var(--radius);
     max-height: 80vh;
     overflow-y: auto;
     scrollbar-width: thin;
+    color: var(--text-color);
+    line-height: 1.2;
+    max-width: 600px;
+}
+
+.popup-content h1,
+.popup-content h2,
+.popup-content h3 {
+    margin: 0.2em 0;
+    color: var(--text-color);
+}
+
+.popup-content h1 {
+    font-size: 1.7em;
+    margin-bottom: 1em;
+    color: var(--primary-color);
+}
+
+.popup-content h2 {
+    font-size: 1.4em;
+    margin: 1.5em 0 0.8em;
+}
+
+.popup-content h3 {
+    font-size: 1.2em;
+    margin: 1.2em 0 0.6em;
+}
+
+.popup-content p {
+    margin-bottom: var(--spacing);
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.popup-content ul,
+.popup-content ol {
+    margin: 0 0 1em 1.5em;
+    padding-left: 0.25em;
+}
+
+.popup-content li {
+    margin: 0.1em 0 0.5em;
+}
+
+.popup-content code {
+    background: var(--surface-color);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: monospace;
 }
 
 .popup-content::-webkit-scrollbar {
@@ -408,31 +451,27 @@ body {
     background: var(--text-color);
 }
 
-.popup-content h3 {
-    margin-top: calc(var(--spacing) * 0.5);
-    margin-bottom: calc(var(--spacing) * 0.5);
+.popup-content .note {
+    background-color: #f8f9fa;
+    padding: 1em;
+    border-left: 4px solid #007bff;
+    margin: 1em 0;
+}
+
+.controls {
+    margin-top: var(--spacing);
+    display: flex;
+    gap: var(--spacing);
+    justify-content: center;
+}
+
+.controls button {
+    padding: calc(var(--spacing) * 0.5) var(--spacing);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
     color: var(--text-color);
-}
-
-.popup-content h3:first-child {
-    margin-top: 0;
-}
-
-.popup-content p {
-    margin-bottom: var(--spacing);
-    line-height: 1.4;
-    color: var(--text-muted);
-}
-
-.controls-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.controls-list li {
-    margin-bottom: var(--spacing);
-    color: var(--text-muted);
+    cursor: pointer;
 }
 
 .truth-table {
@@ -501,133 +540,4 @@ body {
     background-color: var(--bg-light);
     transform: none;
     box-shadow: none;
-}
-
-/* Markdown content styles */
-.popup-content {
-    color: var(--text-color);
-    line-height: 1.2;
-    padding: 20px;
-    max-width: 600px;
-}
-
-.popup-content h1,
-.popup-content h2,
-.popup-content h3 {
-    margin: 0.2em 0;
-    color: var(--text-color);
-}
-
-.popup-content h1 {
-    color: var(--primary-color);
-}
-
-.popup-content p {
-    margin: 0.2em 0;
-}
-
-/* List styles */
-.popup-content ul,
-.popup-content ol {
-    margin: 0;
-    padding-left: 0.25em;
-}
-
-.popup-content li {
-    margin: 0.1em 0;
-}
-
-/* Nested lists */
-.popup-content li > ul,
-.popup-content li > ol {
-    margin: 0.1em 0;
-}
-
-.popup-content ol {
-    list-style-type: decimal;
-}
-
-.popup-content ul {
-    list-style-type: disc;
-}
-
-.popup-content a {
-    color: var(--primary-color);
-    text-decoration: none;
-}
-
-.popup-content a:hover {
-    text-decoration: underline;
-}
-
-.popup-content code {
-    background: var(--surface-color);
-    padding: 0.1em 0.3em;
-    border-radius: 3px;
-}
-
-/* Remove extra spacing */
-.popup-content br {
-    display: none;
-}
-
-.popup-content h1 {
-    font-size: 1.7em;
-    margin-bottom: 1em;
-}
-
-.popup-content h2 {
-    font-size: 1.4em;
-    margin-top: 1.5em;
-    margin-bottom: 0.8em;
-}
-
-.popup-content h3 {
-    font-size: 1.2em;
-    margin-top: 1.2em;
-    margin-bottom: 0.6em;
-}
-
-.popup-content p {
-    margin-bottom: 1em;
-    line-height: 1.5;
-}
-
-.popup-content ul, .popup-content ol {
-    margin-left: 1.5em;
-    margin-bottom: 1em;
-}
-
-.popup-content li {
-    margin-bottom: 0.5em;
-}
-
-.popup-content code {
-    background-color: #f5f5f5;
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
-    font-family: monospace;
-}
-
-.popup-content .note {
-    background-color: #f8f9fa;
-    padding: 1em;
-    border-left: 4px solid #007bff;
-    margin: 1em 0;
-}
-
-.controls {
-    margin-top: var(--spacing);
-    display: flex;
-    gap: var(--spacing);
-    justify-content: center;
-}
-
-.controls button {
-    padding: calc(var(--spacing) * 0.5) var(--spacing);
-    border-radius: var(--radius);
-    border: 1px solid var(--border-color);
-    background: var(--surface-color);
-    color: var(--text-color);
-    cursor: pointer;
 }
