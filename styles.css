@@ -438,7 +438,7 @@ body {
 }
 
 .popup-content::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--bg-light);
     border-radius: 4px;
 }
 
