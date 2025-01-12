@@ -9,13 +9,14 @@
     --text-color: #333;
     --text-muted: #6c757d;
     --spacing: 0.5rem;
-    --radius: 6px;
+    --radius: 8px;
     --font-sm: 0.75rem;
     --font-md: 0.9rem;
     --font-lg: 1.2rem;
     --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     --surface-color: #f8f9fa;
     --surface-hover: #f0f0f0;
+    --soft-border: rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -105,26 +106,104 @@ body {
     display: block;
 }
 
-.info-btn {
-    background: none;
-    border: none;
+/* Common button styles */
+.button-base,
+.icon-button,
+.svg-button,
+.close-btn,
+.controls button {
+    border: 1px solid var(--soft-border);
+    border-radius: var(--radius);
     cursor: pointer;
-    padding: calc(var(--spacing) * 0.5);
-    color: white    ;
     transition: all 0.2s ease;
+    user-select: none;
+}
+
+/* Icon button styles */
+.icon-button,
+.svg-button {
+    background: var(--surface-color);
+    color: var(--text-color);
+    padding: var(--spacing);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius);
+    width: 40px;
+    height: 40px;
+}
+
+.icon-button:hover,
+.svg-button:hover {
+    background: var(--surface-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.icon-button svg,
+.svg-button svg,
+.close-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Close button with border */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color);
+    padding: var(--spacing);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    box-shadow: var(--shadow);
+    z-index: 1;
+}
+
+.close-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary-color) !important;
+    transform: translateY(-1px);
+}
+
+/* Header info button override */
+.info-btn {
+    background: none;
+    color: white;
+    padding: calc(var(--spacing) * 0.5);
 }
 
 .info-btn:hover {
-    color: #000;
+    color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.1);
 }
 
-.info-btn svg {
-    width: 24px;
-    height: 24px;
+/* Control buttons */
+.controls button {
+    background: var(--surface-color);
+    color: var(--text-color);
+    padding: var(--spacing) calc(var(--spacing) * 3);
+    font-size: var(--font-lg);
+}
+
+.controls button:hover {
+    background: var(--surface-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+#clear-btn {
+    background-color: var(--text-muted);
+    color: white;
+}
+
+#clear-btn:hover {
+    background-color: var(--danger-color);
 }
 
 .legend {
@@ -261,23 +340,6 @@ body {
     gap: var(--spacing);
 }
 
-.icon-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: var(--radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-color);
-    flex-shrink: 0;
-}
-
-.icon-button:hover {
-    background-color: var(--surface-hover);
-}
-
 .solution-container {
     min-width: 50px;
     flex-grow: 1;
@@ -312,47 +374,6 @@ body {
     justify-content: center;
     padding: calc(var(--spacing) * 0.3) 0;
     margin-top: calc(var(--spacing) * 0.5);
-}
-
-.controls button {
-    background: var(--surface-color);
-    border: 1px solid var(--border-color);
-    color: var(--text-color);
-    padding: var(--spacing) calc(var(--spacing) * 3);
-    border-radius: var(--radius);
-    transition: all 0.2s ease;
-    font-size: var(--font-lg);
-    user-select: none;
-}
-
-.controls button:hover {
-    background: var(--surface-hover);
-    border-color: var(--primary-color);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-}
-
-#clear-btn {
-    background-color: var(--text-muted);
-    color: white;
-}
-
-#clear-btn:hover {
-    background-color: var(--danger-color);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-    border-color: var(--primary-hover);
-}
-
-.var-not {
-    text-decoration: overline;
-    display: inline-block;
-    padding: 0 1px;
-}
-
-.title-container {
-    text-align: center;
-    margin-bottom: var(--spacing);
 }
 
 .popup-overlay {
@@ -443,33 +464,6 @@ body {
     padding: var(--spacing) calc(var(--spacing) * 0.5);
     border-radius: var(--radius);
     font-size: var(--font-md);
-}
-
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-light);
-    border: 1px solid var(--border-color);
-    border-radius: 50%;
-    font-size: 1.5rem;
-    color: var(--danger-color);
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.2s ease;
-    box-shadow: var(--shadow);
-    z-index: 1;
-}
-
-.close-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-    border-color: var(--primary-hover);
 }
 
 .truth-table {
