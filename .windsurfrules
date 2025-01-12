@@ -1,4 +1,4 @@
-tech used: html5, css3, very little js.
+tech used: html5, css3, minimal js, no external dependencies.
 
 This is a lightweight Karnaugh map solver webapp.
 
@@ -6,7 +6,9 @@ Use boolean algebra to simplify terms.
 Final answer should be a SOP (sum of products) format.
 
 
-Network first caching, no versions, offline fallback. Always latest version when online. 
-Does not need https to work online or offline.
-Update the readme to include any new features included.
-Update the info popup to explain how to use the app.
+Network first caching, no versions, offline fallback. 
+Try to use latest server version when online. 
+Should work on http connections.
+Update the readme to include features.
+Update the info popup to concisely and clearly explain how to use the app. 
+Make sure to include credits and links to the source code.
