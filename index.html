@@ -5,14 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-Map Solver Webapp</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preload" href="styles.css" as="style">
     <link rel="preload" href="kmap-solver.js" as="script">
     <link rel="preload" href="kmap-interface.js" as="script">
     <script>
         // Register service worker for offline functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .catch(error => console.error('Service Worker registration failed:', error));
+                // Service workers can work on HTTP in localhost or file:// protocol
+                const isLocalhost = window.location.hostname === 'localhost' || 
+                                  window.location.hostname === '127.0.0.1' ||
+                                  window.location.protocol === 'file:';
+                
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully');
+                    })
+                    .catch(error => {
+                        console.warn('Service Worker registration failed:', error);
+                        if (!isLocalhost && window.location.protocol === 'http:') {
+                            console.info('Note: Service Workers have better support with HTTPS, but will still work with reduced capabilities on HTTP');
+                        }
+                    });
             });
         }
     </script>
@@ -76,13 +90,15 @@
                     </select>
                 </div>
                 <div class="solution-box">
-                    <button id="copy-solution" class="icon-button svg-button" title="Copy to clipboard">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                        </svg>
-                    </button>
-                    <div id="solution" class="solution-container"></div>
+                    <div class="solution-bar">
+                        <div id="solution"></div>
+                        <button id="copy-solution" class="icon-button svg-button" title="Copy to clipboard">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="controls">
@@ -167,7 +183,7 @@
             }
 
             // Load and convert markdown content
-            fetch('/info.md')
+            fetch('info.md')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Failed to load info.md');

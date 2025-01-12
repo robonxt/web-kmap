@@ -205,66 +205,41 @@ class KMapInterface {
         return { minterms, dontcares };
     }
 
-    convertToOverline(expression) {
-        if (expression === '0' || expression === '1') return expression;
+    addOverline(expression) {  
+        if (!expression || expression === '0' || expression === '1') return expression;
         
-        // Split into terms
-        return expression.split(' + ').map(term => {
-            // Process each variable in the term
-            return term.split(/(!)?([A-Z])/).filter(Boolean).map((part, i, arr) => {
-                if (part === '!') return '';
-                if (i > 0 && arr[i-1] === '!') {
-                    return `<span class="var-not">${part}</span>`;
-                }
-                return part;
-            }).join('');
-        }).join(' + ');
+        return expression.split(' + ')
+            .map(term => term.replace(/!([A-Z])/g, (_, p1) => `${p1}\u0305`))  
+            .join(' + ');
     }
 
     updateSolution(result) {
         const solutionDiv = document.getElementById('solution');
-        const solutionSelect = document.getElementById('solution-select');
+        const solutionSelect = document.querySelector('.solution-select');
         
-        // Handle special cases
-        if (!result || result === '0') {
-            solutionDiv.innerHTML = '0';
-            solutionSelect.style.display = 'none';
-            return;
-        }
-        if (result === '1') {
-            solutionDiv.innerHTML = '1';
-            solutionSelect.style.display = 'none';
-            return;
-        }
-
-        // Handle array of solutions
-        if (Array.isArray(result)) {
-            const totalSolutions = result.length;
-            solutionSelect.style.display = totalSolutions > 1 ? 'block' : 'none';
+        const solutions = Array.isArray(result) ? result : [result];
+        
+        if (solutions.length > 1) {
             solutionSelect.innerHTML = '';
+            solutionSelect.style.display = 'block';
             
-            if (totalSolutions > 1) {
-                result.forEach((solution, index) => {
-                    const option = document.createElement('option');
-                    option.value = solution;
-                    option.textContent = `#${index + 1}/${totalSolutions}`;
-                    solutionSelect.appendChild(option);
-                });
-                
-                // Show first solution by default
-                solutionSelect.value = result[0];
-                
-                // Update solution display when selection changes
-                solutionSelect.onchange = () => {
-                    solutionDiv.innerHTML = this.convertToOverline(solutionSelect.value);
-                };
-            }
+            solutions.forEach((solution, index) => {
+                const option = document.createElement('option');
+                option.value = solution;
+                option.textContent = `Solution ${index + 1}`;
+                solutionSelect.appendChild(option);
+            });
             
-            // Display the first solution
-            solutionDiv.innerHTML = this.convertToOverline(result[0]);
+            solutionSelect.value = solutions[0];
+            solutionSelect.onchange = () => {
+                const solution = solutionSelect.value;
+                solutionDiv.innerHTML = this.addOverline(solution);
+            };
+            
+            solutionDiv.innerHTML = this.addOverline(solutions[0]);
         } else {
-            // Single solution
-            solutionDiv.innerHTML = this.convertToOverline(result);
+            const solution = solutions[0];
+            solutionDiv.innerHTML = this.addOverline(solution);
             solutionSelect.style.display = 'none';
         }
     }
@@ -353,17 +328,51 @@ class KMapInterface {
 
         // Add copy to clipboard functionality
         document.getElementById('copy-solution').addEventListener('click', function() {
-            const solutionText = document.getElementById('solution').textContent;
-            navigator.clipboard.writeText(solutionText).then(() => {
-                // Visual feedback that copy was successful
-                this.style.color = 'var(--primary-color)';
-                setTimeout(() => {
-                    this.style.color = 'var(--text-color)';
-                }, 1000);
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
+            const solutionDiv = document.getElementById('solution');
+            const solutionText = String(solutionDiv.textContent || '');
+            
+            // Try modern clipboard API first
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(solutionText).then(() => {
+                    this.showCopySuccess();
+                }).catch(() => {
+                    // Fallback to legacy method if clipboard API fails
+                    this.copyTextFallback(solutionText);
+                });
+            } else {
+                // Use fallback method for non-HTTPS
+                this.copyTextFallback(solutionText);
+            }
         });
+
+        // Add helper methods to the button element
+        const copyBtn = document.getElementById('copy-solution');
+        copyBtn.showCopySuccess = function() {
+            this.style.color = 'var(--primary-color)';
+            setTimeout(() => {
+                this.style.color = 'var(--text-color)';
+            }, 1000);
+        };
+
+        copyBtn.copyTextFallback = function(text) {
+            // Create temporary textarea
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            textArea.style.top = '0';
+            document.body.appendChild(textArea);
+            
+            try {
+                textArea.select();
+                document.execCommand('copy');
+                this.showCopySuccess();
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        };
     }
 }
 

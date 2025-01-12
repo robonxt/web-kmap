@@ -38,7 +38,15 @@ A Karnaugh map (K-map) is a method to simplify Boolean algebra expressions. It p
 ## Technical Details
 
 - Built with vanilla HTML5, CSS3, and JavaScript
-- Network-first strategy with offline fallback
+- Advanced caching strategy:
+  - Always fetches latest version when online
+  - Seamless offline functionality with cached version
+  - No version locking - always get the most recent version you've accessed
+  - Works with or without HTTPS
+- Progressive features with graceful fallbacks:
+  - Clipboard operations work in all environments
+  - Service worker caching works on HTTP and file:// protocol
+  - Full offline support on all protocols
 - No external dependencies
 - Boolean algebra simplification using Quine-McCluskey algorithm
 - Gray code implementation for optimal cell adjacency

@@ -6,6 +6,7 @@ Use boolean algebra to simplify terms.
 Final answer should be a SOP (sum of products) format.
 
 
-Network first caching, offline fallback. Always show latest version when online.
+Network first caching, no versions, offline fallback. Always latest version when online. 
+Does not need https to work online or offline.
 Update the readme to include any new features included.
 Update the info popup to explain how to use the app.
