@@ -106,29 +106,25 @@ body {
 }
 
 .info-btn {
-    padding: var(--spacing);
-    position: absolute;
-    width: 32px;
-    height: 32px;
-    right: var(--spacing);
-    background: rgba(255, 255, 255, 0.2);
+    background: none;
     border: none;
-    color: var(--text-color);
-    font-size: var(--font-lg); 
-    font-weight: 600;
     cursor: pointer;
-    user-select: none;
-    border-radius: var(--radius);
+    padding: calc(var(--spacing) * 0.5);
+    color: white    ;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: var(--radius);
 }
 
 .info-btn:hover {
-    border: 1px solid ;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
+    color: #000;
+}
+
+.info-btn svg {
+    width: 24px;
+    height: 24px;
 }
 
 .legend {
@@ -497,27 +493,34 @@ body {
     color: white;
 }
 
-.truth-table td {
+.truth-table tr td:last-child {
+    font-weight: normal;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius);
     cursor: pointer;
     transition: all 0.2s ease;
+    background-color: white;
 }
 
-.truth-table td:hover {
+.truth-table tr td:last-child:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow);
+    transform: translateY(-1px);
     background-color: rgba(76, 175, 80, 0.1);
 }
 
-.truth-table tr td:last-child {
-    font-weight: bold;
-}
-
-.truth-table td.selected {
+.truth-table td.selected,
+.truth-table tr td.selected:last-child {
     background-color: var(--primary-color);
     color: white;
+    border-color: var(--primary-color) !important;
 }
 
-.truth-table td.dont-care {
+.truth-table td.dont-care,
+.truth-table tr td.dont-care:last-child {
     background-color: var(--warning-color);
     color: white;
+    border-color: var(--warning-color) !important;
 }
 
 .truth-table td.row-id {
@@ -525,8 +528,63 @@ body {
     font-weight: bold;
     color: var(--text-muted);
     cursor: default;
+    border: none;
 }
 
 .truth-table td.row-id:hover {
     background-color: var(--bg-light);
+    transform: none;
+    box-shadow: none;
+}
+
+/* Info popup markdown styles */
+.popup-content {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.popup-content h1 {
+    font-size: 1.8em;
+    margin-bottom: 1em;
+}
+
+.popup-content h2 {
+    font-size: 1.4em;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+}
+
+.popup-content h3 {
+    font-size: 1.2em;
+    margin-top: 1.2em;
+    margin-bottom: 0.6em;
+}
+
+.popup-content p {
+    margin-bottom: 1em;
+    line-height: 1.5;
+}
+
+.popup-content ul, .popup-content ol {
+    margin-left: 1.5em;
+    margin-bottom: 1em;
+}
+
+.popup-content li {
+    margin-bottom: 0.5em;
+}
+
+.popup-content code {
+    background-color: #f5f5f5;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+.popup-content .note {
+    background-color: #f8f9fa;
+    padding: 1em;
+    border-left: 4px solid #007bff;
+    margin: 1em 0;
 }

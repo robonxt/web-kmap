@@ -25,35 +25,23 @@
                 <button class="tab-btn" data-tab="truthtable">Truth Table</button>
                 <div class="slider-bg"></div>
             </div>
-            <button class="info-btn" aria-label="Show Information">ⓘ</button>
+            <button class="info-btn" aria-label="Show Information">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="8" r="1" fill="currentColor"/>
+                    <path d="M12 11v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
         </div>
         <div class="popup-overlay" id="info-popup">
             <div class="popup-wrapper">
-                <button class="close-btn" aria-label="Close">×</button>
-                <div class="popup-content">
-                    <h3>About K-Maps</h3>
-                    <p>A Karnaugh map (K-map) is a tool for simplifying Boolean algebra expressions. Each cell represents a combination of input variables, arranged so adjacent cells differ by only one bit.</p>
-                    
-                    <h3>Truth Table</h3>
-                    <p>The truth table shows all possible combinations of input variables and their corresponding outputs. Each row represents one possible combination, with 0s and 1s showing the input states and the result. The K-map is derived from this truth table, but arranged in a way that makes it easier to identify patterns and simplify the Boolean expression.</p>
-                    
-                    <h3>How to Use</h3>
-                    <p>Click any cell to cycle through values. The solution updates automatically as you modify cells. You can use the copy button on the left side of the solution box to copy the result to clipboard.</p>
-                    
-                    <h3>Legend</h3>
-                    <div class="legend">
-                        <span class="legend-item zero">0: False input</span>
-                        <span class="legend-item one">1: True input</span>
-                        <span class="legend-item dont-care">X: Don't care (optional)</span>
-                    </div>
-                    
-                    <h3>Controls</h3>
-                    <ul class="controls-list">
-                        <li><strong>All 1:</strong> Set all cells to 1</li>
-                        <li><strong>All 0:</strong> Set all cells to 0</li>
-                        <li><strong>Clear:</strong> Reset the map</li>
-                    </ul>
-                    
+                <button class="close-btn" aria-label="Close">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <div class="popup-content" id="info-content">
+                    <!-- Content will be loaded from info.md -->
                 </div>
             </div>
         </div>
@@ -111,6 +99,88 @@
             const infoBtn = document.querySelector('.info-btn');
             const closeBtn = document.querySelector('.close-btn');
             const infoPopup = document.getElementById('info-popup');
+            const infoContent = document.getElementById('info-content');
+
+            // Simple markdown to HTML converter
+            function mdToHtml(md) {
+                // Process the markdown in steps
+                let html = md
+                    // Headers
+                    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                    // Links [text](url)
+                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+                    // Nested Lists (process deeper indentation first)
+                    .replace(/^(\s{4,})[-*]\s+(.*)$/gm, (match, indent, content) => 
+                        `${' '.repeat(indent.length)}<li>${content}</li>`)
+                    .replace(/^(\s*)[-*]\s+(.*)$/gm, (match, indent, content) => 
+                        `${indent}<li>${content}</li>`)
+                    .replace(/^(\s*)\d+\.\s+(.*)$/gm, (match, indent, content) => 
+                        `${indent}<li>${content}</li>`)
+                    // Wrap lists in ul/ol based on indentation
+                    .replace(/((?:^|\n)(?:\s*)<li>.*(?:\n(?:\s*)<li>.*)*)/g, (match) => {
+                        const lines = match.split('\n').filter(line => line.trim());
+                        const baseIndent = lines[0].match(/^\s*/)[0].length;
+                        let currentIndent = baseIndent;
+                        let result = '<ul>';
+                        
+                        for (const line of lines) {
+                            const indent = line.match(/^\s*/)[0].length;
+                            if (indent > currentIndent) {
+                                result += '<ul>';
+                            } else if (indent < currentIndent) {
+                                result += '</ul>';
+                            }
+                            currentIndent = indent;
+                            result += line.trim();
+                        }
+                        
+                        while (currentIndent > baseIndent) {
+                            result += '</ul>';
+                            currentIndent -= 2;
+                        }
+                        return result + '</ul>';
+                    })
+                    // Bold and Italic
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                    // Code blocks
+                    .replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>')
+                    .replace(/`([^`]+)`/g, '<code>$1</code>')
+                    // Paragraphs (handle multiple newlines)
+                    .replace(/\n\s*\n/g, '</p><p>')
+                    // Cleanup extra paragraph tags
+                    .replace(/<p><\/p>/g, '')
+                    .replace(/<p><(h|ul|ol|li|pre)/g, '<$1')
+                    .replace(/(<\/h[1-6]>|<\/ul>|<\/ol>|<\/li>|<\/pre>)<\/p>/g, '$1');
+
+                // Wrap in paragraph if not already wrapped
+                if (!html.startsWith('<')) {
+                    html = '<p>' + html;
+                }
+                if (!html.endsWith('>')) {
+                    html = html + '</p>';
+                }
+
+                return html;
+            }
+
+            // Load and convert markdown content
+            fetch('/info.md')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load info.md');
+                    }
+                    return response.text();
+                })
+                .then(markdown => {
+                    infoContent.innerHTML = mdToHtml(markdown);
+                })
+                .catch(error => {
+                    console.error('Error loading info.md:', error);
+                    infoContent.innerHTML = '<p>Error loading content. Please try again later.</p>';
+                });
 
             infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
             closeBtn.addEventListener('click', () => infoPopup.classList.remove('active'));

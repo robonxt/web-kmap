@@ -6,5 +6,6 @@ Use boolean algebra to simplify terms.
 Final answer should be a SOP (sum of products) format.
 
 
+Network first caching, offline fallback. Always show latest version when online.
 Update the readme to include any new features included.
 Update the info popup to explain how to use the app.
