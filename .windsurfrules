@@ -10,5 +10,7 @@ Network first caching, no versions, offline fallback.
 Try to use latest server version when online. 
 Should work on http connections.
 Update the readme to include features.
-Update the info popup to concisely and clearly explain how to use the app. 
-Make sure to include credits and links to the source code.
+Update the info to concisely and clearly explain how to use the app. 
+Make sure to include credits and links to the source code in the info.
+
+You have vision, look at the image and replicate the designs.

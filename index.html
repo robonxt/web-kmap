@@ -9,6 +9,7 @@
     <link rel="preload" href="kmap-solver.js" as="script">
     <link rel="preload" href="kmap-interface.js" as="script">
     <link rel="preload" href="markdown.js" as="script">
+    <link rel="preload" href="circuit-drawer.js" as="script">
     <script>
         // Register service worker for offline functionality
         if ('serviceWorker' in navigator) {
@@ -30,6 +31,7 @@
             <div class="tab-container">
                 <button class="tab-btn active" data-tab="kmap">K-Map</button>
                 <button class="tab-btn" data-tab="truthtable">Truth Table</button>
+                <button class="tab-btn" data-tab="circuit">Circuit</button>
                 <div class="slider-bg"></div>
             </div>
             <button class="info-btn svg-button" aria-label="Show Information">
@@ -74,6 +76,14 @@
                 </table>
             </div>
         </div>
+        <div class="tab-content" id="circuit">
+            <div class="circuit-container">
+                <canvas id="circuit-canvas"></canvas>
+                <div class="circuit-info">
+                    <p>Circuit diagram for the simplified boolean expression.</p>
+                </div>
+            </div>
+        </div>
         <div class="shared-controls">
             <div class="solution-wrapper">
                 <div class="solution-header">
@@ -104,12 +114,13 @@
     <script src="kmap-solver.js" defer></script>
     <script src="kmap-interface.js" defer></script>
     <script src="markdown.js"></script>
+    <script src="circuit-drawer.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const infoBtn = document.querySelector('.info-btn');
             const closeBtn = document.querySelector('.close-btn');
             const infoPopup = document.getElementById('info-popup');
-
+            
             infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
             closeBtn.addEventListener('click', () => infoPopup.classList.remove('active'));
             infoPopup.addEventListener('click', (e) => {
