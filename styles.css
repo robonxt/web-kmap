@@ -219,33 +219,6 @@ body {
     background-color: var(--danger-color);
 }
 
-.legend {
-    margin: calc(var(--spacing) * 0.3) 0;
-    text-align: center;
-}
-
-.legend-item {
-    display: inline-block;
-    margin: 0 var(--spacing);
-    padding: calc(var(--spacing) * 0.5) var(--spacing);
-    border-radius: var(--radius);
-}
-
-.legend-item.zero {
-    background-color: white;
-    border: 1px solid var(--border-color);
-}
-
-.legend-item.one {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.legend-item.dont-care {
-    background-color: var(--warning-color);
-    color: white;
-}
-
 .kmap-container,
 .truthtable-container {
     background: var(--bg-light);
@@ -364,10 +337,7 @@ body {
     color: white;
 }
 
-.cell.selected .binary-display {
-    color: rgba(255, 255, 255, 0.8);
-}
-
+.cell.selected .binary-display,
 .cell.dont-care .binary-display {
     color: rgba(255, 255, 255, 0.8);
 }
@@ -465,18 +435,6 @@ body {
     color: var(--text-muted);
 }
 
-.legend {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing);
-}
-
-.legend-item {
-    padding: var(--spacing) calc(var(--spacing) * 0.5);
-    border-radius: var(--radius);
-    font-size: var(--font-md);
-}
-
 .truth-table {
     width: 100%;
     border-collapse: separate;
@@ -572,7 +530,7 @@ body {
 .popup-content ul,
 .popup-content ol {
     margin: 0;
-    padding-left: 1em;
+    padding-left: 0.25em;
 }
 
 .popup-content li {
@@ -614,7 +572,7 @@ body {
 }
 
 .popup-content h1 {
-    font-size: 1.8em;
+    font-size: 1.7em;
     margin-bottom: 1em;
 }
 
