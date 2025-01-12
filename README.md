@@ -6,6 +6,23 @@ A lightweight and robust Karnaugh map solver implemented in pure HTML5, CSS3, an
 
 A Karnaugh map (K-map) is a method to simplify Boolean algebra expressions. It provides a visual way to minimize Boolean functions to their simplest form, which is essential in digital logic design and circuit optimization. The map arranges Boolean variables in a grid where adjacent cells differ by only one bit (Gray code order).
 
+## Variables and Notation
+
+The K-map uses four variables: A, B, C, and D, arranged in Gray code order (where adjacent values differ by only one bit):
+
+- **A and B**: Primary variables shown on the top and left edges
+  - Used for basic 2-variable maps (2×2)
+  - Combined for 3-variable maps (2×4)
+
+- **C and D**: Additional variables for larger maps
+  - Used to extend to 4 variables (4×4)
+  - Creates the full 16-cell map
+
+Variable notation in solutions:
+- Regular letter (A): Variable is 1 (TRUE)
+- Letter with prime (A'): Variable is 0 (FALSE)
+- Example: A'BC'D = A=0, B=1, C=0, D=1
+
 ## Features
 
 - 4-variable K-map solver (16 cells)
