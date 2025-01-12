@@ -8,24 +8,17 @@
     <link rel="preload" href="styles.css" as="style">
     <link rel="preload" href="kmap-solver.js" as="script">
     <link rel="preload" href="kmap-interface.js" as="script">
+    <link rel="preload" href="markdown.js" as="script">
     <script>
         // Register service worker for offline functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // Service workers can work on HTTP in localhost or file:// protocol
-                const isLocalhost = window.location.hostname === 'localhost' || 
-                                  window.location.hostname === '127.0.0.1' ||
-                                  window.location.protocol === 'file:';
-                
                 navigator.serviceWorker.register('sw.js')
                     .then(registration => {
                         console.log('Service Worker registered successfully');
                     })
                     .catch(error => {
                         console.warn('Service Worker registration failed:', error);
-                        if (!isLocalhost && window.location.protocol === 'http:') {
-                            console.info('Note: Service Workers have better support with HTTPS, but will still work with reduced capabilities on HTTP');
-                        }
                     });
             });
         }
@@ -110,99 +103,32 @@
     </div>
     <script src="kmap-solver.js" defer></script>
     <script src="kmap-interface.js" defer></script>
+    <script src="markdown.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const infoBtn = document.querySelector('.info-btn');
             const closeBtn = document.querySelector('.close-btn');
             const infoPopup = document.getElementById('info-popup');
-            const infoContent = document.getElementById('info-content');
-
-            // Simple markdown to HTML converter
-            function mdToHtml(md) {
-                // Process the markdown in steps
-                let html = md
-                    // Headers
-                    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-                    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-                    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-                    // Links [text](url)
-                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-                    // Nested Lists (process deeper indentation first)
-                    .replace(/^(\s{4,})[-*]\s+(.*)$/gm, (match, indent, content) => 
-                        `${' '.repeat(indent.length)}<li>${content}</li>`)
-                    .replace(/^(\s*)[-*]\s+(.*)$/gm, (match, indent, content) => 
-                        `${indent}<li>${content}</li>`)
-                    .replace(/^(\s*)\d+\.\s+(.*)$/gm, (match, indent, content) => 
-                        `${indent}<li>${content}</li>`)
-                    // Wrap lists in ul/ol based on indentation
-                    .replace(/((?:^|\n)(?:\s*)<li>.*(?:\n(?:\s*)<li>.*)*)/g, (match) => {
-                        const lines = match.split('\n').filter(line => line.trim());
-                        const baseIndent = lines[0].match(/^\s*/)[0].length;
-                        let currentIndent = baseIndent;
-                        let result = '<ul>';
-                        
-                        for (const line of lines) {
-                            const indent = line.match(/^\s*/)[0].length;
-                            if (indent > currentIndent) {
-                                result += '<ul>';
-                            } else if (indent < currentIndent) {
-                                result += '</ul>';
-                            }
-                            currentIndent = indent;
-                            result += line.trim();
-                        }
-                        
-                        while (currentIndent > baseIndent) {
-                            result += '</ul>';
-                            currentIndent -= 2;
-                        }
-                        return result + '</ul>';
-                    })
-                    // Bold and Italic
-                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-                    // Code blocks
-                    .replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>')
-                    .replace(/`([^`]+)`/g, '<code>$1</code>')
-                    // Paragraphs (handle multiple newlines)
-                    .replace(/\n\s*\n/g, '</p><p>')
-                    // Cleanup extra paragraph tags
-                    .replace(/<p><\/p>/g, '')
-                    .replace(/<p><(h|ul|ol|li|pre)/g, '<$1')
-                    .replace(/(<\/h[1-6]>|<\/ul>|<\/ol>|<\/li>|<\/pre>)<\/p>/g, '$1');
-
-                // Wrap in paragraph if not already wrapped
-                if (!html.startsWith('<')) {
-                    html = '<p>' + html;
-                }
-                if (!html.endsWith('>')) {
-                    html = html + '</p>';
-                }
-
-                return html;
-            }
-
-            // Load and convert markdown content
-            fetch('info.md')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to load info.md');
-                    }
-                    return response.text();
-                })
-                .then(markdown => {
-                    infoContent.innerHTML = mdToHtml(markdown);
-                })
-                .catch(error => {
-                    console.error('Error loading info.md:', error);
-                    infoContent.innerHTML = '<p>Error loading content. Please try again later.</p>';
-                });
 
             infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
             closeBtn.addEventListener('click', () => infoPopup.classList.remove('active'));
             infoPopup.addEventListener('click', (e) => {
                 if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
             });
+
+            // Load and convert markdown content
+            fetch('info.md')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to load info.md');
+                    return response.text();
+                })
+                .then(content => {
+                    document.getElementById('info-content').innerHTML = mdToHtml(content);
+                })
+                .catch(error => {
+                    console.error('Error loading info.md:', error);
+                    document.getElementById('info-content').innerHTML = '<p>Error loading content. Please try again later.</p>';
+                });
         });
     </script>
 </body>

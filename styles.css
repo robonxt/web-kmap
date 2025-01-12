@@ -545,11 +545,72 @@ body {
     box-shadow: none;
 }
 
-/* Info popup markdown styles */
+/* Markdown content styles */
 .popup-content {
+    color: var(--text-color);
+    line-height: 1.2;
     padding: 20px;
     max-width: 600px;
-    margin: 0 auto;
+}
+
+.popup-content h1,
+.popup-content h2,
+.popup-content h3 {
+    margin: 0.2em 0;
+    color: var(--text-color);
+}
+
+.popup-content h1 {
+    color: var(--primary-color);
+}
+
+.popup-content p {
+    margin: 0.2em 0;
+}
+
+/* List styles */
+.popup-content ul,
+.popup-content ol {
+    margin: 0;
+    padding-left: 1em;
+}
+
+.popup-content li {
+    margin: 0.1em 0;
+}
+
+/* Nested lists */
+.popup-content li > ul,
+.popup-content li > ol {
+    margin: 0.1em 0;
+}
+
+.popup-content ol {
+    list-style-type: decimal;
+}
+
+.popup-content ul {
+    list-style-type: disc;
+}
+
+.popup-content a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.popup-content a:hover {
+    text-decoration: underline;
+}
+
+.popup-content code {
+    background: var(--surface-color);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+}
+
+/* Remove extra spacing */
+.popup-content br {
+    display: none;
 }
 
 .popup-content h1 {
