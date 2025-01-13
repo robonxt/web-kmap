@@ -408,24 +408,52 @@ class CircuitDrawer {
                     // Draw NOT gate
                     const notGate = this.drawNOTGate(notX, notY, gateSize/2);
                     
-                    // Draw stair-step wire to NOT gate
+                    // Draw stair-step wire to NOT gate with additional segments to avoid overlaps
                     const stepX = fromPoint.x + horizontalOffset * (input.originalIndex + 1);
+                    const extraStepX = stepX + (termIndex * gateSize); // Extra horizontal offset based on term
+                    
+                    // Route with right angles, avoiding overlaps
                     this.drawLine(fromPoint.x, fromPoint.y, stepX, fromPoint.y);
-                    this.drawLine(stepX, fromPoint.y, stepX, notY);
-                    this.drawLine(stepX, notY, notGate.inputPoint.x, notY);
+                    this.drawLine(stepX, fromPoint.y, extraStepX, fromPoint.y);
+                    this.drawLine(extraStepX, fromPoint.y, extraStepX, notY);
+                    this.drawLine(extraStepX, notY, notGate.inputPoint.x, notY);
                     
                     // Connect NOT gate to AND gate
                     this.drawLine(notGate.outputPoint.x, notY, toPoint.x, toPoint.y);
+                    
+                    // Only add junction dots where wires actually split to different gates
+                    const isSharedInput = termAnalysis.filter(t => 
+                        t.inputs.some(i => i.letter === input.letter && i.inverted === input.inverted)
+                    ).length > 1;
+                    
+                    if (isSharedInput) {
+                        this.drawJunctionDot(fromPoint.x, fromPoint.y);
+                        this.drawJunctionDot(stepX, fromPoint.y);
+                    }
                 } else {
-                    // Draw stair-step wire directly to AND gate
+                    // Draw stair-step wire directly to AND gate with additional segments to avoid overlaps
                     const stepX = fromPoint.x + horizontalOffset * (input.originalIndex + 1);
+                    const extraStepX = stepX + (termIndex * gateSize); // Extra horizontal offset based on term
+                    
+                    // Route with right angles, avoiding overlaps
                     this.drawLine(fromPoint.x, fromPoint.y, stepX, fromPoint.y);
-                    this.drawLine(stepX, fromPoint.y, stepX, toPoint.y);
-                    this.drawLine(stepX, toPoint.y, toPoint.x, toPoint.y);
+                    this.drawLine(stepX, fromPoint.y, extraStepX, fromPoint.y);
+                    this.drawLine(extraStepX, fromPoint.y, extraStepX, toPoint.y);
+                    this.drawLine(extraStepX, toPoint.y, toPoint.x, toPoint.y);
+                    
+                    // Only add junction dots where wires actually split to different gates
+                    const isSharedInput = termAnalysis.filter(t => 
+                        t.inputs.some(i => i.letter === input.letter && i.inverted === input.inverted)
+                    ).length > 1;
+                    
+                    if (isSharedInput) {
+                        this.drawJunctionDot(fromPoint.x, fromPoint.y);
+                        this.drawJunctionDot(stepX, fromPoint.y);
+                    }
                 }
                 this.ctx.stroke();
                 
-                // Add junction dots
+                // Add junction dots at input points
                 this.drawJunctionDot(fromPoint.x, fromPoint.y);
             });
         });
