@@ -40,7 +40,6 @@ body {
 }
 
 .container {
-    min-height: 350px;
     width: 100%;
     max-width: 550px;
     margin: var(--spacing) auto;
@@ -49,7 +48,7 @@ body {
 
 .header-bar {
     background-color: var(--primary-color);
-    padding: calc(var(--spacing) * 0.5);
+    padding: var(--spacing);
     text-align: center;
     border-radius: var(--radius);
     margin-bottom: var(--spacing);
@@ -62,7 +61,6 @@ body {
 
 .tab-container {
     background: rgba(255, 255, 255, 0.1);
-    padding: 3px;
     border-radius: 20px;
     display: inline-flex;
     position: relative;
@@ -118,7 +116,6 @@ body {
 }
 
 /* Common button styles */
-.button-base,
 .icon-button,
 .svg-button,
 .close-btn,
@@ -172,6 +169,11 @@ body {
     border-color: var(--primary-color) !important;
 }
 
+.controls button {
+    padding: calc(var(--spacing) * 0.5) var(--spacing);
+    font-size: var(--font-lg);
+}
+
 .info-btn {
     background: none;
     color: white;
@@ -184,11 +186,6 @@ body {
     transform: translateY(-1px);
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.5);
-}
-
-.controls button {
-    padding: calc(var(--spacing) * 0.5) var(--spacing);
-    font-size: var(--font-lg);
 }
 
 #clear-btn {
@@ -220,14 +217,15 @@ body {
 .truthtable-container {
     background: var(--bg-light);
     border-radius: var(--radius);
-    padding: calc(var(--spacing) * 0.5);
+    /* padding: var(--cell-padding); */
+    width: 100%;
 }
 
 .kmap-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(80px, 1fr));
-    gap: var(--spacing);
-    padding: calc(var(--spacing) * 0.5);
+    grid-template-columns: repeat(4, minmax(10px, 1fr));
+    gap: calc(var(--spacing) * 0.5);
+    /* padding: var(--cell-padding); */
 }
 
 .shared-controls {
@@ -257,7 +255,6 @@ body {
 }
 
 .solution-select {
-    padding: calc(var(--spacing) * 0.5) var(--spacing);
     border-radius: var(--radius);
     border: 1px solid var(--border-color);
     background-color: var(--surface-color);
@@ -265,8 +262,6 @@ body {
     font-size: var(--font-md);
     cursor: pointer;
     display: none;
-    width: 100%;
-    max-width: 200px;
 }
 
 .solution-select:focus {
@@ -294,7 +289,7 @@ body {
     font-size: var(--font-lg);
 }
 
-.svg-button {
+.solution-bar .svg-button {
     width: 32px;
     height: 32px;
     flex-shrink: 0;
@@ -311,7 +306,6 @@ body {
     align-items: center;
     justify-content: center;
     background: white;
-    padding: calc(var(--spacing) * 0.3);
     transition: all 0.2s ease;
 }
 
@@ -377,7 +371,7 @@ body {
 
 .popup-content {
     background: white;
-    padding: 20px;
+    padding: var(--spacing);
     border-radius: var(--radius);
     max-height: 80vh;
     overflow-y: auto;
@@ -419,7 +413,7 @@ body {
 .popup-content ul,
 .popup-content ol {
     margin: 0 0 1em 1.5em;
-    padding-left: 0.25em;
+    padding-left: 0.1em;
 }
 
 .popup-content li {
@@ -428,7 +422,7 @@ body {
 
 .popup-content code {
     background: var(--surface-color);
-    padding: 0.2em 0.4em;
+    padding: 0.1em 0.4em;
     border-radius: 3px;
     font-family: monospace;
 }
@@ -453,7 +447,7 @@ body {
 
 .popup-content .note {
     background-color: #f8f9fa;
-    padding: 1em;
+    padding: .5em;
     border-left: 4px solid #007bff;
     margin: 1em 0;
 }
@@ -463,15 +457,6 @@ body {
     display: flex;
     gap: var(--spacing);
     justify-content: center;
-}
-
-.controls button {
-    padding: calc(var(--spacing) * 0.5) var(--spacing);
-    border-radius: var(--radius);
-    border: 1px solid var(--border-color);
-    background: var(--surface-color);
-    color: var(--text-color);
-    cursor: pointer;
 }
 
 .truth-table {
@@ -494,7 +479,6 @@ body {
 .truth-table th {
     background-color: var(--primary-color);
     color: white;
-    padding: calc(var(--spacing) * 0.5);
     border-radius: var(--radius);
 }
 
