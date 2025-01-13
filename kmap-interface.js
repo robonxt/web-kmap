@@ -226,7 +226,7 @@ class KMapInterface {
             solutions.forEach((solution, index) => {
                 const option = document.createElement('option');
                 option.value = solution;
-                option.textContent = `Solution ${index + 1}`;
+                option.textContent = `#${index + 1} of ${solutions.length}`;
                 solutionSelect.appendChild(option);
             });
             
