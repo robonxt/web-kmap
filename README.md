@@ -80,8 +80,15 @@ The solver uses the following process:
 4. Simplifies the expression using Boolean algebra
 5. Presents the result in minimal SOP format
 
+## TODO:
+
+ - Try to get it working on browsers as old as Chrome 104+, Safari 12+. [Compare working features here](https://caniuse.com/?compare=chrome+104,safari+12&compareCats=CSS,HTML5,JS,JS%20API,Other,Security,SVG)
+
 ## Credits
 
 Created by [robonxt](https://github.com/robonxt). 
+
 Assisted by Claude Sonnet 3.5 using Windsurf.
+
 Logic inspired by https://github.com/obsfx/kmap-solver-lib
+
