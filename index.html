@@ -29,10 +29,17 @@
     <div class="container">
         <div class="header-bar">
             <div class="tab-container">
-                <button class="tab-btn active" data-tab="kmap">K-Map</button>
-                <button class="tab-btn" data-tab="truthtable">Truth Table</button>
-                <button class="tab-btn" data-tab="circuit">Circuit</button>
-                <div class="slider-bg"></div>
+                <button class="hamburger-menu svg-button" aria-label="Menu">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <div class="tabs-wrapper">
+                    <button class="tab-btn active" data-tab="kmap">K-Map</button>
+                    <button class="tab-btn" data-tab="truthtable">Truth Table</button>
+                    <button class="tab-btn" data-tab="circuit">Circuit</button>
+                    <div class="slider-bg"></div>
+                </div>
             </div>
             <button class="info-btn svg-button" aria-label="Show Information">
                 <svg viewBox="0 0 24 24">

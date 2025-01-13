@@ -379,4 +379,55 @@ class KMapInterface {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new KMapInterface();
+
+    // Add hamburger menu toggle
+    const hamburgerBtn = document.querySelector('.hamburger-menu');
+    const tabsWrapper = document.querySelector('.tabs-wrapper');
+    const sliderBg = document.querySelector('.slider-bg');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    
+    // Function to update slider position
+    function updateSlider(activeTab) {
+        if (window.innerWidth > 375 && sliderBg && activeTab) {
+            const tabWidth = activeTab.offsetWidth;
+            const tabLeft = activeTab.offsetLeft;
+            sliderBg.style.width = `${tabWidth}px`;
+            sliderBg.style.transform = `translateX(${tabLeft}px)`;
+        }
+    }
+
+    // Update slider on window resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            const activeTab = document.querySelector('.tab-btn.active');
+            updateSlider(activeTab);
+        }, 100);
+    });
+    
+    if (hamburgerBtn && tabsWrapper) {
+        hamburgerBtn.addEventListener('click', () => {
+            tabsWrapper.classList.toggle('show');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!tabsWrapper.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                tabsWrapper.classList.remove('show');
+            }
+        });
+
+        // Update slider when switching tabs
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabsWrapper.classList.remove('show');
+                setTimeout(() => updateSlider(btn), 0);
+            });
+        });
+    }
+
+    // Initial slider position
+    const initialActiveTab = document.querySelector('.tab-btn.active');
+    updateSlider(initialActiveTab);
 });

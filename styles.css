@@ -66,6 +66,23 @@ body {
     position: relative;
 }
 
+.hamburger-menu {
+    display: none;
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.hamburger-menu:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.tabs-wrapper {
+    display: inline-flex;
+    position: relative;
+}
+
 .tab-btn {
     color: rgba(255, 255, 255, 0.7);
     padding: 6px 16px;
@@ -543,4 +560,71 @@ body {
     height: 100%;
     display: block;
     overflow: scroll;
+}
+
+@media (max-width: 375px) {
+    .hamburger-menu {
+        display: flex;
+    }
+    
+    .tabs-wrapper {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: var(--primary-color);
+        border-radius: var(--radius);
+        padding: var(--spacing);
+        margin-top: var(--spacing);
+        box-shadow: var(--shadow);
+        flex-direction: column;
+        min-width: 150px;
+        z-index: 10;
+    }
+    
+    .tabs-wrapper.show {
+        display: flex;
+    }
+    
+    .tab-btn {
+        width: 100%;
+        text-align: left;
+        color: white;
+        padding: 8px 16px;
+    }
+    
+    .tab-btn.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .slider-bg {
+        display: none;
+    }
+}
+
+@media (min-width: 376px) {
+    .hamburger-menu {
+        display: none;
+    }
+    
+    .tabs-wrapper {
+        display: inline-flex !important;
+        position: relative;
+        flex-direction: row;
+    }
+    
+    .tab-btn {
+        color: rgba(255, 255, 255, 0.7);
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    .tab-btn.active {
+        color: #333;
+    }
+    
+    .slider-bg {
+        display: block;
+    }
 }
