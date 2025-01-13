@@ -40,7 +40,6 @@ body {
 }
 
 .container {
-    min-height: 350px;
     width: 100%;
     max-width: 550px;
     margin: var(--spacing) auto;
@@ -224,8 +223,8 @@ body {
 
 .kmap-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(80px, 1fr));
-    gap: var(--spacing);
+    grid-template-columns: repeat(4, minmax(10px, 1fr));
+    gap: calc(var(--spacing) * 0.5);
     /* padding: var(--cell-padding); */
 }
 
