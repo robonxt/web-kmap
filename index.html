@@ -60,7 +60,6 @@
                     </svg>
                 </button>
                 <div class="popup-content" id="info-content">
-                    <!-- Content will be loaded from info.md -->
                 </div>
             </div>
         </div>
@@ -102,13 +101,6 @@
                 <div class="solution-box">
                     <div class="solution-bar">
                         <div id="solution"></div>
-                        <button id="copy-solution" class="icon-button svg-button" title="Copy to clipboard">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                            </svg>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -118,6 +110,7 @@
                 <button id="clear-btn">Clear</button>
             </div>
         </div>
+        <div id="toast" class="toast hidden">Copied to clipboard!</div>
     </div>
     <script src="kmap-solver.js" defer></script>
     <script src="kmap-interface.js" defer></script>
@@ -146,16 +139,6 @@
                     sliderBg.style.transform = `translateX(${tabLeft}px)`;
                 }
             }
-
-            // Update slider on window resize
-            let resizeTimer;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(() => {
-                    const activeTab = document.querySelector('.tab-btn.active');
-                    updateSlider(activeTab);
-                }, 100);
-            });
 
             if (hamburgerBtn && tabsWrapper) {
                 hamburgerBtn.addEventListener('click', () => {
