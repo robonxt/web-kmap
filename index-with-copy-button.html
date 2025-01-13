@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Map Solver Webapp</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preload" href="styles.css" as="style">
+    <link rel="preload" href="kmap-solver.js" as="script">
+    <link rel="preload" href="kmap-interface.js" as="script">
+    <link rel="preload" href="markdown.js" as="script">
+    <link rel="preload" href="circuit-drawer.js" as="script">
+    <script>
+        // Register service worker for offline functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully');
+                    })
+                    .catch(error => {
+                        console.warn('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header-bar">
+            <div class="tab-container">
+                <button class="hamburger-menu svg-button" aria-label="Menu">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" />
+                    </svg>
+                </button>
+                <div class="tabs-wrapper">
+                    <button class="tab-btn active" data-tab="kmap">K-Map</button>
+                    <button class="tab-btn" data-tab="truthtable">Truth Table</button>
+                    <button class="tab-btn" data-tab="circuit">Circuit</button>
+                    <div class="slider-bg"></div>
+                </div>
+            </div>
+            <button class="info-btn svg-button" aria-label="Show Information">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" />
+                    <circle cx="12" cy="8" r="1" fill="currentColor" />
+                    <path d="M12 11v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </button>
+        </div>
+        <div class="popup-overlay" id="info-popup">
+            <div class="popup-wrapper">
+                <button class="close-btn svg-button" aria-label="Close">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </button>
+                <div class="popup-content" id="info-content">
+                </div>
+            </div>
+        </div>
+        <div class="tab-content active" id="kmap">
+            <div class="kmap-container">
+                <div class="kmap-grid" id="kmap-grid"></div>
+            </div>
+        </div>
+        <div class="tab-content" id="truthtable">
+            <div class="truthtable-container">
+                <table class="truth-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>Output</th>
+                        </tr>
+                    </thead>
+                    <tbody id="truth-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-content" id="circuit">
+            <div class="circuit-container">
+                <canvas id="circuit-canvas"></canvas>
+            </div>
+        </div>
+        <div class="shared-controls">
+            <div class="solution-wrapper">
+                <div class="solution-header">
+                    <h3>Solution:</h3>
+                    <select id="solution-select" class="solution-select">
+                        <option value="sop">Sum of Products (SOP)</option>
+                    </select>
+                </div>
+                <div class="solution-box">
+                    <div class="solution-bar">
+                        <div id="solution"></div>
+                        <!-- DO NOT DELETE - commented the copy-solution button out for now due to it not working on older iOS devices. - DO NOT DELETE -->
+                        <button id="copy-solution" class="icon-button svg-button" title="Copy to clipboard">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="all-one-btn">All 1</button>
+                <button id="all-zero-btn">All 0</button>
+                <button id="clear-btn">Clear</button>
+            </div>
+        </div>
+        <div id="toast" class="toast hidden">Copied to clipboard!</div>
+    </div>
+    <script src="kmap-solver.js" defer></script>
+    <script src="kmap-interface.js" defer></script>
+    <script src="markdown.js"></script>
+    <script src="circuit-drawer.js" defer></script>
+    <script>
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new KMapInterface();
+
+            // Add hamburger menu toggle
+            const hamburgerBtn = document.querySelector('.hamburger-menu');
+            const tabsWrapper = document.querySelector('.tabs-wrapper');
+            const sliderBg = document.querySelector('.slider-bg');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const infoBtn = document.querySelector('.info-btn');
+            const closeBtn = document.querySelector('.close-btn');
+            const infoPopup = document.getElementById('info-popup');
+
+            // Function to update slider position
+            function updateSlider(activeTab) {
+                if (window.innerWidth > 375 && sliderBg && activeTab) {
+                    const tabWidth = activeTab.offsetWidth;
+                    const tabLeft = activeTab.offsetLeft;
+                    sliderBg.style.width = `${tabWidth}px`;
+                    sliderBg.style.transform = `translateX(${tabLeft}px)`;
+                }
+            }
+
+            if (hamburgerBtn && tabsWrapper) {
+                hamburgerBtn.addEventListener('click', () => {
+                    tabsWrapper.classList.toggle('show');
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!tabsWrapper.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                        tabsWrapper.classList.remove('show');
+                    }
+                });
+
+                // Update slider when switching tabs
+                tabBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        tabsWrapper.classList.remove('show');
+                        setTimeout(() => updateSlider(btn), 0);
+                    });
+                });
+            }
+
+            // Initial slider position
+            const initialActiveTab = document.querySelector('.tab-btn.active');
+            updateSlider(initialActiveTab);
+
+            // Info popup functionality
+            infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
+            closeBtn.addEventListener('click', () => infoPopup.classList.remove('active'));
+            infoPopup.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+            });
+
+            // Load and convert markdown content
+            fetch('info.md')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to load info.md');
+                    return response.text();
+                })
+                .then(content => {
+                    document.getElementById('info-content').innerHTML = mdToHtml(content);
+                })
+                .catch(error => {
+                    console.error('Error loading info.md:', error);
+                    document.getElementById('info-content').innerHTML = '<p>Error loading content. Please try again later.</p>';
+                });
+        });
+    </script>
+</body>
+
+</html>
