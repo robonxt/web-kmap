@@ -331,17 +331,17 @@ class KMapInterface {
             const solutionDiv = document.getElementById('solution');
             const solutionText = String(solutionDiv.textContent || '');
             
-            // Try modern clipboard API first
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(solutionText).then(() => {
-                    this.showCopySuccess();
-                }).catch(() => {
-                    // Fallback to legacy method if clipboard API fails
-                    this.copyTextFallback(solutionText);
-                });
+                navigator.clipboard.writeText(solutionText)
+                    .then(() => {
+                        this.showCopySuccess();
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        copyTextFallback(solutionDiv);
+                    });
             } else {
-                // Use fallback method for non-HTTPS
-                this.copyTextFallback(solutionText);
+                copyTextFallback(solutionDiv);
             }
         });
 
@@ -354,80 +354,34 @@ class KMapInterface {
             }, 1000);
         };
 
-        copyBtn.copyTextFallback = function(text) {
-            // Create temporary textarea
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-9999px';
-            textArea.style.top = '0';
-            document.body.appendChild(textArea);
-            
+        function copyTextFallback(solutionDiv) {
+            const range = document.createRange();
+            range.selectNodeContents(solutionDiv);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+
             try {
-                textArea.select();
-                document.execCommand('copy');
-                this.showCopySuccess();
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    copyBtn.showCopySuccess();
+                } else {
+                    console.error('Failed to copy text using execCommand.');
+                    highlightSolution(solutionDiv); // Highlight if copy fails
+                }
             } catch (err) {
                 console.error('Failed to copy text: ', err);
+                highlightSolution(solutionDiv); // Highlight if an error occurs
             } finally {
-                document.body.removeChild(textArea);
+                selection.removeAllRanges();
             }
-        };
-    }
-}
+        }
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new KMapInterface();
-
-    // Add hamburger menu toggle
-    const hamburgerBtn = document.querySelector('.hamburger-menu');
-    const tabsWrapper = document.querySelector('.tabs-wrapper');
-    const sliderBg = document.querySelector('.slider-bg');
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    
-    // Function to update slider position
-    function updateSlider(activeTab) {
-        if (window.innerWidth > 375 && sliderBg && activeTab) {
-            const tabWidth = activeTab.offsetWidth;
-            const tabLeft = activeTab.offsetLeft;
-            sliderBg.style.width = `${tabWidth}px`;
-            sliderBg.style.transform = `translateX(${tabLeft}px)`;
+        function highlightSolution(solutionDiv) {
+            solutionDiv.classList.add('highlight'); // Add highlight class
+            setTimeout(() => {
+                solutionDiv.classList.remove('highlight'); // Remove highlight after 1 second
+            }, 1000);
         }
     }
-
-    // Update slider on window resize
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            const activeTab = document.querySelector('.tab-btn.active');
-            updateSlider(activeTab);
-        }, 100);
-    });
-    
-    if (hamburgerBtn && tabsWrapper) {
-        hamburgerBtn.addEventListener('click', () => {
-            tabsWrapper.classList.toggle('show');
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!tabsWrapper.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-                tabsWrapper.classList.remove('show');
-            }
-        });
-
-        // Update slider when switching tabs
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                tabsWrapper.classList.remove('show');
-                setTimeout(() => updateSlider(btn), 0);
-            });
-        });
-    }
-
-    // Initial slider position
-    const initialActiveTab = document.querySelector('.tab-btn.active');
-    updateSlider(initialActiveTab);
-});
+}
