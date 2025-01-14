@@ -51,8 +51,8 @@ class CircuitDrawer {
         this.ctx.strokeStyle = '#000';
         this.ctx.fillStyle = '#fff';
 
-        const fontSize = window.getComputedStyle(container).getPropertyValue('--font-md') || '16px';
-        const fontFamily = window.getComputedStyle(container).getPropertyValue('--font-family') || 'Arial';
+        const fontSize = window.getComputedStyle(container).getPropertyValue('--font-md') || '24px';
+        const fontFamily = window.getComputedStyle(container).getPropertyValue('--font-family') || 'Console, monospace';
         this.ctx.font = `${fontSize} ${fontFamily}`;
     }
 

@@ -11,6 +11,7 @@
     <link rel="preload" href="kmap-interface.js" as="script">
     <link rel="preload" href="markdown.js" as="script">
     <link rel="preload" href="circuit-drawer.js" as="script">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <script>
         // Register service worker for offline functionality
         if ('serviceWorker' in navigator) {
@@ -110,11 +111,10 @@
                 <button id="clear-btn">Clear</button>
             </div>
         </div>
-        <div id="toast" class="toast hidden">Copied to clipboard!</div>
     </div>
     <script src="kmap-solver.js" defer></script>
     <script src="kmap-interface.js" defer></script>
-    <script src="markdown.js"></script>
+    <script src="markdown.js" defer></script>
     <script src="circuit-drawer.js" defer></script>
     <script>
         // Initialize when DOM is loaded
