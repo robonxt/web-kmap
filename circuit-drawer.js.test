@@ -1,0 +1,313 @@
+class GridCircuitDrawer {
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.gridSize = { rows: 32, cols: 32 };
+        this.grid = Array(this.gridSize.rows).fill().map(() => 
+            Array(this.gridSize.cols).fill().map(() => ({
+                isOccupied: false,
+                type: null // 'wire', 'gate', 'cross'
+            }))
+        );
+        this.setupCanvas();
+        this.setupTabListener();
+    }
+
+    setupTabListener() {
+        document.querySelector('[data-tab="circuit"]')?.addEventListener('click', () => {
+            setTimeout(() => {
+                this.setupCanvas();
+                const solutionDiv = document.getElementById('solution');
+                if (solutionDiv?.textContent) {
+                    this.drawCircuit(solutionDiv.textContent);
+                }
+            }, 0);
+        });
+    }
+
+    setupCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        const container = this.canvas.parentElement;
+        const rect = container.getBoundingClientRect();
+        
+        this.cellSize = Math.floor(Math.min(rect.width, rect.height) / Math.max(this.gridSize.rows, this.gridSize.cols));
+        this.canvas.width = this.cellSize * this.gridSize.cols * dpr;
+        this.canvas.height = this.cellSize * this.gridSize.rows * dpr;
+        this.canvas.style.width = `${this.cellSize * this.gridSize.cols}px`;
+        this.canvas.style.height = `${this.cellSize * this.gridSize.rows}px`;
+        
+        this.ctx.scale(dpr, dpr);
+        this.ctx.lineWidth = 1;
+        this.clear();
+    }
+
+    clear() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.grid = Array(this.gridSize.rows).fill().map(() => 
+            Array(this.gridSize.cols).fill().map(() => ({
+                isOccupied: false,
+                type: null
+            }))
+        );
+    }
+
+    gridToCanvas(row, col) {
+        return {
+            x: col * this.cellSize + this.cellSize / 2,
+            y: row * this.cellSize + this.cellSize / 2
+        };
+    }
+
+    isValidGridPoint(row, col) {
+        return row >= 0 && row < this.gridSize.rows && 
+               col >= 0 && col < this.gridSize.cols &&
+               !this.grid[row][col].isOccupied;
+    }
+
+    reserveGateSpace(startRow, startCol, height, width) {
+        for (let r = startRow; r < startRow + height && r < this.gridSize.rows; r++) {
+            for (let c = startCol; c < startCol + width && c < this.gridSize.cols; c++) {
+                this.grid[r][c].isOccupied = true;
+                this.grid[r][c].type = 'gate';
+            }
+        }
+    }
+
+    drawInput(row, col, label) {
+        const pos = this.gridToCanvas(row, col);
+        this.ctx.font = '12px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(label, pos.x, pos.y);
+        this.grid[row][col].isOccupied = true;
+        return { row, col };
+    }
+
+    drawANDGate(row, col, inputs) {
+        const gateHeight = Math.min(8, Math.max(3, inputs + 2));
+        const gateWidth = 3;
+        
+        if (row + gateHeight >= this.gridSize.rows || col + gateWidth >= this.gridSize.cols) {
+            return null;
+        }
+        
+        this.reserveGateSpace(row, col, gateHeight, gateWidth);
+        const start = this.gridToCanvas(row, col);
+        
+        // Draw gate body
+        const height = gateHeight * this.cellSize;
+        const width = gateWidth * this.cellSize;
+        this.ctx.beginPath();
+        this.ctx.moveTo(start.x, start.y);
+        this.ctx.lineTo(start.x, start.y + height);
+        this.ctx.arcTo(start.x + width, start.y + height, start.x + width, start.y, height/2);
+        this.ctx.arcTo(start.x + width, start.y, start.x, start.y, height/2);
+        this.ctx.closePath();
+        this.ctx.stroke();
+
+        // Calculate input points
+        const inputPoints = [];
+        const spacing = Math.floor(gateHeight / (inputs + 1));
+        for (let i = 0; i < inputs; i++) {
+            const inputRow = row + spacing * (i + 1);
+            inputPoints.push({ row: inputRow, col });
+        }
+
+        return {
+            inputPoints,
+            outputPoint: { row: row + Math.floor(gateHeight/2), col: col + gateWidth }
+        };
+    }
+
+    drawORGate(row, col) {
+        if (row >= this.gridSize.rows || col + 2 >= this.gridSize.cols) {
+            return null;
+        }
+
+        this.reserveGateSpace(row, col, 1, 2);
+        const start = this.gridToCanvas(row, col);
+        
+        // Draw OR gate as a small circle
+        this.ctx.beginPath();
+        this.ctx.arc(start.x + this.cellSize, start.y, this.cellSize/2, 0, Math.PI * 2);
+        this.ctx.stroke();
+
+        return {
+            inputPoint: { row, col },
+            outputPoint: { row, col: col + 2 }
+        };
+    }
+
+    findWirePath(start, end) {
+        if (!start || !end) return null;
+        
+        const queue = [[start]];
+        const visited = new Set();
+        const key = p => `${p.row},${p.col}`;
+        visited.add(key(start));
+
+        while (queue.length > 0) {
+            const path = queue.shift();
+            const current = path[path.length - 1];
+
+            if (current.row === end.row && current.col === end.col) {
+                return this.optimizePath(path);
+            }
+
+            // Only consider moves right and up/down
+            const moves = [
+                { row: current.row, col: current.col + 1 },     // right
+                { row: current.row + 1, col: current.col },     // down
+                { row: current.row - 1, col: current.col }      // up
+            ];
+
+            for (const move of moves) {
+                const moveKey = key(move);
+                if (!this.isValidGridPoint(move.row, move.col)) continue;
+                if (visited.has(moveKey)) continue;
+                
+                // Allow crossing wires perpendicularly
+                const currentCell = this.grid[move.row][move.col];
+                if (currentCell.isOccupied && currentCell.type !== 'cross') continue;
+
+                visited.add(moveKey);
+                queue.push([...path, move]);
+            }
+        }
+        return null;
+    }
+
+    optimizePath(path) {
+        if (!path || path.length < 3) return path;
+        
+        const optimized = [path[0]];
+        let currentDirection = null;
+        
+        for (let i = 1; i < path.length; i++) {
+            const prev = path[i - 1];
+            const current = path[i];
+            const direction = current.row === prev.row ? 'horizontal' : 'vertical';
+            
+            if (direction !== currentDirection) {
+                optimized.push(current);
+                currentDirection = direction;
+            }
+        }
+        
+        if (optimized[optimized.length - 1] !== path[path.length - 1]) {
+            optimized.push(path[path.length - 1]);
+        }
+        
+        return optimized;
+    }
+
+    drawWire(path) {
+        if (!path || path.length < 2) return;
+
+        this.ctx.beginPath();
+        const start = this.gridToCanvas(path[0].row, path[0].col);
+        this.ctx.moveTo(start.x, start.y);
+
+        for (let i = 1; i < path.length; i++) {
+            const point = this.gridToCanvas(path[i].row, path[i].col);
+            this.ctx.lineTo(point.x, point.y);
+            
+            // Mark wire points and crossings on grid
+            const prev = path[i - 1];
+            const current = path[i];
+            
+            for (let r = Math.min(prev.row, current.row); r <= Math.max(prev.row, current.row); r++) {
+                for (let c = Math.min(prev.col, current.col); c <= Math.max(prev.col, current.col); c++) {
+                    if (this.grid[r][c].type === 'wire') {
+                        this.grid[r][c].type = 'cross';
+                    } else if (!this.grid[r][c].isOccupied) {
+                        this.grid[r][c].isOccupied = true;
+                        this.grid[r][c].type = 'wire';
+                    }
+                }
+            }
+        }
+        
+        this.ctx.stroke();
+    }
+
+    parseExpression(expression) {
+        if (!expression) return [];
+        
+        const cleanExpr = expression
+            .replace(/<[^>]+>/g, '')
+            .replace(/([A-Z])̅|([A-Z])̄/g, '$1$2\'')
+            .trim();
+            
+        return cleanExpr.split('+').map(term => {
+            const inputs = (term.match(/[A-Z]'?/g) || []).map(input => ({
+                letter: input[0],
+                inverted: input.includes('\'')
+            }));
+            return { inputs };
+        });
+    }
+
+    getUniqueInputs(terms) {
+        const inputs = new Set();
+        terms.forEach(term => {
+            term.inputs.forEach(input => inputs.add(input.letter));
+        });
+        return Array.from(inputs).sort();
+    }
+
+    drawCircuit(expression) {
+        this.clear();
+        const terms = this.parseExpression(expression);
+        if (!terms.length) return;
+
+        const inputs = this.getUniqueInputs(terms);
+        let currentCol = 0;
+        const inputPositions = new Map();
+        
+        // Place inputs
+        inputs.forEach((input, idx) => {
+            const row = idx * 3 + 2;
+            inputPositions.set(input, this.drawInput(row, currentCol, input));
+        });
+        
+        currentCol += 4;
+        const andGates = [];
+        
+        // Draw AND gates for each term
+        terms.forEach((term, idx) => {
+            const gateRow = idx * 8 + 2;
+            const gate = this.drawANDGate(gateRow, currentCol, term.inputs.length);
+            if (!gate) return;
+            
+            // Connect inputs to AND gate
+            term.inputs.forEach((input, inputIdx) => {
+                const inputPos = inputPositions.get(input.letter);
+                const path = this.findWirePath(inputPos, gate.inputPoints[inputIdx]);
+                if (path) this.drawWire(path);
+            });
+            
+            andGates.push(gate);
+        });
+        
+        // Draw final OR gate if needed
+        if (andGates.length > 1) {
+            currentCol += 6;
+            const orRow = Math.floor(this.gridSize.rows/2);
+            const orGate = this.drawORGate(orRow, currentCol);
+            
+            if (orGate) {
+                // Connect AND gates to OR gate
+                andGates.forEach(andGate => {
+                    const path = this.findWirePath(andGate.outputPoint, orGate.inputPoint);
+                    if (path) this.drawWire(path);
+                });
+            }
+        }
+    }
+}
+
+// Initialize circuit drawer
+document.addEventListener('DOMContentLoaded', () => {
+    window.circuitDrawer = new GridCircuitDrawer('circuit-canvas');
+});

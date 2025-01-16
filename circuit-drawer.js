@@ -1,5 +1,5 @@
 // Circuit Drawer functionality
-const LINE_WIDTH = 2;
+const LINE_WIDTH = 1;
 
 class CircuitDrawer {
     constructor(canvasId) {
@@ -52,7 +52,14 @@ class CircuitDrawer {
 
         terms.forEach(term => {
             const termVars = term.match(/[A-Z]'?/g) || [];
-            if (termVars.length > 1) gates.and++;
+            const nonInvertedVars = termVars.filter(v => !v.includes('\'')).length;
+            const invertedVars = termVars.filter(v => v.includes('\'')).length;
+            
+            // Only count AND gate if we have at least 2 variables AND at least one is non-inverted
+            if (termVars.length > 1 && nonInvertedVars > 0) {
+                gates.and++;
+            }
+            
             termVars.forEach(v => {
                 gates.inputs.add(v[0]);
                 if (v.includes('\'')) gates.not++;
@@ -81,34 +88,34 @@ class CircuitDrawer {
         return nandCount + (terms.length > 1 ? Math.ceil(terms.length / 8) : 0);
     }
 
-   setupCanvas() {
-       const container = this.canvas.parentElement;
-       const rect = container.getBoundingClientRect();
-       
-       const dpr = window.devicePixelRatio || 1;
-   
-       // Calculate logical dimensions based on the container's size
-       this.logicalWidth = Math.max(300, rect.width);
-       this.logicalHeight = Math.max(300, rect.height);
-   
-       // Set the canvas size in pixels
-       this.canvas.width = this.logicalWidth * dpr;
-       this.canvas.height = this.logicalHeight * dpr;
-   
-       // Set the canvas style dimensions
-       this.canvas.style.width = `${this.logicalWidth}px`;
-       this.canvas.style.height = `${this.logicalHeight}px`;
-   
-       // Set the context properties
-       this.ctx.scale(dpr, dpr);
-       this.ctx.lineWidth = LINE_WIDTH;
-       this.ctx.strokeStyle = '#000';
-       this.ctx.fillStyle = '#fff';
-   
-       const fontSize = window.getComputedStyle(container).getPropertyValue('--font-md') || '24px';
-       const fontFamily = window.getComputedStyle(container).getPropertyValue('--font-family') || 'Console, monospace';
-       this.ctx.font = `${fontSize} ${fontFamily}`;
-   }
+    setupCanvas() {
+        const container = this.canvas.parentElement;
+        const rect = container.getBoundingClientRect();
+
+        const dpr = window.devicePixelRatio || 1;
+
+        // Calculate logical dimensions based on the container's size
+        this.logicalWidth = Math.max(300, rect.width);
+        this.logicalHeight = Math.max(300, rect.height);
+
+        // Set the canvas size in pixels
+        this.canvas.width = this.logicalWidth * dpr;
+        this.canvas.height = this.logicalHeight * dpr;
+
+        // Set the canvas style dimensions
+        this.canvas.style.width = `${this.logicalWidth}px`;
+        this.canvas.style.height = `${this.logicalHeight}px`;
+
+        // Set the context properties
+        this.ctx.scale(dpr, dpr);
+        this.ctx.lineWidth = LINE_WIDTH;
+        this.ctx.strokeStyle = '#000';
+        this.ctx.fillStyle = '#fff';
+
+        const fontSize = window.getComputedStyle(container).getPropertyValue('--font-md') || '24px';
+        const fontFamily = window.getComputedStyle(container).getPropertyValue('--font-family') || 'Console, monospace';
+        this.ctx.font = `${fontSize} ${fontFamily}`;
+    }
 
     clear() {
         // Clear with white background
@@ -124,6 +131,18 @@ class CircuitDrawer {
         this.ctx.stroke();
     }
 
+    drawWire(points, addJunction = false) {
+        for (let i = 0; i < points.length - 1; i++) {
+            this.drawLine(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
+        }
+        if (addJunction) {
+            this.drawJunctionDot(points[0].x, points[0].y);
+            if (points.length > 2) {
+                this.drawJunctionDot(points[1].x, points[1].y);
+            }
+        }
+    }
+
     drawJunctionDot(x, y) {
         this.ctx.fillStyle = '#000';
         this.ctx.beginPath();
@@ -131,7 +150,6 @@ class CircuitDrawer {
         this.ctx.fill();
     }
 
-    // Returns input and output points for an AND gate
     drawANDGate(x, y, numOfInputs, size) {
         // Draw the rectangular body with curved right side
         this.ctx.beginPath();
@@ -173,7 +191,6 @@ class CircuitDrawer {
         };
     }
 
-    // Returns input and output points for an OR gate
     drawORGate(x, y, numInputs, size) {
         // Draw OR gate with proper curved shape
         this.ctx.beginPath();
@@ -212,7 +229,7 @@ class CircuitDrawer {
         const inputSpacing = size / (numInputs + 1);
         const inputPoints = Array.from({ length: numInputs }, (_, i) => {
             const inputY = y - size / 2 + inputSpacing * (i + 1);
-            return { x: x - size * 0.75, y: inputY };
+            return { x: x - size / 2, y: inputY };
         });
 
         // Draw input lines
@@ -236,7 +253,6 @@ class CircuitDrawer {
         };
     }
 
-    // Returns input and output points for a NOT gate
     drawNOTGate(x, y, size) {
         // Triangle
         this.ctx.beginPath();
@@ -281,197 +297,233 @@ class CircuitDrawer {
         this.clear();
         this.currentExpression = expression;
 
-        // Count gates first
-        const basicGates = this.countBasicGates(expression);
-        const nandGates = this.countNANDGates(expression);
-
-        // Parse expression
-        const cleanExpression = expression
-            .replace(/<[^>]+>/g, '')
-            .replace(/([A-Z])̅|([A-Z])̄/g, '$1$2\'')
-            .trim();
-
-        const terms = cleanExpression.split('+').map(term => term.trim());
-
-        // Canvas setup
-        const dpr = window.devicePixelRatio || 1;
-        const width = Math.max(300, this.canvas.width / dpr);
-        const height = Math.max(300, this.canvas.height / dpr);
-
-        // Calculate sizes and spacing
-        const gateSize = Math.min(this.logicalWidth, this.logicalHeight) / 12;
-        const padding = gateSize;
-        const wireSpacing = gateSize * 1.5;
-
-        // Calculate grid positions
-        const startX = padding * 2;
-        const startY = padding * 2;
-
-        // Input positions - vertically aligned with horizontal offsets
-        const inputs = Array.from(basicGates.inputs).sort();
-        const inputPoints = {};
-        const verticalSpacing = Math.min(wireSpacing * 2, (this.logicalHeight - padding * 4) / (inputs.length + 1));
-
-        // Draw inputs with stair-step pattern
-        inputs.forEach((input, i) => {
-            const x = startX;
-            const y = startY + verticalSpacing * (i + 1);
-            inputPoints[input] = this.drawInput(x, y, input, y);  // Only draw vertical line to input height
-        });
-
-        // Calculate horizontal positions for gates
-        const horizontalOffset = gateSize * 1.5;  // Offset for each step
-        const notGatesX = startX + horizontalOffset * (inputs.length + 1);
-        const andGatesX = notGatesX + horizontalOffset;
-        const orGateX = andGatesX + horizontalOffset * 2;
-
         // Special case: constant 1 or 0
         if (expression === "1" || expression === "0") {
-            this.ctx.textAlign = 'left';
-            this.ctx.textBaseline = 'top';
-            let infoY = 10;
-            const gateInfo = [
-                `Constant ${expression} Output`,
-                'No gates needed'
-            ];
-
-            gateInfo.forEach(info => {
-                this.ctx.fillText(info, 10, infoY);
-                infoY += 20;
-            });
-
+            this.drawConstantOutput(expression);
             return;
         }
 
-        // Analyze terms to determine optimal vertical positions
-        const termAnalysis = terms.map(term => {
-            const vars = term.match(/[A-Z]'?/g) || [];
-            return {
-                inputs: vars.map(v => ({
-                    letter: v[0],
-                    inverted: v.includes('\''),
-                    originalIndex: inputs.indexOf(v[0])
-                })).sort((a, b) => a.originalIndex - b.originalIndex)
-            };
+        // Parse and setup
+        const basicGates = this.countBasicGates(expression);
+        const nandGates = this.countNANDGates(expression);
+        const cleanExpression = this.cleanExpression(expression);
+        const terms = cleanExpression.split('+').map(term => term.trim());
+
+        // Calculate layout dimensions
+        const { gateSize, padding, wireSpacing, startX, startY } = this.calculateLayout();
+        const horizontalOffset = gateSize * 1;
+
+        // Draw inputs and calculate gate positions
+        const inputs = Array.from(basicGates.inputs).sort();
+        const inputPoints = this.drawInputs(inputs, startX, startY, wireSpacing);
+        const { notGatesX, andGatesX, orGateX } = this.calculateGatePositions(startX, horizontalOffset, inputs.length);
+
+        // Analyze and draw terms
+        const termAnalysis = this.analyzeTerms(terms, inputs);
+        const andGates = this.drawTerms(termAnalysis, andGatesX, startY, gateSize, notGatesX, horizontalOffset, inputPoints);
+
+        // Draw final OR gate if needed
+        this.drawFinalGate(andGates, orGateX, gateSize);
+
+        // Draw gate counts
+        this.drawGateInfoLabel(basicGates, nandGates, inputs);
+    }
+
+    cleanExpression(expression) {
+        return expression
+            .replace(/<[^>]+>/g, '')
+            .replace(/([A-Z])̅|([A-Z])̄/g, '$1$2\'')
+            .trim();
+    }
+
+    calculateLayout() {
+        const gateSize = Math.min(this.logicalWidth, this.logicalHeight) / 16;
+        return {
+            gateSize,
+            padding: gateSize * 1.2,
+            wireSpacing: gateSize * 1.2,
+            startX: gateSize * 2,
+            startY: gateSize * 2
+        };
+    }
+
+    calculateGatePositions(startX, horizontalOffset, inputCount) {
+        const notGatesX = startX + horizontalOffset * (inputCount + 1);
+        return {
+            notGatesX,
+            andGatesX: notGatesX + horizontalOffset,
+            orGateX: notGatesX + horizontalOffset * 3
+        };
+    }
+
+
+    drawInputs(inputs, startX, startY, verticalSpacing) {
+        const inputPoints = {};
+        const spacing = Math.min(verticalSpacing * 2, (this.logicalHeight - startY * 2) / (inputs.length + 1));
+
+        inputs.forEach((input, i) => {
+            const y = startY + spacing * (i + 1);
+            inputPoints[input] = this.drawInput(startX, y, input, y);
         });
 
-        // Draw gates and connections
+        return inputPoints;
+    }
+
+    analyzeTerms(terms, inputs) {
+        return terms.map(term => ({
+            inputs: (term.match(/[A-Z]'?/g) || []).map(v => ({
+                letter: v[0],
+                inverted: v.includes('\''),
+                originalIndex: inputs.indexOf(v[0])
+            })).sort((a, b) => a.originalIndex - b.originalIndex)
+        }));
+    }
+
+    drawTerms(termAnalysis, andGatesX, startY, gateSize, notGatesX, horizontalOffset, inputPoints) {
         const andGates = [];
+        const basicGates = this.countBasicGates(this.currentExpression);
+        let andGateCount = 0;
+
         termAnalysis.forEach((term, termIndex) => {
-            const baseY = startY + (this.logicalHeight - padding * 4) * (termIndex + 1) / (terms.length + 1);
+            const baseY = startY + (this.logicalHeight - startY * 2) * (termIndex + 1) / (termAnalysis.length + 1);
+            
+            // Check if this term needs an AND gate
+            const nonInvertedVars = term.inputs.filter(input => !input.inverted).length;
+            const needsAndGate = term.inputs.length > 1 && nonInvertedVars > 0 && andGateCount < basicGates.and;
+            
+            let termOutput;
+            if (needsAndGate) {
+                const andGate = this.drawANDGate(andGatesX, baseY, term.inputs.length, gateSize);
+                andGates.push(andGate);
+                termOutput = andGate;
+                andGateCount++;
+            }
 
-            // Draw AND gate
-            const andGate = this.drawANDGate(andGatesX, baseY, term.inputs.length, gateSize);
-            andGates.push(andGate);
-
-            // Connect inputs to AND gate with stair-step pattern
             term.inputs.forEach((input, inputIndex) => {
-                const fromPoint = inputPoints[input.letter];
-                const toPoint = andGate.inputPoints[inputIndex];
+                const toPoint = needsAndGate ? 
+                    termOutput.inputPoints[inputIndex] : 
+                    { x: andGatesX + gateSize * 0.75, y: baseY };
 
-                this.ctx.beginPath();
-                if (input.inverted) {
-                    // Calculate NOT gate position
-                    const notX = notGatesX;
-                    const notY = toPoint.y;
-
-                    // Draw NOT gate
-                    const notGate = this.drawNOTGate(notX, notY, gateSize / 2);
-
-                    // Draw stair-step wire to NOT gate with additional segments to avoid overlaps
-                    const stepX = fromPoint.x + horizontalOffset * (input.originalIndex + 1);
-                    const extraStepX = stepX + (termIndex * gateSize); // Extra horizontal offset based on term
-
-                    // Route with right angles, avoiding overlaps
-                    this.drawLine(fromPoint.x, fromPoint.y, stepX, fromPoint.y);
-                    this.drawLine(stepX, fromPoint.y, extraStepX, fromPoint.y);
-                    this.drawLine(extraStepX, fromPoint.y, extraStepX, notY);
-                    this.drawLine(extraStepX, notY, notGate.inputPoint.x, notY);
-
-                    // Connect NOT gate to AND gate
-                    this.drawLine(notGate.outputPoint.x, notY, toPoint.x, toPoint.y);
-
-                    // Only add junction dots where wires actually split to different gates
-                    const isSharedInput = termAnalysis.filter(t =>
-                        t.inputs.some(i => i.letter === input.letter && i.inverted === input.inverted)
-                    ).length > 1;
-
-                    if (isSharedInput) {
-                        this.drawJunctionDot(fromPoint.x, fromPoint.y);
-                        this.drawJunctionDot(stepX, fromPoint.y);
-                    }
-                } else {
-                    // Draw stair-step wire directly to AND gate with additional segments to avoid overlaps
-                    const stepX = fromPoint.x + horizontalOffset * (input.originalIndex + 1);
-                    const extraStepX = stepX + (termIndex * gateSize); // Extra horizontal offset based on term
-
-                    // Route with right angles, avoiding overlaps
-                    this.drawLine(fromPoint.x, fromPoint.y, stepX, fromPoint.y);
-                    this.drawLine(stepX, fromPoint.y, extraStepX, fromPoint.y);
-                    this.drawLine(extraStepX, fromPoint.y, extraStepX, toPoint.y);
-                    this.drawLine(extraStepX, toPoint.y, toPoint.x, toPoint.y);
-
-                    // Only add junction dots where wires actually split to different gates
-                    const isSharedInput = termAnalysis.filter(t =>
-                        t.inputs.some(i => i.letter === input.letter && i.inverted === input.inverted)
-                    ).length > 1;
-
-                    if (isSharedInput) {
-                        this.drawJunctionDot(fromPoint.x, fromPoint.y);
-                        this.drawJunctionDot(stepX, fromPoint.y);
-                    }
+                this.drawTermConnection(input, inputPoints, toPoint, notGatesX,
+                    horizontalOffset, termIndex, gateSize, termAnalysis);
+                
+                // If no AND gate needed and this is the last input, store the output point
+                if (!needsAndGate && inputIndex === term.inputs.length - 1) {
+                    andGates.push({
+                        outputPoint: { x: toPoint.x, y: toPoint.y }
+                    });
                 }
-                this.ctx.stroke();
-
-                // Add junction dots at input points
-                this.drawJunctionDot(fromPoint.x, fromPoint.y);
             });
         });
 
-        // Draw OR gate if needed
+        return andGates;
+    }
+
+    drawTermConnection(input, inputPoints, toPoint, notGatesX, horizontalOffset, termIndex, gateSize, termAnalysis) {
+        const fromPoint = inputPoints[input.letter];
+        const stepX = fromPoint.x + horizontalOffset * (input.originalIndex + 1);
+        const extraStepX = Math.max(stepX + (termIndex * gateSize), fromPoint.x);
+
+        // Ensure points only move left to right
+        const wirePoints = [fromPoint];
+
+        // Only add horizontal segments if they move right
+        if (stepX > fromPoint.x) {
+            wirePoints.push({ x: stepX, y: fromPoint.y });
+        }
+        if (extraStepX > stepX) {
+            wirePoints.push({ x: extraStepX, y: fromPoint.y });
+        }
+
+        // Add vertical segment if needed
+        if (toPoint.y !== fromPoint.y) {
+            wirePoints.push({ x: extraStepX, y: toPoint.y });
+        }
+
+        if (input.inverted) {
+            const notGate = this.drawNOTGate(notGatesX, toPoint.y, gateSize / 2);
+
+            // Connect to NOT gate input
+            wirePoints.push({ x: notGate.inputPoint.x, y: toPoint.y });
+            this.drawWire(wirePoints, this.isSharedInput(input, termAnalysis));
+
+            // Connect NOT gate output to AND gate
+            this.drawLine(notGate.outputPoint.x, toPoint.y, toPoint.x, toPoint.y);
+        } else {
+            // Connect directly to AND gate
+            wirePoints.push(toPoint);
+            this.drawWire(wirePoints, this.isSharedInput(input, termAnalysis));
+        }
+    }
+
+    isSharedInput(input, termAnalysis) {
+        return termAnalysis.filter(t =>
+            t.inputs.some(i => i.letter === input.letter && i.inverted === input.inverted)
+        ).length > 1;
+    }
+
+    drawFinalGate(andGates, orGateX, gateSize) {
         if (andGates.length > 1) {
             const orGateY = (andGates[0].outputPoint.y + andGates[andGates.length - 1].outputPoint.y) / 2;
             const orGate = this.drawORGate(orGateX, orGateY, andGates.length, gateSize);
 
-            // Connect AND gates to OR gate
             andGates.forEach((andGate, i) => {
                 const toPoint = orGate.inputPoints[i];
+                const midX = Math.max(andGate.outputPoint.x + gateSize * 1.5, toPoint.x - gateSize);
 
-                this.ctx.beginPath();
-                this.drawLine(andGate.outputPoint.x, andGate.outputPoint.y,
-                    andGate.outputPoint.x + horizontalOffset, andGate.outputPoint.y);
-                this.drawLine(andGate.outputPoint.x + horizontalOffset, andGate.outputPoint.y,
-                    andGate.outputPoint.x + horizontalOffset, toPoint.y);
-                this.drawLine(andGate.outputPoint.x + horizontalOffset, toPoint.y,
-                    toPoint.x, toPoint.y);
-                // this.ctx.stroke();
+                // Ensure points only move left to right
+                const wirePoints = [andGate.outputPoint];
+
+                // Only add horizontal segment if it moves right
+                if (midX > andGate.outputPoint.x) {
+                    wirePoints.push({ x: midX, y: andGate.outputPoint.y });
+                }
+
+                // Add vertical segment if needed
+                if (toPoint.y !== andGate.outputPoint.y) {
+                    wirePoints.push({ x: midX, y: toPoint.y });
+                }
+
+                // Connect to OR gate
+                wirePoints.push(toPoint);
+                this.drawWire(wirePoints);
             });
 
-            // Draw output label
-            this.ctx.textAlign = 'left';
-            this.ctx.fillText('S', orGate.outputPoint.x + gateSize / 2 + 5, orGate.outputPoint.y - 8);
+            this.drawOutputLabel(orGate.outputPoint, gateSize);
         } else if (andGates.length === 1) {
-            // Single AND gate output
-            const andGate = andGates[0];
-            this.ctx.textAlign = 'left';
-            this.ctx.fillText('S', andGate.outputPoint.x + gateSize / 2 + 5, andGate.outputPoint.y - 8);
+            this.drawOutputLabel(andGates[0].outputPoint, gateSize);
         }
+    }
 
-        // Draw gate counts on the top right
+    drawOutputLabel(point, gateSize) {
+        this.ctx.textAlign = 'left';
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillText('S', point.x + gateSize / 2 - 8, point.y);
+    }
+
+    drawConstantOutput(value) {
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        let y = 10;
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillText(`Constant ${value} Output`, this.logicalWidth * 0.95, 10);
+        this.ctx.fillText('No gates needed', this.logicalWidth * 0.95, 30);
+    }
+
+    drawGateInfoLabel(basicGates, nandGates, inputs) {
+        this.ctx.textAlign = 'right';
+        this.ctx.textBaseline = 'top';
+        this.ctx.fillStyle = '#000';
+
         const gateInfo = [
-            `Inputs: ${Array.from(basicGates.inputs).join(', ')}`,
+            `Inputs: ${inputs.join(', ')}`,
             `AND Gates: ${basicGates.and}`,
             `OR Gates: ${basicGates.or}`,
             `NOT Gates: ${basicGates.not}`,
             `NAND Gates: ${nandGates}`
         ];
 
-        gateInfo.forEach(info => {
-            this.ctx.fillText(info, this.canvas.width - 10, y);
-            y += 20;
+        gateInfo.forEach((info, i) => {
+            this.ctx.fillText(info, this.logicalWidth * 0.95, 10 + i * 20);
         });
     }
 
