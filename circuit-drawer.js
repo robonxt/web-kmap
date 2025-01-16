@@ -299,7 +299,7 @@ class CircuitDrawer {
 
         // Special case: constant 1 or 0
         if (expression === "1" || expression === "0") {
-            this.drawConstantOutput(expression);
+            this.drawConstantOutputLabel(expression);
             return;
         }
 
@@ -501,7 +501,7 @@ class CircuitDrawer {
         this.ctx.fillText('S', point.x + gateSize / 2 - 8, point.y);
     }
 
-    drawConstantOutput(value) {
+    drawConstantOutputLabel(value) {
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
         this.ctx.fillStyle = '#000';
