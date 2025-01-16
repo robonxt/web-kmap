@@ -13,6 +13,57 @@ class CircuitDrawer {
             OR: this.drawORGate.bind(this),
             NOT: this.drawNOTGate.bind(this)
         };
+        // this.groupColors = {
+        //     'A̅B̅C̅D̅': '#FF5733',  // Example color for group 1
+        //     'A̅B̅CD': '#33FF57',   // Example color for group 2
+        //     'A̅BC̅D': '#3357FF',   // Example color for group 3
+        //     'AB̅C̅D': '#33CCFF',   // Example color for group 4
+        //     'A̅BCD': '#FF99CC',   // Example color for group 5
+        //     'AB̅CD': '#CCFF99',   // Example color for group 6
+        //     'ABCD': '#FFCC99',   // Example color for group 7
+        //     'A̅B̅C̅D': '#CC99FF',   // Example color for group 8
+        //     'A̅B̅CD̅': '#99CCFF',   // Example color for group 9
+        //     'A̅BC̅D̅': '#FF99FF',   // Example color for group 10
+        //     'AB̅C̅D̅': '#CCFFCC',   // Example color for group 11
+        //     'A̅BCD̅': '#99FFCC',   // Example color for group 12
+        //     'AB̅CD̅': '#CC99CC',   // Example color for group 13
+        //     'ABCD̅': '#FFCCFF',   // Example color for group 14
+        //     'A̅B̅C̅': '#33CC99',   // Example color for group 15
+        //     'A̅B̅CD': '#99FF99',   // Example color for group 16
+        //     'A̅BC̅': '#FF33CC',   // Example color for group 17
+        //     'AB̅C̅': '#CC33FF',   // Example color for group 18
+        //     'A̅BC': '#33FFCC',   // Example color for group 19
+        //     'AB̅C': '#FF99FF',   // Example color for group 20
+        //     'ABC̅': '#CC99FF',   // Example color for group 21
+        //     'AB̅': '#33CCFF',   // Example color for group 22
+        //     'A̅B̅': '#FFCC99',   // Example color for group 23
+        //     'A̅C̅': '#CCFFCC',   // Example color for group 24
+        //     'AC̅': '#99FFCC',   // Example color for group 25
+        //     'A̅D̅': '#FF99CC',   // Example color for group 26
+        //     'AD̅': '#CC99FF',   // Example color for group 27
+        //     'BC̅D̅': '#33FF99',   // Example color for group 28
+        //     'BCD̅': '#FFCCFF',   // Example color for group 29
+        //     'B̅C̅D̅': '#99CCFF',   // Example color for group 30
+        //     'B̅CD̅': '#CCFF99',   // Example color for group 31
+        //     'B̅C̅D': '#FF99FF',   // Example color for group 32
+        //     'B̅CD': '#CCFFCC',   // Example color for group 33
+        //     'BC̅D': '#99FF99',   // Example color for group 34
+        //     'BCD': '#FF33CC',   // Example color for group 35
+        //     'B̅C̅': '#33CCFF',   // Example color for group 36
+        //     'B̅D̅': '#FFCCFF',   // Example color for group 37
+        //     'BD̅': '#CC99CC',   // Example color for group 38
+        //     'C̅D̅': '#99FFCC',   // Example color for group 39
+        //     'CD̅': '#CCFF99',   // Example color for group 40
+        //     'A̅': '#33FF99',   // Example color for group 41
+        //     'B̅': '#FF33CC',   // Example color for group 42
+        //     'C̅': '#CC33FF',   // Example color for group 43
+        //     'D̅': '#33CC99',   // Example color for group 44
+        //     'A': '#FF99CC',   // Example color for group 45
+        //     'B': '#CCFFCC',   // Example color for group 46
+        //     'C': '#99FF99',   // Example color for group 47
+        //     'D': '#FFCC99',   // Example color for group 48
+        //     // Add more groups and colors as needed
+        // };
     }
 
     setupTabListener() {
@@ -343,6 +394,9 @@ class CircuitDrawer {
 
         // Draw gate counts
         this.drawGateInfoLabel(basicGates, nandGates, inputs);
+
+        // // Draw groups with colors
+        // this.drawGroups(termAnalysis, andGates, gateSize);
     }
 
     cleanExpression(expression) {
@@ -553,6 +607,16 @@ class CircuitDrawer {
             this.ctx.fillText(info, this.logicalWidth * 0.95, 10 + i * 20);
         });
     }
+
+    // drawGroups(termAnalysis, andGates, gateSize) {
+    //     termAnalysis.forEach((term, termIndex) => {
+    //         const group = term.inputs.map(input => input.letter + (input.inverted ? '̅' : '')).join('');
+    //         const color = this.groupColors[group] || '#000000'; // Default to black if no color is assigned
+
+    //         this.ctx.fillStyle = color;
+    //         this.ctx.fillRect(andGates[termIndex].outputPoint.x, andGates[termIndex].outputPoint.y - gateSize / 2, gateSize, gateSize);
+    //     });
+    // }
 
     redraw() {
         // Implement redraw logic based on current expression
