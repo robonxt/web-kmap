@@ -169,19 +169,22 @@ class CircuitDrawer {
         const startY = y - totalHeight / 2;
 
         // Draw input lines
-        const inputPoints = Array.from({ length: numOfInputs }, (_, i) => {
-            const inputY = startY + inputSpacing * (i + 1);
-            this.ctx.beginPath();
-            this.ctx.moveTo(x - size, inputY);
-            this.ctx.lineTo(x - size / 2, inputY);
-            this.ctx.stroke();
-            return { x: x - size, y: inputY };
-        });
+        const inputPoints = Array.from(
+            { length: numOfInputs },
+            (_, i) => {
+                const inputY = startY + inputSpacing * (i + 1);
+                this.ctx.beginPath();
+                this.ctx.moveTo(x - size, inputY);
+                this.ctx.lineTo(x - size / 2, inputY);
+                this.ctx.stroke();
+                return { x: x - size / 2, y: inputY };
+            }
+        );
 
         // Draw output line
         const outputX = x + size * 0.75;
         this.ctx.beginPath();
-        this.ctx.moveTo(x + size * 0.75, y);
+        this.ctx.moveTo(x + size, y);
         this.ctx.lineTo(outputX, y);
         this.ctx.stroke();
 
@@ -227,10 +230,11 @@ class CircuitDrawer {
 
         // Calculate evenly spaced input points
         const inputSpacing = size / (numInputs + 1);
-        const inputPoints = Array.from({ length: numInputs }, (_, i) => {
+        const inputPoints = [];
+        for (let i = 0; i < numInputs; i++) {
             const inputY = y - size / 2 + inputSpacing * (i + 1);
-            return { x: x - size / 2, y: inputY };
-        });
+            inputPoints.push({ x: x - size / 2, y: inputY });
+        }
 
         // Draw input lines
         inputPoints.forEach(point => {
@@ -271,9 +275,21 @@ class CircuitDrawer {
         this.ctx.stroke();
         this.ctx.fill();
 
+        // Draw input line
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - size, y);
+        this.ctx.lineTo(x - size / 2, y);
+        this.ctx.stroke();
+
+        // Draw output line
+        this.ctx.beginPath();
+        this.ctx.moveTo(circleX + size / 4, y);
+        this.ctx.lineTo(circleX + size / 2, y);
+        this.ctx.stroke();
+
         return {
-            inputPoint: { x: x - size / 2, y },
-            outputPoint: { x: circleX + size / 4, y }
+            inputPoint: { x: x - size, y },
+            outputPoint: { x: circleX + size / 2, y }
         };
     }
 
@@ -337,22 +353,27 @@ class CircuitDrawer {
     }
 
     calculateLayout() {
-        const gateSize = Math.min(this.logicalWidth, this.logicalHeight) / 16;
+        const gateSize = Math.min(this.canvas.width, this.canvas.height) / 32;
         return {
             gateSize,
-            padding: gateSize * 1.2,
+            padding: gateSize * 1.3,
             wireSpacing: gateSize * 1.2,
-            startX: gateSize * 2,
-            startY: gateSize * 2
+            startX: this.canvas.width * 0.05,  
+            startY: gateSize
         };
     }
 
     calculateGatePositions(startX, horizontalOffset, inputCount) {
-        const notGatesX = startX + horizontalOffset * (inputCount + 1);
+        // Calculate total width needed for the circuit
+        const totalWidth = this.logicalWidth;  
+        const sections = inputCount;  
+        // const sectionWidth = totalWidth / sections;
+        
+        // const notGatesX = startX + sectionWidth * inputCount;
         return {
-            notGatesX,
-            andGatesX: notGatesX + horizontalOffset,
-            orGateX: notGatesX + horizontalOffset * 3
+            notGatesX: totalWidth * 0.50,
+            andGatesX: totalWidth * 0.65,
+            orGateX: totalWidth * 0.85
         };
     }
 
@@ -489,7 +510,13 @@ class CircuitDrawer {
                 this.drawWire(wirePoints);
             });
 
-            this.drawOutputLabel(orGate.outputPoint, gateSize);
+            const finalX = this.logicalWidth * 0.90;
+            this.drawLine(orGate.outputPoint.x, orGate.outputPoint.y, finalX, orGate.outputPoint.y);
+
+            // Create a junction point at the end of the circuit
+            const junctionPoint = { x: finalX, y: orGate.outputPoint.y };
+            this.drawJunctionDot(junctionPoint);
+            this.drawOutputLabel(junctionPoint, gateSize);
         } else if (andGates.length === 1) {
             this.drawOutputLabel(andGates[0].outputPoint, gateSize);
         }
@@ -498,7 +525,7 @@ class CircuitDrawer {
     drawOutputLabel(point, gateSize) {
         this.ctx.textAlign = 'left';
         this.ctx.fillStyle = '#000';
-        this.ctx.fillText('S', point.x + gateSize / 2 - 8, point.y);
+        this.ctx.fillText('S', point.x + gateSize / 2 - 8, point.y - 8);
     }
 
     drawConstantOutputLabel(value) {

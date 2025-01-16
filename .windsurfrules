@@ -12,3 +12,5 @@ Should work on http connections.
 Update the readme to include features.
 Update the info to concisely and clearly explain how to use the app. 
 Make sure to include credits and links to the source code in the info.
+
+Wires uses the Manhattan routing algorithm.
