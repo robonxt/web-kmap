@@ -1,6 +1,14 @@
-tech used: html5, css3, minimal js, no external dependencies.
+We are building a lightweight Karnaugh map solver webapp. The tech used: html5, css3, minimal js, no external dependencies.
 
-This is a lightweight Karnaugh map solver webapp.
+There are several features:
+A K-Map grid tab.
+A Truth Table tab.
+A Circuit tab.
+A Help popup.
+A solution container with copy to clipboard button that updates automatically and is shown in SOP format.
+PWA with full offline support.
+
+
 
 Use boolean algebra to simplify terms.
 Final answer should be a SOP (sum of products) format.
