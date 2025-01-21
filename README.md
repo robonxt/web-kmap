@@ -34,7 +34,6 @@ Variable notation in solutions:
 - Synchronized Truth Table view
 - Enhanced info guide with usage examples
 - Modern, clean UI with vector icons
-- Works offline after first load
 - Quick operations:
   - Set all cells to 1
   - Set all cells to 0
@@ -55,15 +54,7 @@ Variable notation in solutions:
 ## Technical Details
 
 - Built with vanilla HTML5, CSS3, and JavaScript
-- Advanced caching strategy:
-  - Always fetches latest version when online
-  - Seamless offline functionality with cached version
-  - No version locking - always get the most recent version you've accessed
-  - Works with or without HTTPS
-- Progressive features with graceful fallbacks:
-  - Clipboard operations work in all environments
-  - Service worker caching works on HTTP and file:// protocol
-  - Full offline support on all protocols
+- Offline support for seamless usage without internet connection
 - No external dependencies
 - Boolean algebra simplification using Quine-McCluskey algorithm
 - Gray code implementation for optimal cell adjacency
@@ -82,11 +73,11 @@ The solver uses the following process:
 
 ## TODO:
 
- - Try to get it working on browsers as old as Chrome 104+, Safari 12+. [Compare working features here](https://caniuse.com/?compare=chrome+104,safari+12&compareCats=CSS,HTML5,JS,JS%20API,Other,Security,SVG)
+- Try to get it working on browsers as old as Chrome 104+, Safari 12+. [Compare working features here](https://caniuse.com/?compare=chrome+104,safari+12&compareCats=CSS,HTML5,JS,JS%20API,Other,Security,SVG)
 
 ## Credits
 
-Created by [robonxt](https://github.com/robonxt). 
+Created by [robonxt](https://github.com/robonxt).
 
 Assisted by Claude Sonnet 3.5 using Windsurf.
 
