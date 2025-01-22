@@ -1,6 +1,13 @@
-tech used: html5, css3, minimal js, no external dependencies.
+We are building a lightweight Karnaugh map solver webapp. The tech used: html5, css3, minimal js, no external dependencies.
 
-This is a lightweight Karnaugh map solver webapp.
+There are several features:
+A K-Map grid tab.
+A Truth Table tab.
+A Circuit tab.
+A Help popup.
+A solution container with copy to clipboard button that updates automatically and is shown in SOP format.
+PWA with full offline support.
+
 
 Use boolean algebra to simplify terms.
 Final answer should be a SOP (sum of products) format.
@@ -10,5 +17,9 @@ Network first caching, no versions, offline fallback.
 Try to use latest server version when online. 
 Should work on http connections.
 Update the readme to include features.
-Update the info popup to concisely and clearly explain how to use the app. 
-Make sure to include credits and links to the source code.
+Update the info to concisely and clearly explain how to use the app. 
+Make sure to include credits and links to the source code in the info.
+
+Wires uses the Manhattan routing algorithm.
+
+You should try to reuse existing code, styles, or logic where possible instead of creating new ones. Also try to optimize the code where possible.
