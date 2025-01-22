@@ -1,36 +1,38 @@
 # K-Map Solver Guide
 
-## What is a K-Map?
-A Karnaugh map (K-map) simplifies Boolean expressions visually by arranging terms in a grid where adjacent cells differ by only one variable.
+A Karnaugh map (K-map) helps simplify Boolean expressions by arranging variables in a grid where adjacent cells differ by only one bit.
 
-## Quick Guide
-1. **Variables (A, B, C, D)**
-   - Variables are arranged in Gray code order
-   - A, B: Top and left labels (2-variable)
-   - C, D: Additional variables for larger maps
-   - Example: A'BC'D means A=0, B=1, C=0, D=1
+## Variables
 
-2. **Cell Values**
-   - Click cells to toggle: 0 → 1 → X → 0
-   - 0: False/OFF
-   - 1: True/ON
-   - X: Don't care (can be either 0 or 1)
+Uses four variables (A, B, C, D) in Gray code order:
+- Regular letter (A): Variable is 1 (TRUE)
+- Letter with prime (A'): Variable is 0 (FALSE)
+- Example: A'BC'D means A=0, B=1, C=0, D=1
 
-3. **Using the Map**
-   - Solution updates automatically in SOP format
-   - Look for groups of 1's and X's
-   - Adjacent cells (including edges) can be grouped
-   - Larger groups = simpler expressions
+## How to Use
 
-4. **Truth Table View**
-   - Shows all input combinations
-   - Click output column to change values
-   - Changes sync with K-map view
+1. Click cells to cycle through values:
+   - 0 → 1 → X (don't care) → 0
+2. Solution updates automatically in SOP format
+3. Use quick actions:
+   - "All 1" or "All 0" buttons for quick setup
+   - "Clear" to reset the map
+   - Copy icon to copy the result
+4. Switch views:
+   - Toggle between K-map and Truth Table
+   - Switch between Gray code and normal layouts
 
-5. **Quick Actions**
-   - "All 1": Fill with 1's
-   - "All 0": Fill with 0's
-   - "Clear": Reset map
-   - "Copy": Copy solution
+## Features
 
-Need more details? Check our [full documentation on GitHub](https://github.com/robonxt/web-kmap).
+- Interactive 4-variable K-Map
+- Auto-solving in SOP format
+- Support for don't care conditions (X)
+- Two layout options:
+  - Gray code (optimal adjacency)
+  - Normal binary
+- Synchronized Truth Table view
+- Copy results to clipboard
+
+## Source Code
+
+Available on GitHub: [robonxt/web-kmap](https://github.com/robonxt/web-kmap)
