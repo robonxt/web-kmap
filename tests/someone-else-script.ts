@@ -1,3 +1,6 @@
+// this code is taken directly from https://github.com/obsfx/kmap-solver-lib with no changes. 
+// I ran AI on this to get the logic in the solve function.
+// Credit goes to https://github.com/obsfx for the initial solve code (I have since enhanced it a bit).
 export type KMapGrayCode = {
     rows: string[];
     cols: string[];
