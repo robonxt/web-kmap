@@ -4,6 +4,7 @@ class KMapInterface {
         this.variables = ['A', 'B', 'C', 'D'];
         this.size = 16; // 4x4 grid for 4 variables
         this.grid = Array(this.size).fill(0);
+        this.isGrayCodeLayout = true; // Track current layout
         this.initializeUI();
         this.initializeTruthTable();
         this.setupEventListeners();
@@ -23,37 +24,77 @@ class KMapInterface {
         const grid = document.getElementById('kmap-grid');
         grid.innerHTML = '';
         
-        // Gray code sequences for rows (AB) and columns (CD)
-        const grayRows = ['00', '01', '11', '10'];
-        const grayCols = ['00', '01', '11', '10'];
+        // Define both layout patterns
+        const grayCodeLayout = {
+            rows: ['00', '01', '11', '10'],
+            cols: ['00', '01', '11', '10']
+        };
         
-        // Create 4x4 grid in Gray code order
-        for (let row = 0; row < 4; row++) {
-            for (let col = 0; col < 4; col++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                
-                // Calculate index in Gray code order
-                const rowBits = parseInt(grayRows[row], 2);
-                const colBits = parseInt(grayCols[col], 2);
-                const index = (rowBits << 2) | colBits;
-                cell.dataset.index = index;
-                cell.dataset.state = '0'; // Track cell state: '0', '1', or 'X'
+        const normalLayout = {
+            indices: [
+                [0, 4, 12, 8],
+                [1, 5, 13, 9],
+                [3, 7, 15, 11],
+                [2, 6, 14, 10]
+            ]
+        };
+        
+        if (this.isGrayCodeLayout) {
+            // Create 4x4 grid in Gray code order
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    
+                    // Calculate index in Gray code order
+                    const rowBits = parseInt(grayCodeLayout.rows[row], 2);
+                    const colBits = parseInt(grayCodeLayout.cols[col], 2);
+                    const index = (rowBits << 2) | colBits;
+                    cell.dataset.index = index;
+                    cell.dataset.state = '0'; // Track cell state: '0', '1', or 'X'
 
-                // Create cell content
-                const binaryDisplay = document.createElement('div');
-                binaryDisplay.className = 'binary-display';
-                binaryDisplay.textContent = `${grayRows[row] + grayCols[col]} (${index})`;
+                    // Create cell content
+                    const binaryDisplay = document.createElement('div');
+                    binaryDisplay.className = 'binary-display';
+                    binaryDisplay.textContent = `${grayCodeLayout.rows[row] + grayCodeLayout.cols[col]} (${index})`;
 
-                const valueDisplay = document.createElement('div');
-                valueDisplay.className = 'value-display';
-                valueDisplay.textContent = '0';
+                    const valueDisplay = document.createElement('div');
+                    valueDisplay.className = 'value-display';
+                    valueDisplay.textContent = '0';
 
-                cell.appendChild(binaryDisplay);
-                cell.appendChild(valueDisplay);
-                
-                cell.addEventListener('click', () => this.toggleCell(cell));
-                grid.appendChild(cell);
+                    cell.appendChild(binaryDisplay);
+                    cell.appendChild(valueDisplay);
+                    
+                    cell.addEventListener('click', () => this.toggleCell(cell));
+                    grid.appendChild(cell);
+                }
+            }
+        } else {
+            // Create 4x4 grid in normal order
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    
+                    const index = normalLayout.indices[row][col];
+                    cell.dataset.index = index;
+                    cell.dataset.state = '0'; // Track cell state: '0', '1', or 'X'
+
+                    // Create cell content
+                    const binaryDisplay = document.createElement('div');
+                    binaryDisplay.className = 'binary-display';
+                    binaryDisplay.textContent = index.toString(2).padStart(4, '0') + ` (${index})`;
+
+                    const valueDisplay = document.createElement('div');
+                    valueDisplay.className = 'value-display';
+                    valueDisplay.textContent = '0';
+
+                    cell.appendChild(binaryDisplay);
+                    cell.appendChild(valueDisplay);
+                    
+                    cell.addEventListener('click', () => this.toggleCell(cell));
+                    grid.appendChild(cell);
+                }
             }
         }
     }
@@ -292,22 +333,59 @@ class KMapInterface {
         this.solve();
     }
 
-    setupEventListeners() {
-        // Tab switching
-        document.querySelectorAll('.tab-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                // Remove active class from all tabs and contents
-                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(content => 
-                    content.classList.remove('active')
-                );
-                
-                // Add active class to clicked tab and corresponding content
-                button.classList.add('active');
-                const tabId = button.dataset.tab;
-                document.getElementById(tabId).classList.add('active');
+    toggleLayout() {
+        this.isGrayCodeLayout = !this.isGrayCodeLayout;
+        
+        // Store current states
+        const states = this.grid.slice();
+        
+        // Update the layout icon
+        const layoutBtn = document.getElementById('toggle-layout-btn');
+        if (this.isGrayCodeLayout) {
+            layoutBtn.innerHTML = `
+                <svg viewBox="0 0 24 24">
+                    <rect x="4" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <rect x="13" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M17 7l3-3-3-3M7 17l-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>`;
+        } else {
+            layoutBtn.innerHTML = `
+                <svg viewBox="0 0 24 24">
+                    <rect x="4" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <rect x="13" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M7 7l-3-3 3-3M17 17l3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>`;
+        }
+        
+        // Reinitialize UI with new layout
+        this.initializeUI();
+        
+        // Restore states
+        states.forEach((state, index) => {
+            if (state !== '0') {
+                const cell = document.querySelector(`.cell[data-index="${index}"]`);
+                if (cell) {
+                    cell.dataset.state = state;
+                    cell.querySelector('.value-display').textContent = state;
+                    if (state === '1') {
+                        cell.classList.add('selected');
+                        cell.classList.remove('dont-care');
+                    } else if (state === 'X') {
+                        cell.classList.remove('selected');
+                        cell.classList.add('dont-care');
+                    }
+                }
+            }
+        });
+    }
 
-                // Update slider position and width
+    switchTab(tabName) {
+        // Update active tab
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.classList.toggle('active', button.dataset.tab === tabName);
+            
+            // Update slider position if this is the active button
+            if (button.dataset.tab === tabName) {
                 const slider = document.querySelector('.slider-bg');
                 const buttonRect = button.getBoundingClientRect();
                 const containerRect = button.parentElement.getBoundingClientRect();
@@ -318,6 +396,26 @@ class KMapInterface {
                 // Calculate offset from left edge of container
                 const offset = buttonRect.left - containerRect.left;
                 slider.style.transform = `translateX(${offset}px)`;
+            }
+        });
+
+        // Show/hide content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.toggle('active', content.id === tabName);
+        });
+
+        // Show/hide layout button based on tab
+        const layoutBtn = document.getElementById('toggle-layout-btn');
+        if (layoutBtn) {
+            layoutBtn.style.display = tabName === 'kmap' ? 'flex' : 'none';
+        }
+    }
+
+    setupEventListeners() {
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                this.switchTab(button.dataset.tab);
             });
         });
 
@@ -325,6 +423,7 @@ class KMapInterface {
         document.getElementById('all-one-btn').addEventListener('click', () => this.setAllCells('1'));
         document.getElementById('all-zero-btn').addEventListener('click', () => this.setAllCells('0'));
         document.getElementById('clear-btn').addEventListener('click', () => this.clear());
+        document.getElementById('toggle-layout-btn').addEventListener('click', () => this.toggleLayout());
 
         // Add copy to clipboard functionality
         document.getElementById('copy-solution').addEventListener('click', function() {

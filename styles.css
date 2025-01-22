@@ -66,6 +66,23 @@ body {
     position: relative;
 }
 
+.hamburger-menu {
+    display: none;
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.hamburger-menu:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.tabs-wrapper {
+    display: inline-flex;
+    position: relative;
+}
+
 .tab-btn {
     color: rgba(255, 255, 255, 0.7);
     padding: 6px 16px;
@@ -113,6 +130,29 @@ body {
 
 .tab-content.active {
     display: block;
+}
+
+.header-actions {
+    display: flex;
+    gap: var(--spacing);
+    align-items: center;
+}
+
+/* Header buttons share the same base styles */
+.header-actions .svg-button,
+.info-btn {
+    background: none;
+    color: white;
+    padding: calc(var(--spacing) * 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.header-actions .svg-button:hover,
+.info-btn:hover {
+    color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 /* Common button styles */
@@ -172,20 +212,6 @@ body {
 .controls button {
     padding: calc(var(--spacing) * 0.5) var(--spacing);
     font-size: var(--font-lg);
-}
-
-.info-btn {
-    background: none;
-    color: white;
-    padding: calc(var(--spacing) * 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.info-btn:hover {
-    color: rgba(255, 255, 255, 0.8);
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
 }
 
 #clear-btn {
@@ -524,4 +550,103 @@ body {
     background-color: var(--bg-light);
     transform: none;
     box-shadow: none;
+}
+
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: opacity 0.5s ease;
+    opacity: 0;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+.toast.hidden {
+    display: none;
+}
+
+@media (max-width: 400px) {
+    .hamburger-menu {
+        display: flex;
+    }
+    
+    .tabs-wrapper {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: var(--primary-color);
+        border-radius: var(--radius);
+        padding: var(--spacing);
+        margin-top: var(--spacing);
+        box-shadow: var(--shadow);
+        flex-direction: column;
+        min-width: 150px;
+        z-index: 10;
+    }
+    
+    .tabs-wrapper.show {
+        display: flex;
+    }
+    
+    .header-actions {
+        gap: calc(var(--spacing) * 0.5);
+    }
+    
+    .header-actions .svg-button {
+        width: 32px;
+        height: 32px;
+        padding: calc(var(--spacing) * 0.25);
+    }
+    
+    .tab-btn {
+        width: 100%;
+        text-align: left;
+        color: white;
+        padding: 8px 16px;
+    }
+    
+    .tab-btn.active {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .slider-bg {
+        display: none;
+    }
+}
+
+@media (min-width: 400px) {
+    .hamburger-menu {
+        display: none;
+    }
+    
+    .tabs-wrapper {
+        display: inline-flex !important;
+        position: relative;
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .tab-btn {
+        color: rgba(255, 255, 255, 0.7);
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    .tab-btn.active {
+        color: #333;
+    }
+    
+    .slider-bg {
+        display: block;
+    }
 }
