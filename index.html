@@ -8,9 +8,6 @@
     <meta name="description" content="A lightweight Karnaugh map solver with Truth Table visualization. Features include SOP format solutions and offline support. No external dependencies required.">
     <link rel="stylesheet" href="styles.css">
     <link rel="preload" href="styles.css" as="style">
-    <link rel="preload" href="kmap-solver.js" as="script">
-    <link rel="preload" href="kmap-interface.js" as="script">
-    <link rel="preload" href="markdown.js" as="script">
     <script>
         // Register service worker for offline functionality
         if ('serviceWorker' in navigator) {
@@ -134,7 +131,7 @@
     </div>
     <script src="kmap-solver.js" defer></script>
     <script src="kmap-interface.js" defer></script>
-    <script src="markdown.js"></script>
+    <script src="markdown.js" defer></script>
     <script>
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
