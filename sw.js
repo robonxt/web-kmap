@@ -15,8 +15,11 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(cached => {
       const networked = fetch(e.request, {cache: 'no-store'})
         .then(r => {
-          if (r && r.status === 200) 
-            caches.open(CACHE).then(c => c.put(e.request, r.clone()));
+          if (r && r.status === 200) {
+            const clone = r.clone();
+            caches.open(CACHE)
+              .then(c => c.put(e.request, clone));
+          }
           return r;
         })
         .catch(() => cached);
