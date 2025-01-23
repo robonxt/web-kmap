@@ -25,7 +25,7 @@ Thumbs.db
 *.swp
 
 # Test directories
-tests/
+.tests/
 
 # VSCode files
 .vscode/
