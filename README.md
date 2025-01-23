@@ -8,15 +8,13 @@ A Karnaugh map (K-map) is a method to simplify Boolean algebra expressions. It p
 
 ## Variables and Notation
 
-The K-map uses four variables: A, B, C, and D, arranged in Gray code order (where adjacent values differ by only one bit):
+The K-map supports 2-4 variables, which can be selected via the variable selector:
 
-- **A and B**: Primary variables shown on the top and left edges
-  - Used for basic 2-variable maps (2×2)
-  - Combined for 3-variable maps (2×4)
+- **2 variables**: A, B (2×2 grid)
+- **3 variables**: A, B, C (2×4 grid)
+- **4 variables**: A, B, C, D (4×4 grid)
 
-- **C and D**: Additional variables for larger maps
-  - Used to extend to 4 variables (4×4)
-  - Creates the full 16-cell map
+Variables are arranged in Gray code order (where adjacent values differ by only one bit).
 
 Variable notation in solutions:
 - Regular letter (A): Variable is 1 (TRUE)
@@ -25,10 +23,10 @@ Variable notation in solutions:
 
 ## Features
 
-- Interactive 4-variable K-Map interface
+- Interactive K-Map interface with variable selection (2-4 variables)
 - Two layout options:
   - Gray code layout (optimal for adjacency)
-  - Normal binary layout
+  - Normal binary layout (available for 3-4 variables)
 - Auto-solving with Boolean algebra simplification
 - Results always in minimal SOP (Sum of Products) format
 - Support for don't care conditions (X)
@@ -54,15 +52,16 @@ Variable notation in solutions:
 
 ## How to Use
 
-1. Click on cells to cycle through values:
+1. Select the number of variables (2-4) using the variable selector
+2. Click on cells to cycle through values:
    - 0 → 1 → X (don't care) → 0
-2. The solution updates automatically in SOP format
-3. Click the copy icon to copy the result
-4. Use "All 1" or "All 0" buttons for quick setup
-5. Use "Clear" to reset the map
-6. Switch between K-map and Truth Table views
-7. Use the layout toggle to switch between Gray code and normal layouts
-8. Click the info icon for the usage guide
+3. The solution updates automatically in SOP format
+4. Click the copy icon to copy the result
+5. Use "All 1" or "All 0" buttons for quick setup
+6. Use "Clear" to reset the map
+7. Switch between K-map and Truth Table views
+8. Use the layout toggle to switch between Gray code and normal layouts (3-4 variables only)
+9. Click the info icon for the usage guide
 
 ## Technical Details
 

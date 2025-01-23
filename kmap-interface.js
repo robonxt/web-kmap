@@ -1,288 +1,234 @@
 // K-Map Interface
 class KMapInterface {
-    constructor() {
-        this.variables = ['A', 'B', 'C', 'D'];
-        this.size = 16; // 4x4 grid for 4 variables
+    constructor(numVars = 4) {
+        // Cache frequently used DOM elements
+        this.elements = {
+            grid: document.getElementById('kmap-grid'),
+            solution: document.getElementById('solution'),
+            solutionSelect: document.querySelector('.solution-select'),
+            copyBtn: document.getElementById('copy-solution'),
+            truthTableBody: document.getElementById('truth-table-body'),
+            toggleLayoutBtn: document.getElementById('toggle-layout-btn'),
+            sliderBg: document.querySelector('.slider-bg')
+        };
+
+        // Initialize state
+        this.variables = [...Array(numVars).keys()].map(i => String.fromCharCode(65 + i));
+        this.numVars = numVars;
+        this.size = 1 << numVars; // 2^numVars
         this.grid = Array(this.size).fill(0);
-        this.isGrayCodeLayout = true; // Track current layout
+        this.isGrayCodeLayout = true;
+        this.layouts = this.initializeLayouts();
+        
+        // Update variable count attribute
+        document.body.setAttribute('data-vars', numVars);
+        
+        // Initialize UI components
         this.initializeUI();
         this.initializeTruthTable();
         this.setupEventListeners();
-        
-        // Initialize slider position
-        const activeTab = document.querySelector('.tab-btn.active');
-        if (activeTab) {
-            const slider = document.querySelector('.slider-bg');
+        this.updateSliderPosition();
+    }
+
+    initializeLayouts() {
+        return {
+            2: {
+                gray: { rows: [''], cols: ['00', '01', '11', '10'] },
+                normal: [[0, 1, 3, 2]]
+            },
+            3: {
+                gray: { rows: ['0', '1'], cols: ['00', '01', '11', '10'] },
+                normal: [[0, 2, 6, 4], [1, 3, 7, 5]]
+            },
+            4: {
+                gray: { rows: ['00', '01', '11', '10'], cols: ['00', '01', '11', '10'] },
+                normal: [[0, 4, 12, 8], [1, 5, 13, 9], [3, 7, 15, 11], [2, 6, 14, 10]]
+            }
+        };
+    }
+
+    updateSliderPosition(activeTab = document.querySelector('.tab-btn.active')) {
+        if (activeTab && this.elements.sliderBg) {
             const buttonRect = activeTab.getBoundingClientRect();
             const containerRect = activeTab.parentElement.getBoundingClientRect();
-            slider.style.width = buttonRect.width + 'px';
-            slider.style.transform = `translateX(${buttonRect.left - containerRect.left}px)`;
+            this.elements.sliderBg.style.width = buttonRect.width + 'px';
+            this.elements.sliderBg.style.transform = `translateX(${buttonRect.left - containerRect.left}px)`;
         }
     }
 
     initializeUI() {
-        const grid = document.getElementById('kmap-grid');
+        const grid = this.elements.grid;
         grid.innerHTML = '';
         
-        // Define both layout patterns
-        const grayCodeLayout = {
-            rows: ['00', '01', '11', '10'],
-            cols: ['00', '01', '11', '10']
-        };
+        const layout = this.isGrayCodeLayout ? 
+            this.layouts[this.numVars].gray :
+            this.layouts[this.numVars].normal;
         
-        const normalLayout = {
-            indices: [
-                [0, 4, 12, 8],
-                [1, 5, 13, 9],
-                [3, 7, 15, 11],
-                [2, 6, 14, 10]
-            ]
-        };
+        grid.style.gridTemplateColumns = `repeat(${this.isGrayCodeLayout ? layout.cols.length : layout[0].length}, minmax(10px, 1fr))`;
         
         if (this.isGrayCodeLayout) {
-            // Create 4x4 grid in Gray code order
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 4; col++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    
-                    // Calculate index in Gray code order
-                    const rowBits = parseInt(grayCodeLayout.rows[row], 2);
-                    const colBits = parseInt(grayCodeLayout.cols[col], 2);
-                    const index = (rowBits << 2) | colBits;
-                    cell.dataset.index = index;
-                    cell.dataset.state = '0'; // Track cell state: '0', '1', or 'X'
-
-                    // Create cell content
-                    const binaryDisplay = document.createElement('div');
-                    binaryDisplay.className = 'binary-display';
-                    binaryDisplay.textContent = `${grayCodeLayout.rows[row] + grayCodeLayout.cols[col]} (${index})`;
-
-                    const valueDisplay = document.createElement('div');
-                    valueDisplay.className = 'value-display';
-                    valueDisplay.textContent = '0';
-
-                    cell.appendChild(binaryDisplay);
-                    cell.appendChild(valueDisplay);
-                    
-                    cell.addEventListener('click', () => this.toggleCell(cell));
-                    grid.appendChild(cell);
-                }
-            }
+            this.createGrayCodeGrid(layout);
         } else {
-            // Create 4x4 grid in normal order
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 4; col++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    
-                    const index = normalLayout.indices[row][col];
-                    cell.dataset.index = index;
-                    cell.dataset.state = '0'; // Track cell state: '0', '1', or 'X'
-
-                    // Create cell content
-                    const binaryDisplay = document.createElement('div');
-                    binaryDisplay.className = 'binary-display';
-                    binaryDisplay.textContent = index.toString(2).padStart(4, '0') + ` (${index})`;
-
-                    const valueDisplay = document.createElement('div');
-                    valueDisplay.className = 'value-display';
-                    valueDisplay.textContent = '0';
-
-                    cell.appendChild(binaryDisplay);
-                    cell.appendChild(valueDisplay);
-                    
-                    cell.addEventListener('click', () => this.toggleCell(cell));
-                    grid.appendChild(cell);
-                }
-            }
+            this.createBinaryGrid(layout);
         }
+    }
+
+    createCell(index, binaryDisplay) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.index = index;
+        
+        // Initialize with current state from grid
+        const state = this.grid[index] || '0';
+        cell.dataset.state = state;
+
+        const binDiv = document.createElement('div');
+        binDiv.className = 'binary-display';
+        binDiv.textContent = binaryDisplay;
+
+        const valDiv = document.createElement('div');
+        valDiv.className = 'value-display';
+        valDiv.textContent = state;
+
+        // Add appropriate classes based on state
+        if (state === '1') {
+            cell.classList.add('selected');
+        } else if (state === 'X') {
+            cell.classList.add('dont-care');
+        }
+
+        cell.append(binDiv, valDiv);
+        cell.addEventListener('click', () => this.toggleCell(cell));
+        return cell;
+    }
+
+    createGrayCodeGrid(layout) {
+        const fragment = document.createDocumentFragment();
+        layout.rows.forEach(row => {
+            layout.cols.forEach(col => {
+                const rowBits = parseInt(row, 2);
+                const colBits = parseInt(col, 2);
+                const index = (rowBits << Math.log2(layout.cols.length)) | colBits;
+                fragment.appendChild(this.createCell(index, `${row}${col} (${index})`));
+            });
+        });
+        this.elements.grid.appendChild(fragment);
+    }
+
+    createBinaryGrid(layout) {
+        const fragment = document.createDocumentFragment();
+        layout.forEach(row => {
+            row.forEach(index => {
+                fragment.appendChild(this.createCell(index, 
+                    index.toString(2).padStart(this.numVars, '0') + ` (${index})`));
+            });
+        });
+        this.elements.grid.appendChild(fragment);
     }
 
     initializeTruthTable() {
-        const tbody = document.getElementById('truth-table-body');
+        const tbody = this.elements.truthTableBody;
         tbody.innerHTML = '';
         
-        // Create all possible combinations
-        for (let i = 0; i < 16; i++) {
+        // Update variable column visibility in header
+        const varCols = document.querySelectorAll('.truth-table thead tr th:not(:first-child):not(:last-child)');
+        varCols.forEach((col, i) => col.style.display = i < this.numVars ? '' : 'none');
+
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < this.size; i++) {
             const row = document.createElement('tr');
             row.dataset.rowIndex = i;
             
-            // Add row ID (using row index)
-            const idCell = document.createElement('td');
-            idCell.textContent = i;
-            idCell.classList.add('row-id');
-            row.appendChild(idCell);
+            const binary = i.toString(2).padStart(this.numVars, '0');
+            const cells = [
+                this.createTableCell(i, 'row-id'),
+                ...Array.from({length: 4}, (_, j) => 
+                    this.createTableCell(j < this.numVars ? binary[j] : '', '', j < this.numVars)),
+                this.createTableCell('0', '', true, i)
+            ];
             
-            // Convert number to 4-bit binary and create input columns
-            const binary = i.toString(2).padStart(4, '0');
-            for (let j = 0; j < 4; j++) {
-                const td = document.createElement('td');
-                td.textContent = binary[j];
-                row.appendChild(td);
-            }
-            
-            // Add output column
-            const outputTd = document.createElement('td');
-            outputTd.textContent = '0';
-            outputTd.dataset.index = i;
-            outputTd.dataset.state = '0';
-            outputTd.addEventListener('click', () => this.toggleTruthTableCell(outputTd));
-            row.appendChild(outputTd);
-            
-            tbody.appendChild(row);
+            row.append(...cells);
+            fragment.appendChild(row);
         }
+        tbody.appendChild(fragment);
+    }
+
+    createTableCell(text, className = '', show = true, index = null) {
+        const td = document.createElement('td');
+        td.textContent = text;
+        if (className) td.classList.add(className);
+        if (!show) td.style.display = 'none';
+        if (index !== null) {
+            td.dataset.index = index;
+            td.dataset.state = '0';
+            td.addEventListener('click', () => this.toggleTruthTableCell(td));
+        }
+        return td;
     }
 
     toggleCell(cell) {
-        const valueDisplay = cell.querySelector('.value-display');
-        const currentState = cell.dataset.state;
-        let newState;
+        const newState = this.getNextState(cell.dataset.state);
+        this.updateCellState(cell, newState, true);
         
-        // Cycle through states: 0 -> 1 -> X -> 0
-        switch (currentState) {
-            case '0':
-                newState = '1';
-                cell.classList.add('selected');
-                cell.classList.remove('dont-care');
-                break;
-            case '1':
-                newState = 'X';
-                cell.classList.remove('selected');
-                cell.classList.add('dont-care');
-                break;
-            case 'X':
-                newState = '0';
-                cell.classList.remove('selected', 'dont-care');
-                break;
-        }
-        
-        cell.dataset.state = newState;
-        valueDisplay.textContent = newState;
-        
-        // Sync with Truth Table
         const index = parseInt(cell.dataset.index);
-        const ttCell = document.querySelector(`#truth-table-body td[data-index="${index}"]`);
+        const ttCell = this.elements.truthTableBody.querySelector(`td[data-index="${index}"]`);
         if (ttCell) {
-            ttCell.dataset.state = newState;
-            ttCell.textContent = newState;
-            if (newState === '1') {
-                ttCell.classList.add('selected');
-                ttCell.classList.remove('dont-care');
-            } else if (newState === 'X') {
-                ttCell.classList.remove('selected');
-                ttCell.classList.add('dont-care');
-            } else {
-                ttCell.classList.remove('selected', 'dont-care');
-            }
+            this.updateCellState(ttCell, newState, false);
         }
         
         this.grid[index] = newState;
-        this.solve();
+        this.debounce(() => this.solve(), 100);
     }
 
     toggleTruthTableCell(cell) {
-        const currentState = cell.dataset.state;
-        let newState;
+        const newState = this.getNextState(cell.dataset.state);
+        this.updateCellState(cell, newState, false);
         
-        // Cycle through states: 0 -> 1 -> X -> 0
-        switch (currentState) {
-            case '0':
-                newState = '1';
-                cell.classList.add('selected');
-                cell.classList.remove('dont-care');
-                break;
-            case '1':
-                newState = 'X';
-                cell.classList.remove('selected');
-                cell.classList.add('dont-care');
-                break;
-            case 'X':
-                newState = '0';
-                cell.classList.remove('selected', 'dont-care');
-                break;
-        }
-        
-        cell.dataset.state = newState;
-        cell.textContent = newState;
-        
-        // Sync with K-Map
         const index = parseInt(cell.dataset.index);
-        const kmapCell = document.querySelector(`.cell[data-index="${index}"]`);
+        const kmapCell = this.elements.grid.querySelector(`.cell[data-index="${index}"]`);
         if (kmapCell) {
-            kmapCell.dataset.state = newState;
-            kmapCell.querySelector('.value-display').textContent = newState;
-            if (newState === '1') {
-                kmapCell.classList.add('selected');
-                kmapCell.classList.remove('dont-care');
-            } else if (newState === 'X') {
-                kmapCell.classList.remove('selected');
-                kmapCell.classList.add('dont-care');
-            } else {
-                kmapCell.classList.remove('selected', 'dont-care');
-            }
+            this.updateCellState(kmapCell, newState, true);
         }
         
         this.grid[index] = newState;
-        this.solve();
+        this.debounce(() => this.solve(), 100);
     }
 
     getMintermsAndDontCares() {
-        const minterms = [];
-        const dontcares = [];
-        const cells = document.querySelectorAll('.cell');
-        
-        cells.forEach(cell => {
+        const cells = this.elements.grid.querySelectorAll('.cell');
+        return Array.from(cells).reduce((acc, cell) => {
             const index = parseInt(cell.dataset.index);
             const state = cell.dataset.state;
-            
-            if (state === '1') {
-                minterms.push(index);
-            } else if (state === 'X') {
-                dontcares.push(index);
-            }
-        });
-        
-        return { minterms, dontcares };
+            if (state === '1') acc.minterms.push(index);
+            else if (state === 'X') acc.dontcares.push(index);
+            return acc;
+        }, { minterms: [], dontcares: [] });
     }
 
-    addOverline(expression) {  
+    addOverline(expression) {
         if (!expression || expression === '0' || expression === '1') return expression;
-        
         return expression.split(' + ')
-            .map(term => term.replace(/!([A-Z])/g, (_, p1) => `${p1}\u0305`))  
+            .map(term => term.replace(/!([A-Z])/g, (_, p1) => `${p1}\u0305`))
             .join(' + ');
     }
 
     updateSolution(result) {
-        const solutionDiv = document.getElementById('solution');
-        const solutionSelect = document.querySelector('.solution-select');
-        
+        const { solution, solutionSelect } = this.elements;
         const solutions = Array.isArray(result) ? result : [result];
         
         if (solutions.length > 1) {
-            solutionSelect.innerHTML = '';
+            solutionSelect.innerHTML = solutions.map((sol, i) => 
+                `<option value="${sol}">#${i + 1} of ${solutions.length}</option>`).join('');
             solutionSelect.style.display = 'block';
-            
-            solutions.forEach((solution, index) => {
-                const option = document.createElement('option');
-                option.value = solution;
-                option.textContent = `#${index + 1} of ${solutions.length}`;
-                solutionSelect.appendChild(option);
-            });
-            
             solutionSelect.value = solutions[0];
             solutionSelect.onchange = () => {
-                const solution = solutionSelect.value;
-                solutionDiv.innerHTML = this.addOverline(solution);
+                solution.innerHTML = this.addOverline(solutionSelect.value);
             };
-            
-            solutionDiv.innerHTML = this.addOverline(solutions[0]);
         } else {
-            const solution = solutions[0];
-            solutionDiv.innerHTML = this.addOverline(solution);
+            solution.innerHTML = this.addOverline(solutions[0]);
             solutionSelect.style.display = 'none';
         }
+        solution.innerHTML = this.addOverline(solutions[0]);
     }
 
     solve() {
@@ -292,89 +238,61 @@ class KMapInterface {
     }
 
     clear() {
-        const cells = document.querySelectorAll('.cell');
-        cells.forEach(cell => {
-            const valueDisplay = cell.querySelector('.value-display');
-            valueDisplay.textContent = '0';
-            cell.classList.remove('selected', 'dont-care');
-            cell.dataset.state = '0';
+        // Clear K-map cells
+        this.elements.grid.querySelectorAll('.cell').forEach(cell => {
+            this.updateCellState(cell, '0', true);
         });
+
+        // Clear truth table cells
+        this.elements.truthTableBody.querySelectorAll('td[data-index]').forEach(cell => {
+            this.updateCellState(cell, '0', false);
+        });
+
+        // Reset grid state and clear solution
         this.grid.fill(0);
-        document.getElementById('solution').innerHTML = '';
-        document.getElementById('solution-select').style.display = 'none';
+        this.elements.solution.innerHTML = '';
+        this.elements.solutionSelect.style.display = 'none';
     }
 
     setAllCells(value) {
-        // Update K-Map
-        document.querySelectorAll('.cell').forEach(cell => {
-            cell.dataset.state = value;
-            cell.querySelector('.value-display').textContent = value;
-            if (value === '1') {
-                cell.classList.add('selected');
-                cell.classList.remove('dont-care');
-            } else {
-                cell.classList.remove('selected', 'dont-care');
-            }
-        });
+        // Update K-Map and Truth Table cells
+        this.elements.grid.querySelectorAll('.cell').forEach(cell => 
+            this.updateCellState(cell, value, true));
+        
+        this.elements.truthTableBody.querySelectorAll('td[data-index]').forEach(cell => 
+            this.updateCellState(cell, value, false));
 
-        // Update Truth Table
-        document.querySelectorAll('#truth-table-body td[data-index]').forEach(cell => {
-            cell.dataset.state = value;
-            cell.textContent = value;
-            if (value === '1') {
-                cell.classList.add('selected');
-                cell.classList.remove('dont-care');
-            } else {
-                cell.classList.remove('selected', 'dont-care');
-            }
-        });
-
+        // Update grid state and solve
         this.grid = Array(this.size).fill(value);
         this.solve();
     }
 
     toggleLayout() {
-        this.isGrayCodeLayout = !this.isGrayCodeLayout;
+        if (this.numVars === 2) return; // Disable for 2 variables
         
-        // Store current states
+        this.isGrayCodeLayout = !this.isGrayCodeLayout;
         const states = this.grid.slice();
         
-        // Update the layout icon
-        const layoutBtn = document.getElementById('toggle-layout-btn');
-        if (this.isGrayCodeLayout) {
-            layoutBtn.innerHTML = `
-                <svg viewBox="0 0 24 24">
-                    <rect x="4" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <rect x="13" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <path d="M17 7l3-3-3-3M7 17l-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                </svg>`;
-        } else {
-            layoutBtn.innerHTML = `
-                <svg viewBox="0 0 24 24">
-                    <rect x="4" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <rect x="13" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <path d="M7 7l-3-3 3-3M17 17l3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                </svg>`;
-        }
+        // Update layout icon
+        this.elements.toggleLayoutBtn.innerHTML = this.isGrayCodeLayout ? 
+            `<svg viewBox="0 0 24 24">
+                <rect x="4" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                <rect x="13" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M17 7l3-3-3-3M7 17l-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>` :
+            `<svg viewBox="0 0 24 24">
+                <rect x="4" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                <rect x="13" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M7 7l-3-3 3-3M17 17l3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>`;
         
-        // Reinitialize UI with new layout
         this.initializeUI();
         
         // Restore states
         states.forEach((state, index) => {
             if (state !== '0') {
-                const cell = document.querySelector(`.cell[data-index="${index}"]`);
-                if (cell) {
-                    cell.dataset.state = state;
-                    cell.querySelector('.value-display').textContent = state;
-                    if (state === '1') {
-                        cell.classList.add('selected');
-                        cell.classList.remove('dont-care');
-                    } else if (state === 'X') {
-                        cell.classList.remove('selected');
-                        cell.classList.add('dont-care');
-                    }
-                }
+                const cell = this.elements.grid.querySelector(`.cell[data-index="${index}"]`);
+                if (cell) this.updateCellState(cell, state, true);
             }
         });
     }
@@ -383,19 +301,10 @@ class KMapInterface {
         // Update active tab
         document.querySelectorAll('.tab-btn').forEach(button => {
             button.classList.toggle('active', button.dataset.tab === tabName);
-            
+
             // Update slider position if this is the active button
             if (button.dataset.tab === tabName) {
-                const slider = document.querySelector('.slider-bg');
-                const buttonRect = button.getBoundingClientRect();
-                const containerRect = button.parentElement.getBoundingClientRect();
-                
-                // Set width to match the button
-                slider.style.width = buttonRect.width + 'px';
-                
-                // Calculate offset from left edge of container
-                const offset = buttonRect.left - containerRect.left;
-                slider.style.transform = `translateX(${offset}px)`;
+                this.updateSliderPosition(button);
             }
         });
 
@@ -404,10 +313,11 @@ class KMapInterface {
             content.classList.toggle('active', content.id === tabName);
         });
 
-        // Show/hide layout button based on tab
-        const layoutBtn = document.getElementById('toggle-layout-btn');
+        // Show/hide layout button based on tab and variable count
+        const layoutBtn = this.elements.toggleLayoutBtn;
         if (layoutBtn) {
-            layoutBtn.style.display = tabName === 'kmap' ? 'flex' : 'none';
+            // Only show layout button if we're in kmap tab AND not in 2-variable mode
+            layoutBtn.style.display = (tabName === 'kmap' && this.numVars !== 2) ? 'flex' : 'none';
         }
     }
 
@@ -423,55 +333,157 @@ class KMapInterface {
         document.getElementById('all-one-btn').addEventListener('click', () => this.setAllCells('1'));
         document.getElementById('all-zero-btn').addEventListener('click', () => this.setAllCells('0'));
         document.getElementById('clear-btn').addEventListener('click', () => this.clear());
-        document.getElementById('toggle-layout-btn').addEventListener('click', () => this.toggleLayout());
+
+        // Setup layout toggle button
+        const varCycleBtn = document.getElementById('var-cycle-btn');
+        if (varCycleBtn) {
+            // Update toggle button visibility based on variable count and current tab
+            const updateToggleButton = () => {
+                const toggleLayoutBtn = this.elements.toggleLayoutBtn;
+                const kmapTab = document.querySelector('.tab-btn[data-tab="kmap"]');
+                const isKmapActive = kmapTab && kmapTab.classList.contains('active');
+                if (toggleLayoutBtn) {
+                    toggleLayoutBtn.style.display = (this.numVars !== 2 && isKmapActive) ? 'flex' : 'none';
+                }
+            };
+
+            // Initial visibility
+            updateToggleButton();
+
+            varCycleBtn.addEventListener('click', () => {
+                // Cycle between 4 -> 3 -> 2 -> 4
+                this.numVars = this.numVars > 2 ? this.numVars - 1 : 4;
+
+                // Update variables array
+                this.variables = [...Array(this.numVars).keys()].map(i => String.fromCharCode(65 + i));
+                this.size = 1 << this.numVars;
+
+                // Reset grid state
+                this.grid = Array(this.size).fill(0);
+
+                // Update data-vars attribute
+                document.body.setAttribute('data-vars', this.numVars);
+
+                // Force Gray code layout for 2 variables
+                if (this.numVars === 2) {
+                    this.isGrayCodeLayout = true;
+                }
+
+                // Reinitialize UI with new variable count
+                this.initializeUI();
+                this.initializeTruthTable();
+
+                // Clear all states and solution
+                this.clear();
+
+                // Update toggle button visibility
+                updateToggleButton();
+
+                // Dispatch event for variable change
+                document.dispatchEvent(new Event('varchange'));
+            });
+        }
 
         // Add copy to clipboard functionality
-        document.getElementById('copy-solution').addEventListener('click', function() {
-            const solutionDiv = document.getElementById('solution');
+        this.elements.copyBtn.addEventListener('click', () => {
+            const solutionDiv = this.elements.solution;
             const solutionText = String(solutionDiv.textContent || '');
-            
+
             // Try modern clipboard API first
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(solutionText).then(() => {
-                    this.showCopySuccess();
-                }).catch(() => {
-                    // Fallback to legacy method if clipboard API fails
-                    this.copyTextFallback(solutionText);
-                });
+                navigator.clipboard.writeText(solutionText)
+                    .then(() => this.showCopySuccess())
+                    .catch(() => this.copyTextFallback(solutionText));
             } else {
                 // Use fallback method for non-HTTPS
                 this.copyTextFallback(solutionText);
             }
         });
 
-        // Add helper methods to the button element
-        const copyBtn = document.getElementById('copy-solution');
-        copyBtn.showCopySuccess = function() {
-            this.style.color = 'var(--primary-color)';
-            setTimeout(() => {
-                this.style.color = 'var(--text-color)';
-            }, 1000);
-        };
+        // Setup variable cycle button
+        const toggleLayoutBtn = this.elements.toggleLayoutBtn;
+        if (toggleLayoutBtn) {
+            toggleLayoutBtn.addEventListener('click', () => {
+                if (this.numVars === 2) return; // Disable for 2 variables
+                this.isGrayCodeLayout = !this.isGrayCodeLayout;
+                this.initializeUI();
+            });
+        }
+    }
 
-        copyBtn.copyTextFallback = function(text) {
-            // Create temporary textarea
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-9999px';
-            textArea.style.top = '0';
-            document.body.appendChild(textArea);
-            
-            try {
-                textArea.select();
-                document.execCommand('copy');
-                this.showCopySuccess();
-            } catch (err) {
-                console.error('Failed to copy text: ', err);
-            } finally {
-                document.body.removeChild(textArea);
-            }
-        };
+    // Helper method to update cell state and appearance
+    updateCellState(cell, newState, isKMapCell = true) {
+        const display = isKMapCell ? cell.querySelector('.value-display') : cell;
+        if (isKMapCell) {
+            display.textContent = newState;
+        } else {
+            cell.textContent = newState;
+        }
+
+        cell.dataset.state = newState;
+
+        // Update classes
+        if (newState === '1') {
+            cell.classList.add('selected');
+            cell.classList.remove('dont-care');
+        } else if (newState === 'X') {
+            cell.classList.remove('selected');
+            cell.classList.add('dont-care');
+        } else {
+            cell.classList.remove('selected', 'dont-care');
+        }
+    }
+
+    // Helper method to get next state in the cycle
+    getNextState(currentState) {
+        switch (currentState) {
+            case '0': return '1';
+            case '1': return 'X';
+            case 'X': return '0';
+            default: return '0';
+        }
+    }
+
+    showCopySuccess() {
+        const copyBtn = this.elements.copyBtn;
+        copyBtn.style.color = 'var(--primary-color)';
+        setTimeout(() => {
+            copyBtn.style.color = 'var(--text-color)';
+        }, 1000);
+    }
+
+    copyTextFallback(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        textArea.style.top = '0';
+        document.body.appendChild(textArea);
+
+        try {
+            textArea.select();
+            document.execCommand('copy');
+            this.showCopySuccess();
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        } finally {
+            document.body.removeChild(textArea);
+        }
+    }
+
+    // Update toggle button visibility based on variable count and current tab
+    updateToggleButton() {
+        const toggleLayoutBtn = this.elements.toggleLayoutBtn;
+        const kmapTab = document.querySelector('.tab-btn[data-tab="kmap"]');
+        const isKmapActive = kmapTab && kmapTab.classList.contains('active');
+        if (toggleLayoutBtn) {
+            toggleLayoutBtn.style.display = (this.numVars !== 2 && isKmapActive) ? 'flex' : 'none';
+        }
+    }
+
+    debounce(func, wait) {
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = setTimeout(func, wait);
     }
 }
 

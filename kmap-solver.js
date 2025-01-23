@@ -182,10 +182,15 @@ function extract(variables, group) {
 
 function solve(variables, minterms, dontcares = []) {
     if (minterms.length === 0 && dontcares.length === 0) return ["0"];
-    if (minterms.length === 16) return ["1"];
+    if (minterms.length === (1 << variables.length)) return ["1"];
+
+    // Special case for single minterm
     if (minterms.length === 1 && dontcares.length === 0) {
-        return [minterms[0].toString(2).padStart(4, '0')
-            .split('').map((bit, i) => `${bit === '0' ? '!' : ''}${variables[i]}`).join('')];
+        const binary = minterms[0].toString(2).padStart(variables.length, '0');
+        const term = binary.split('')
+            .map((bit, i) => bit === '1' ? variables[i] : `!${variables[i]}`)
+            .join('');
+        return [term];
     }
 
     const terms = [...minterms, ...dontcares];
