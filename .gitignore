@@ -1,0 +1,29 @@
+# Node modules
+node_modules/
+
+# Build directories
+/dist/
+/build/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+
+# Temporary files
+*.tmp
+
+# Backup files
+*.bak
+
+# Swap files
+*.swp
+
+tests
+.vscode
+*.code-workspace
