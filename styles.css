@@ -11,14 +11,14 @@
     --spacing: 0.5rem;
     --radius: 8px;
     --font-sm: 0.75rem;
-    --font-md: 0.9rem;
     --font-lg: 1.2rem;
     --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     --surface-color: #f8f9fa;
     --surface-hover: #f0f0f0;
     --soft-border: rgba(0, 0, 0, 0.08);
     --font-family: "DejaVu Sans", "DejaVu Sans Book", "DejaVu Sans Condensed", sans-serif;
-    /* New variables for common values */
+    --max-width: 800px;
+    --mobile-max-width: 400px; /* not actually being used due to media requires static values. Keep for reference */
     --header-btn-border: rgba(255, 255, 255, 0.3);
     --header-btn-hover-border: rgba(255, 255, 255, 0.5);
     --header-btn-hover-bg: rgba(255, 255, 255, 0.1);
@@ -46,7 +46,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 550px;
+    max-width: var(--max-width);
     margin: var(--spacing) auto;
     padding: var(--spacing);
 }
@@ -224,7 +224,7 @@ body {
 
 .controls button {
     padding: calc(var(--spacing) * 0.5) var(--spacing);
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     min-width: 80px;
     border-color: var(--soft-border);
     transition: var(--transition-standard);
@@ -271,7 +271,6 @@ body {
     gap: calc(var(--spacing) * 0.5);
     margin: 0 auto;
     width: 100%;
-    max-width: 500px;
 }
 
 .shared-controls {
@@ -305,7 +304,7 @@ body {
     border: 1px solid var(--border-color);
     background-color: var(--surface-color);
     color: var(--text-color);
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     cursor: pointer;
     display: none;
 }
@@ -410,7 +409,7 @@ body {
 
 .popup-wrapper {
     position: relative;
-    max-width: 500px;
+    max-width: var(--max-width);
     width: 90%;
     margin: 15px auto;
 }
@@ -424,7 +423,6 @@ body {
     scrollbar-width: thin;
     color: var(--text-color);
     line-height: 1.2;
-    max-width: 600px;
 }
 
 .popup-content h1,
