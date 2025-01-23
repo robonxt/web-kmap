@@ -18,6 +18,11 @@
     --surface-hover: #f0f0f0;
     --soft-border: rgba(0, 0, 0, 0.08);
     --font-family: "DejaVu Sans", "DejaVu Sans Book", "DejaVu Sans Condensed", sans-serif;
+    /* New variables for common values */
+    --header-btn-border: rgba(255, 255, 255, 0.3);
+    --header-btn-hover-border: rgba(255, 255, 255, 0.5);
+    --header-btn-hover-bg: rgba(255, 255, 255, 0.1);
+    --transition-standard: all 0.2s ease;
 }
 
 * {
@@ -93,7 +98,7 @@ body {
     font-size: var(--font-lg);
     position: relative;
     z-index: 2;
-    transition: all 0.2s ease;
+    transition: var(--transition-standard);
     text-align: center;
     min-width: 80px;
     user-select: none;
@@ -144,15 +149,16 @@ body {
     background: none;
     color: white;
     padding: calc(var(--spacing) * 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--header-btn-border);
+    transition: var(--transition-standard);
 }
 
 .header-actions .svg-button:hover,
 .info-btn:hover {
     color: rgba(255, 255, 255, 0.8);
     transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: var(--header-btn-hover-bg);
+    border-color: var(--header-btn-hover-border);
 }
 
 /* Common button styles */
@@ -163,7 +169,7 @@ body {
     border: 1px solid var(--soft-border);
     border-radius: var(--radius);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition-standard);
     user-select: none;
     background: var(--surface-color);
     color: var(--text-color);
@@ -249,9 +255,11 @@ body {
 
 .kmap-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(10px, 1fr));
+    /* grid-template-columns is now set dynamically in JavaScript */
     gap: calc(var(--spacing) * 0.5);
-    /* padding: var(--cell-padding); */
+    margin: 0 auto;
+    width: 100%;
+    max-width: 500px;
 }
 
 .shared-controls {
@@ -332,7 +340,7 @@ body {
     align-items: center;
     justify-content: center;
     background: white;
-    transition: all 0.2s ease;
+    transition: var(--transition-standard);
 }
 
 .cell:hover {
@@ -513,7 +521,7 @@ body {
     border: 1px solid var(--soft-border);
     border-radius: var(--radius);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition-standard);
     background-color: var(--surface-color);
 }
 
@@ -551,7 +559,6 @@ body {
     transform: none;
     box-shadow: none;
 }
-
 
 .toast {
     position: fixed;
