@@ -22,6 +22,8 @@ Uses four variables (A, B, C, D) in Gray code order:
    - Toggle between K-map and Truth Table
    - Switch between Gray code and normal layouts
 
+Note: The app works offline! Once you've visited the page, you can use it anytime without internet connection. It will automatically update when you're back online.
+
 ## Features
 
 - Interactive 4-variable K-Map
@@ -32,6 +34,9 @@ Uses four variables (A, B, C, D) in Gray code order:
   - Normal binary
 - Synchronized Truth Table view
 - Copy results to clipboard
+- Offline support:
+  - Works without internet after first visit
+  - Fast loading from cache
 
 ## Source Code
 

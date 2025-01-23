@@ -48,6 +48,9 @@ Variable notation in solutions:
   - X (don't care)
 - Responsive design for mobile and desktop
 - Toast notifications for user feedback
+- Offline support:
+  - Works without internet after first visit
+  - Fast loading with cached resources
 
 ## How to Use
 
