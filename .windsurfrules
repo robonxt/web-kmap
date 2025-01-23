@@ -1,13 +1,15 @@
 We are building a lightweight Karnaugh map solver webapp. The tech used: html5, css3, minimal js, no external dependencies.
 
-There are several features:
+I want the following features:
 A K-Map grid tab.
 A Truth Table tab.
 A Circuit tab.
 A Help popup.
 A solution container with copy to clipboard button that updates automatically and is shown in SOP format.
-PWA with full offline support.
+Full offline support.
+PWA.
 
+When adding description about the features, make sure to use the readme file as a reference, as well as the actual code itself, as the features listed previously may not be available in the current version.
 
 Use boolean algebra to simplify terms.
 Final answer should be a SOP (sum of products) format.
