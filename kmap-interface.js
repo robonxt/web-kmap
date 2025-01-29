@@ -19,10 +19,10 @@ class KMapInterface {
         this.grid = Array(this.size).fill(0);
         this.isGrayCodeLayout = true;
         this.layouts = this.initializeLayouts();
-        
+
         // Update variable count attribute
         document.body.setAttribute('data-vars', numVars);
-        
+
         // Initialize UI components
         this.initializeUI();
         this.initializeTruthTable();
@@ -31,17 +31,21 @@ class KMapInterface {
     }
 
     initializeLayouts() {
+        // Use gray code layouts from KMapSolver and only maintain normal layouts here
         return {
             2: {
-                gray: { rows: [''], cols: ['00', '01', '11', '10'] },
+                gray: {
+                    rows: [''],
+                    cols: window.KMapSolver.KMapGrayCodes.get(2).cols.map(x => x.padStart(2, '0'))
+                },
                 normal: [[0, 1, 3, 2]]
             },
             3: {
-                gray: { rows: ['0', '1'], cols: ['00', '01', '11', '10'] },
+                gray: window.KMapSolver.KMapGrayCodes.get(3),
                 normal: [[0, 2, 6, 4], [1, 3, 7, 5]]
             },
             4: {
-                gray: { rows: ['00', '01', '11', '10'], cols: ['00', '01', '11', '10'] },
+                gray: window.KMapSolver.KMapGrayCodes.get(4),
                 normal: [[0, 4, 12, 8], [1, 5, 13, 9], [3, 7, 15, 11], [2, 6, 14, 10]]
             }
         };
@@ -59,13 +63,13 @@ class KMapInterface {
     initializeUI() {
         const grid = this.elements.grid;
         grid.innerHTML = '';
-        
-        const layout = this.isGrayCodeLayout ? 
+
+        const layout = this.isGrayCodeLayout ?
             this.layouts[this.numVars].gray :
             this.layouts[this.numVars].normal;
-        
+
         grid.style.gridTemplateColumns = `repeat(${this.isGrayCodeLayout ? layout.cols.length : layout[0].length}, minmax(10px, 1fr))`;
-        
+
         if (this.isGrayCodeLayout) {
             this.createGrayCodeGrid(layout);
         } else {
@@ -77,7 +81,7 @@ class KMapInterface {
         const cell = document.createElement('div');
         cell.className = 'cell';
         cell.dataset.index = index;
-        
+
         // Initialize with current state from grid
         const state = this.grid[index] || '0';
         cell.dataset.state = state;
@@ -119,7 +123,7 @@ class KMapInterface {
         const fragment = document.createDocumentFragment();
         layout.forEach(row => {
             row.forEach(index => {
-                fragment.appendChild(this.createCell(index, 
+                fragment.appendChild(this.createCell(index,
                     index.toString(2).padStart(this.numVars, '0') + ` (${index})`));
             });
         });
@@ -129,7 +133,7 @@ class KMapInterface {
     initializeTruthTable() {
         const tbody = this.elements.truthTableBody;
         tbody.innerHTML = '';
-        
+
         // Update variable column visibility in header
         const varCols = document.querySelectorAll('.truth-table thead tr th:not(:first-child):not(:last-child)');
         varCols.forEach((col, i) => col.style.display = i < this.numVars ? '' : 'none');
@@ -138,15 +142,15 @@ class KMapInterface {
         for (let i = 0; i < this.size; i++) {
             const row = document.createElement('tr');
             row.dataset.rowIndex = i;
-            
+
             const binary = i.toString(2).padStart(this.numVars, '0');
             const cells = [
                 this.createTableCell(i, 'row-id'),
-                ...Array.from({length: 4}, (_, j) => 
+                ...Array.from({length: 4}, (_, j) =>
                     this.createTableCell(j < this.numVars ? binary[j] : '', '', j < this.numVars)),
                 this.createTableCell('0', '', true, i)
             ];
-            
+
             row.append(...cells);
             fragment.appendChild(row);
         }
@@ -167,31 +171,35 @@ class KMapInterface {
     }
 
     toggleCell(cell) {
-        const newState = this.getNextState(cell.dataset.state);
-        this.updateCellState(cell, newState, true);
-        
-        const index = parseInt(cell.dataset.index);
-        const ttCell = this.elements.truthTableBody.querySelector(`td[data-index="${index}"]`);
-        if (ttCell) {
-            this.updateCellState(ttCell, newState, false);
-        }
-        
-        this.grid[index] = newState;
-        this.debounce(() => this.solve(), 100);
+        this.updateCellAndLinkedCell(cell, true);
     }
 
     toggleTruthTableCell(cell) {
+        this.updateCellAndLinkedCell(cell, false);
+    }
+
+    updateCellAndLinkedCell(cell, isKMapCell) {
         const newState = this.getNextState(cell.dataset.state);
-        this.updateCellState(cell, newState, false);
-        
+        this.updateCellState(cell, newState, isKMapCell);
+
         const index = parseInt(cell.dataset.index);
-        const kmapCell = this.elements.grid.querySelector(`.cell[data-index="${index}"]`);
-        if (kmapCell) {
-            this.updateCellState(kmapCell, newState, true);
+        const linkedSelector = isKMapCell ?
+            `td[data-index="${index}"]` :
+            `.cell[data-index="${index}"]`;
+        const linkedCell = isKMapCell ?
+            this.elements.truthTableBody.querySelector(linkedSelector) :
+            this.elements.grid.querySelector(linkedSelector);
+
+        if (linkedCell) {
+            this.updateCellState(linkedCell, newState, !isKMapCell);
         }
-        
+
         this.grid[index] = newState;
-        this.debounce(() => this.solve(), 100);
+
+        // Clear any pending solve operation
+        clearTimeout(this._solveTimer);
+        // Schedule a new solve operation
+        this._solveTimer = setTimeout(() => this.solve(), 100);
     }
 
     getMintermsAndDontCares() {
@@ -215,9 +223,9 @@ class KMapInterface {
     updateSolution(result) {
         const { solution, solutionSelect } = this.elements;
         const solutions = Array.isArray(result) ? result : [result];
-        
+
         if (solutions.length > 1) {
-            solutionSelect.innerHTML = solutions.map((sol, i) => 
+            solutionSelect.innerHTML = solutions.map((sol, i) =>
                 `<option value="${sol}">#${i + 1} of ${solutions.length}</option>`).join('');
             solutionSelect.style.display = 'block';
             solutionSelect.value = solutions[0];
@@ -225,7 +233,6 @@ class KMapInterface {
                 solution.innerHTML = this.addOverline(solutionSelect.value);
             };
         } else {
-            solution.innerHTML = this.addOverline(solutions[0]);
             solutionSelect.style.display = 'none';
         }
         solution.innerHTML = this.addOverline(solutions[0]);
@@ -256,10 +263,10 @@ class KMapInterface {
 
     setAllCells(value) {
         // Update K-Map and Truth Table cells
-        this.elements.grid.querySelectorAll('.cell').forEach(cell => 
+        this.elements.grid.querySelectorAll('.cell').forEach(cell =>
             this.updateCellState(cell, value, true));
-        
-        this.elements.truthTableBody.querySelectorAll('td[data-index]').forEach(cell => 
+
+        this.elements.truthTableBody.querySelectorAll('td[data-index]').forEach(cell =>
             this.updateCellState(cell, value, false));
 
         // Update grid state and solve
@@ -269,12 +276,12 @@ class KMapInterface {
 
     toggleLayout() {
         if (this.numVars === 2) return; // Disable for 2 variables
-        
+
         this.isGrayCodeLayout = !this.isGrayCodeLayout;
         const states = this.grid.slice();
-        
+
         // Update layout icon
-        this.elements.toggleLayoutBtn.innerHTML = this.isGrayCodeLayout ? 
+        this.elements.toggleLayoutBtn.innerHTML = this.isGrayCodeLayout ?
             `<svg viewBox="0 0 24 24">
                 <rect x="4" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
                 <rect x="13" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -285,9 +292,9 @@ class KMapInterface {
                 <rect x="13" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
                 <path d="M7 7l-3-3 3-3M17 17l3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
             </svg>`;
-        
+
         this.initializeUI();
-        
+
         // Restore states
         states.forEach((state, index) => {
             if (state !== '0') {
@@ -403,11 +410,7 @@ class KMapInterface {
         // Setup variable cycle button
         const toggleLayoutBtn = this.elements.toggleLayoutBtn;
         if (toggleLayoutBtn) {
-            toggleLayoutBtn.addEventListener('click', () => {
-                if (this.numVars === 2) return; // Disable for 2 variables
-                this.isGrayCodeLayout = !this.isGrayCodeLayout;
-                this.initializeUI();
-            });
+            toggleLayoutBtn.addEventListener('click', () => this.toggleLayout());
         }
     }
 
@@ -469,21 +472,6 @@ class KMapInterface {
         } finally {
             document.body.removeChild(textArea);
         }
-    }
-
-    // Update toggle button visibility based on variable count and current tab
-    updateToggleButton() {
-        const toggleLayoutBtn = this.elements.toggleLayoutBtn;
-        const kmapTab = document.querySelector('.tab-btn[data-tab="kmap"]');
-        const isKmapActive = kmapTab && kmapTab.classList.contains('active');
-        if (toggleLayoutBtn) {
-            toggleLayoutBtn.style.display = (this.numVars !== 2 && isKmapActive) ? 'flex' : 'none';
-        }
-    }
-
-    debounce(func, wait) {
-        clearTimeout(this.debounceTimer);
-        this.debounceTimer = setTimeout(func, wait);
     }
 }
 
