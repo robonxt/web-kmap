@@ -45,8 +45,8 @@ function generateRegions(rowCount, colCount) {
 
 function findPrimeImplicants(groups, minterms) {
     // Find all prime implicants (not just essential ones)
-    const primeImplicants = groups.filter(group => 
-        !groups.some(other => group !== other && 
+    const primeImplicants = groups.filter(group =>
+        !groups.some(other => group !== other &&
             group.cells.every(cell => other.cells.some(c => c.decimal === cell.decimal))
         )
     );
@@ -68,10 +68,10 @@ function findPrimeImplicants(groups, minterms) {
     // Helper function to get all possible combinations of groups that cover remaining minterms
     function getCombinations(availableGroups, targetMinterms, maxSize) {
         const results = [];
-        
+
         function backtrack(current, remaining, start) {
             if (current.length > maxSize) return;
-            
+
             // Check if current combination covers all target minterms
             const covered = new Set();
             current.forEach(g => {
@@ -79,12 +79,12 @@ function findPrimeImplicants(groups, minterms) {
                     if (targetMinterms.has(m)) covered.add(m);
                 });
             });
-            
+
             if (covered.size === targetMinterms.size) {
                 results.push([...current]);
                 return;
             }
-            
+
             // Try adding each remaining group
             for (let i = start; i < availableGroups.length; i++) {
                 const group = availableGroups[i];
@@ -93,7 +93,7 @@ function findPrimeImplicants(groups, minterms) {
                 current.pop();
             }
         }
-        
+
         backtrack([], new Set(targetMinterms), 0);
         return results;
     }
@@ -105,7 +105,7 @@ function findPrimeImplicants(groups, minterms) {
         if (combinations.length > 0) {
             bestSize = size;
             combinations.forEach(groups => {
-                const expr = groups.map(g => 
+                const expr = groups.map(g =>
                     g.cells.map(c => c.decimal).sort().join(',')
                 ).sort().join('|');
                 solutions.add(expr);
@@ -114,11 +114,11 @@ function findPrimeImplicants(groups, minterms) {
         }
     }
 
-    return Array.from(solutions).map(expr => 
+    return Array.from(solutions).map(expr =>
         expr.split('|').map(indices => {
             const decimals = new Set(indices.split(',').map(Number));
-            return primeImplicants.find(g => 
-                g.cells.length === decimals.size && 
+            return primeImplicants.find(g =>
+                g.cells.length === decimals.size &&
                 g.cells.every(c => decimals.has(c.decimal))
             );
         })
@@ -135,13 +135,13 @@ function group(decimal, terms, KMap) {
         const cells = [];
         let valid = true;
         let includesRequiredTerm = false;
-        
+
         for (let r = 0; r < Math.abs(h) && valid; r++) {
             for (let c = 0; c < Math.abs(w) && valid; c++) {
                 const cellRow = (row + (h < 0 ? -r : r) + KMap.length) % KMap.length;
                 const cellCol = (col + (w < 0 ? -c : c) + KMap[0].length) % KMap[0].length;
                 const cell = KMap[cellRow][cellCol];
-                
+
                 if (!terms.includes(cell.decimal)) {
                     valid = false;
                     break;
@@ -156,7 +156,7 @@ function group(decimal, terms, KMap) {
         if (valid && includesRequiredTerm) {
             // Add this group if it's not already included
             const groupKey = JSON.stringify(cells.map(c => c.decimal).sort());
-            if (!validGroups.some(g => 
+            if (!validGroups.some(g =>
                 JSON.stringify(g.map(c => c.decimal).sort()) === groupKey
             )) {
                 validGroups.push(cells);
@@ -169,20 +169,20 @@ function group(decimal, terms, KMap) {
 }
 
 function extract(variables, group) {
-    const bits = group.reduce((acc, cell) => 
-        acc.map((bit, i) => bit === cell.binary[i] ? bit : 'x'), 
+    const bits = group.reduce((acc, cell) =>
+        acc.map((bit, i) => bit === cell.binary[i] ? bit : 'x'),
         group[0].binary.split('')
     );
-    const result = bits.every(bit => bit === 'x') ? '1' : 
-        bits.reduce((acc, bit, i) => 
-            bit === 'x' ? acc : acc + (bit === '0' ? '!' : '') + variables[i], 
+    const result = bits.every(bit => bit === 'x') ? '1' :
+        bits.reduce((acc, bit, i) =>
+            bit === 'x' ? acc : acc + (bit === '0' ? '!' : '') + variables[i],
         '');
     return result.replace(/!!/g, ''); // Remove any double negations
 }
 
 function solve(variables, minterms, dontcares = []) {
-    if (minterms.length === 0 && dontcares.length === 0) return ["0"];
-    if (minterms.length === (1 << variables.length)) return ["1"];
+    if (minterms.length === 0 && dontcares.length === 0) return { solutions: ["0"], groups: [] };
+    if (minterms.length === (1 << variables.length)) return { solutions: ["1"], groups: [] };
 
     // Special case for single minterm
     if (minterms.length === 1 && dontcares.length === 0) {
@@ -190,7 +190,13 @@ function solve(variables, minterms, dontcares = []) {
         const term = binary.split('')
             .map((bit, i) => bit === '1' ? variables[i] : `!${variables[i]}`)
             .join('');
-        return [term];
+        return { 
+            solutions: [term],
+            groups: [{
+                cells: [{ decimal: minterms[0], binary }],
+                coveredMinterms: new Set([minterms[0]])
+            }]
+        };
     }
 
     const terms = [...minterms, ...dontcares];
@@ -213,13 +219,13 @@ function solve(variables, minterms, dontcares = []) {
         }
     }
 
-    if (allGroups.length === 0) return ["0"];
+    if (allGroups.length === 0) return { solutions: ["0"], groups: [] };
 
     // Find all possible minimal solutions
     const solutions = findPrimeImplicants(allGroups, minterms);
-    
+
     // Convert solutions to expressions
-    const expressions = solutions.map(groups => 
+    const expressions = solutions.map(groups =>
         groups.map(g => extract(variables, g.cells))
             .filter(term => term !== '1')
             .sort()
@@ -227,11 +233,14 @@ function solve(variables, minterms, dontcares = []) {
     );
 
     // Remove duplicates and sort for consistent output
-    return [...new Set(expressions)].sort();
+    return {
+        solutions: [...new Set(expressions)].sort(),
+        groups: allGroups
+    };
 }
 
 if (typeof window !== 'undefined') {
-    window.KMapSolver = { solve, KMapGrayCodes };
+    window.KMapSolver = { solve, KMapGrayCodes, getKMap, findDecimalPos };
 } else {
-    module.exports = { solve, KMapGrayCodes };
+    module.exports = { solve, KMapGrayCodes, getKMap, findDecimalPos };
 }

@@ -15,6 +15,18 @@ class KMapInterface {
             tabButtons: document.querySelectorAll('.tab-btn')
         };
 
+        // Predefined distinct colors for groups
+        this.groupColors = [
+            'hsla(0, 80%, 50%, 0.8)',    // Red
+            'hsla(210, 80%, 50%, 0.8)',  // Blue
+            'hsla(120, 80%, 50%, 0.8)',  // Green
+            'hsla(45, 80%, 50%, 0.8)',   // Orange
+            'hsla(280, 80%, 50%, 0.8)',  // Purple
+            'hsla(180, 80%, 50%, 0.8)',  // Cyan
+            'hsla(330, 80%, 50%, 0.8)',  // Pink
+            'hsla(150, 80%, 50%, 0.8)'   // Teal
+        ];
+
         // Initialize state
         this.variables = [...Array(numVars).keys()].map(i => String.fromCharCode(65 + i));
         this.numVars = numVars;
@@ -31,6 +43,7 @@ class KMapInterface {
         this.initializeTruthTable();
         this.setupEventListeners();
         this.updateSliderPosition();
+        this.clear(); // Clear on initialization
     }
 
     initializeLayouts() {
@@ -79,6 +92,21 @@ class KMapInterface {
         } else {
             this.createBinaryGrid(layout);
         }
+
+        // Add SVG after grid is populated
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.classList.add('kmap-groups-svg');
+        grid.appendChild(svg);
+
+        // Initial update after a short delay to ensure grid is rendered
+        setTimeout(() => this.updateSvgViewBox(svg), 0);
+    }
+
+    updateSvgViewBox(svg) {
+        const gridRect = this.elements.grid.getBoundingClientRect();
+        svg.setAttribute('width', gridRect.width);
+        svg.setAttribute('height', gridRect.height);
+        svg.setAttribute('viewBox', `0 0 ${gridRect.width} ${gridRect.height}`);
     }
 
     createCell(index, binaryDisplay) {
@@ -217,34 +245,63 @@ class KMapInterface {
         }, { minterms: [], dontcares: [] });
     }
 
-    addOverline(expression) {
-        if (!expression || expression === '0' || expression === '1') return expression;
-        return expression.split(' + ')
-            .map(term => term.replace(/!([A-Z])/g, (_, p1) => `${p1}\u0305`))
-            .join(' + ');
+    addOverline(solution) {
+        // Special cases
+        if (solution === "0" || solution === "1") {
+            return solution;
+        }
+
+        // Split into terms
+        const terms = solution.split(' + ');
+
+        return terms.map((term, index) => {
+            const color = this.groupColors[index % this.groupColors.length];
+
+            // Process each character for overline
+            let result = '';
+            let overlineActive = false;
+
+            for (let i = 0; i < term.length; i++) {
+                if (term[i] === '!') {
+                    overlineActive = true;
+                    continue;
+                }
+
+                if (overlineActive) {
+                    result += `<span style="text-decoration: overline">${term[i]}</span>`;
+                    overlineActive = false;
+                } else {
+                    result += term[i];
+                }
+            }
+
+            // Wrap term in colored span
+            return `<span style="color: ${color}">${result}</span>`;
+        }).join(' + ');
     }
 
     updateSolution(result) {
         const { solution, solutionSelect } = this.elements;
-        const solutions = Array.isArray(result) ? result : [result];
+        const solutions = result.solutions;
 
         if (solutions.length > 1) {
-            solutionSelect.innerHTML = solutions.map((sol, i) =>
-                `<option value="${sol}">#${i + 1} of ${solutions.length}</option>`).join('');
             solutionSelect.style.display = 'block';
-            solutionSelect.value = solutions[0];
-            solutionSelect.onchange = () => {
-                solution.innerHTML = this.addOverline(solutionSelect.value);
-            };
+            // TODO: Handle multiple solutions
         } else {
             solutionSelect.style.display = 'none';
         }
+
+        // Use innerHTML since we're adding styled spans
         solution.innerHTML = this.addOverline(solutions[0]);
+
+        // Update groups based on solution terms
+        const terms = solutions[0].split(' + ');
+        this.updateGroupsFromTerms(terms);
     }
 
     solve() {
         const { minterms, dontcares } = this.getMintermsAndDontCares();
-        const result = window.KMapSolver.solve(this.variables, minterms, dontcares);
+        const result = window.KMapSolver.solve(this.variables.slice(0, this.numVars), minterms, dontcares);
         this.updateSolution(result);
     }
 
@@ -351,7 +408,7 @@ class KMapInterface {
 
             // Close menu when clicking outside
             document.addEventListener('click', (e) => {
-                if (!this.elements.tabsWrapper.contains(e.target) && 
+                if (!this.elements.tabsWrapper.contains(e.target) &&
                     !this.elements.hamburgerBtn.contains(e.target)) {
                     this.elements.tabsWrapper.classList.remove('show');
                 }
@@ -434,6 +491,16 @@ class KMapInterface {
         if (toggleLayoutBtn) {
             toggleLayoutBtn.addEventListener('click', () => this.toggleLayout());
         }
+
+        // Add resize observer for SVG updates
+        const resizeObserver = new ResizeObserver(() => {
+            const svg = this.elements.grid.querySelector('.kmap-groups-svg');
+            if (svg) {
+                this.updateSvgViewBox(svg);
+                this.solve(); // This will trigger group updates
+            }
+        });
+        resizeObserver.observe(this.elements.grid);
     }
 
     // Helper method to update cell state and appearance
@@ -494,6 +561,175 @@ class KMapInterface {
         } finally {
             document.body.removeChild(textArea);
         }
+    }
+
+    updateGroupsFromTerms(terms) {
+        const svg = this.elements.grid.querySelector('.kmap-groups-svg');
+        if (!svg) return;
+
+        this.updateSvgViewBox(svg);
+        svg.innerHTML = '';
+
+        // Handle special cases
+        if (!terms || terms.length === 0 || terms[0] === "0") {
+            return; // No groups for empty solution or "0"
+        }
+
+        const gridRect = this.elements.grid.getBoundingClientRect();
+        if (gridRect.width === 0 || gridRect.height === 0) return;
+
+        // Special case for "1" - group all cells
+        if (terms.length === 1 && terms[0] === "1") {
+            const allCells = Array.from(this.elements.grid.querySelectorAll('.cell'))
+                .map(cell => cell.getBoundingClientRect())
+                .filter(rect => rect);
+
+            if (allCells.length > 0) {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.classList.add('kmap-group-path');
+                path.style.stroke = this.groupColors[0];
+
+                const pathData = this.calculateGroupPath(allCells, gridRect);
+                path.setAttribute('d', pathData);
+
+                svg.appendChild(path);
+            }
+            return;
+        }
+
+        // Process each term
+        terms.forEach((term, index) => {
+            // Skip if term is just "1"
+            if (term === "1") return;
+
+            // Parse variables in the term
+            const variables = {};
+            let currentVar = '';
+            for (let i = 0; i < term.length; i++) {
+                if (term[i] === '!') {
+                    currentVar = term[i + 1];
+                    variables[currentVar] = false;
+                    i++; // Skip next character
+                } else {
+                    currentVar = term[i];
+                    variables[currentVar] = true;
+                }
+            }
+
+            // Find cells that match this term
+            const matchingCells = [];
+            const KMap = getKMap(this.variables.slice(0, this.numVars));
+
+            for (let row = 0; row < KMap.length; row++) {
+                for (let col = 0; col < KMap[0].length; col++) {
+                    const cell = KMap[row][col];
+                    const binary = cell.binary.split('');
+                    let matches = true;
+
+                    // Check if cell matches all variables in term
+                    for (const [variable, value] of Object.entries(variables)) {
+                        const varIndex = this.variables.indexOf(variable);
+                        if (varIndex === -1) continue;
+
+                        const cellValue = binary[varIndex] === '1';
+                        if (cellValue !== value) {
+                            matches = false;
+                            break;
+                        }
+                    }
+
+                    if (matches) {
+                        matchingCells.push(cell);
+                    }
+                }
+            }
+
+            // Create path for matching cells
+            if (matchingCells.length > 0) {
+                const cells = matchingCells.map(cell => {
+                    const pos = findDecimalPos(cell.decimal, KMap);
+                    const element = this.getCellElement(pos.row, pos.col);
+                    return element.getBoundingClientRect();
+                }).filter(rect => rect);
+
+                if (cells.length === 0) return;
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.classList.add('kmap-group-path');
+                path.dataset.wrap = this.isWraparound(matchingCells) ? 'true' : 'false';
+                path.style.stroke = this.groupColors[index % this.groupColors.length];
+
+                const pathData = this.calculateGroupPath(cells, gridRect);
+                path.setAttribute('d', pathData);
+
+                svg.appendChild(path);
+            }
+        });
+    }
+
+    getCellElement(row, col) {
+        const cells = Array.from(this.elements.grid.querySelectorAll('.cell'));
+        const layout = this.isGrayCodeLayout ?
+            this.layouts[this.numVars].gray :
+            this.layouts[this.numVars].normal;
+
+        const index = row * layout.cols.length + col;
+        return cells[index];
+    }
+
+    calculateGroupPath(cells, gridRect) {
+        const padding = 4;
+        const radius = 20;
+
+        // Convert cell rects to relative coordinates
+        const rects = cells.map(rect => ({
+            left: rect.left - gridRect.left - padding,
+            top: rect.top - gridRect.top - padding,
+            right: rect.right - gridRect.left + padding,
+            bottom: rect.bottom - gridRect.top + padding
+        }));
+
+        // Find bounds
+        const bounds = {
+            left: Math.min(...rects.map(r => r.left)),
+            top: Math.min(...rects.map(r => r.top)),
+            right: Math.max(...rects.map(r => r.right)),
+            bottom: Math.max(...rects.map(r => r.bottom))
+        };
+
+        // Create rounded rectangle path
+        return `M ${bounds.left + radius} ${bounds.top}
+            L ${bounds.right - radius} ${bounds.top}
+            Q ${bounds.right} ${bounds.top} ${bounds.right} ${bounds.top + radius}
+            L ${bounds.right} ${bounds.bottom - radius}
+            Q ${bounds.right} ${bounds.bottom} ${bounds.right - radius} ${bounds.bottom}
+            L ${bounds.left + radius} ${bounds.bottom}
+            Q ${bounds.left} ${bounds.bottom} ${bounds.left} ${bounds.bottom - radius}
+            L ${bounds.left} ${bounds.top + radius}
+            Q ${bounds.left} ${bounds.top} ${bounds.left + radius} ${bounds.top}`;
+    }
+
+    isWraparound(cells) {
+        // Check if cells are not adjacent in the grid
+        const positions = cells.map(cell =>
+            findDecimalPos(cell.decimal, getKMap(this.variables.slice(0, this.numVars)))
+        );
+
+        // Sort positions by row and column
+        positions.sort((a, b) => a.row - b.row || a.col - b.col);
+
+        // Check for gaps larger than 1 in rows or columns
+        for (let i = 1; i < positions.length; i++) {
+            const prev = positions[i - 1];
+            const curr = positions[i];
+
+            const rowGap = Math.abs(curr.row - prev.row);
+            const colGap = Math.abs(curr.col - prev.col);
+
+            if (rowGap > 1 || colGap > 1) return true;
+        }
+
+        return false;
     }
 }
 
