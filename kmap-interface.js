@@ -9,7 +9,10 @@ class KMapInterface {
             copyBtn: document.getElementById('copy-solution'),
             truthTableBody: document.getElementById('truth-table-body'),
             toggleLayoutBtn: document.getElementById('toggle-layout-btn'),
-            sliderBg: document.querySelector('.slider-bg')
+            sliderBg: document.querySelector('.slider-bg'),
+            hamburgerBtn: document.querySelector('.hamburger-menu'),
+            tabsWrapper: document.querySelector('.tabs-wrapper'),
+            tabButtons: document.querySelectorAll('.tab-btn')
         };
 
         // Initialize state
@@ -52,11 +55,12 @@ class KMapInterface {
     }
 
     updateSliderPosition(activeTab = document.querySelector('.tab-btn.active')) {
-        if (activeTab && this.elements.sliderBg) {
-            const buttonRect = activeTab.getBoundingClientRect();
-            const containerRect = activeTab.parentElement.getBoundingClientRect();
-            this.elements.sliderBg.style.width = buttonRect.width + 'px';
-            this.elements.sliderBg.style.transform = `translateX(${buttonRect.left - containerRect.left}px)`;
+        const sliderBg = this.elements.sliderBg;
+        if (sliderBg && activeTab) {
+            const tabWidth = activeTab.offsetWidth;
+            const tabLeft = activeTab.offsetLeft;
+            sliderBg.style.width = `${tabWidth}px`;
+            sliderBg.style.transform = `translateX(${tabLeft}px)`;
         }
     }
 
@@ -330,18 +334,36 @@ class KMapInterface {
 
     setupEventListeners() {
         // Tab switching
-        document.querySelectorAll('.tab-btn').forEach(button => {
+        this.elements.tabButtons.forEach(button => {
             button.addEventListener('click', () => {
                 this.switchTab(button.dataset.tab);
+                this.elements.tabsWrapper.classList.remove('show');
+                // Update slider after tab switch animation
+                setTimeout(() => this.updateSliderPosition(button), 0);
             });
         });
+
+        // Hamburger menu
+        if (this.elements.hamburgerBtn && this.elements.tabsWrapper) {
+            this.elements.hamburgerBtn.addEventListener('click', () => {
+                this.elements.tabsWrapper.classList.toggle('show');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!this.elements.tabsWrapper.contains(e.target) && 
+                    !this.elements.hamburgerBtn.contains(e.target)) {
+                    this.elements.tabsWrapper.classList.remove('show');
+                }
+            });
+        }
 
         // Controls
         document.getElementById('all-one-btn').addEventListener('click', () => this.setAllCells('1'));
         document.getElementById('all-zero-btn').addEventListener('click', () => this.setAllCells('0'));
         document.getElementById('clear-btn').addEventListener('click', () => this.clear());
 
-        // Setup layout toggle button
+        // Setup variable cycle button
         const varCycleBtn = document.getElementById('var-cycle-btn');
         if (varCycleBtn) {
             // Update toggle button visibility based on variable count and current tab
