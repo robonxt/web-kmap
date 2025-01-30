@@ -11,7 +11,7 @@ class KMapInterface {
             toggleLayoutBtn: document.getElementById('toggle-layout-btn'),
             sliderBg: document.querySelector('.slider-bg'),
             hamburgerBtn: document.querySelector('.hamburger-menu'),
-            tabsWrapper: document.querySelector('.tabs-wrapper'),
+            tabsWrapper: document.querySelector('.tab-container .tabs-wrapper'),
             tabButtons: document.querySelectorAll('.tab-btn')
         };
 
@@ -50,11 +50,8 @@ class KMapInterface {
         // Use gray code layouts from KMapSolver and only maintain normal layouts here
         return {
             2: {
-                gray: {
-                    rows: [''],
-                    cols: window.KMapSolver.KMapGrayCodes.get(2).cols.map(x => x.padStart(2, '0'))
-                },
-                normal: [[0, 1, 3, 2]]
+                gray: window.KMapSolver.KMapGrayCodes.get(2),
+                normal: window.KMapSolver.KMapGrayCodes.get(2)
             },
             3: {
                 gray: window.KMapSolver.KMapGrayCodes.get(3),
@@ -282,11 +279,18 @@ class KMapInterface {
 
     updateSolution(result) {
         const { solution, solutionSelect } = this.elements;
-        const solutions = result.solutions;
+        const solutions = result.solutions || [result];
 
         if (solutions.length > 1) {
+            solutionSelect.innerHTML = solutions.map((sol, i) =>
+                `<option value="${sol}">#${i + 1} of ${solutions.length}</option>`).join('');
             solutionSelect.style.display = 'block';
-            // TODO: Handle multiple solutions
+            solutionSelect.value = solutions[0];
+            solutionSelect.onchange = () => {
+                solution.innerHTML = this.addOverline(solutionSelect.value);
+                const terms = solutionSelect.value.split(' + ');
+                this.updateGroupsFromTerms(terms);
+            };
         } else {
             solutionSelect.style.display = 'none';
         }
@@ -668,13 +672,13 @@ class KMapInterface {
     }
 
     getCellElement(row, col) {
-        const cells = Array.from(this.elements.grid.querySelectorAll('.cell'));
         const layout = this.isGrayCodeLayout ?
             this.layouts[this.numVars].gray :
             this.layouts[this.numVars].normal;
 
-        const index = row * layout.cols.length + col;
-        return cells[index];
+        const colLength = this.isGrayCodeLayout ? layout.cols.length : layout[0].length;
+        const index = row * colLength + col;
+        return this.elements.grid.children[index];
     }
 
     calculateGroupPath(cells, gridRect) {

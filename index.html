@@ -131,6 +131,17 @@
             </div>
         </div>
     </div>
+    <footer class="footer" style="display: flex; justify-content: center;">
+        <button class="svg-button theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <svg class="theme-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="5" />
+                <path
+                    d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+            </svg>
+            <span class="theme-toggle-text">Toggle theme</span>
+        </button>
+    </footer>
     <script src="kmap-solver.js" defer></script>
     <script src="kmap-interface.js" defer></script>
     <script src="markdown.js" defer></script>
@@ -138,12 +149,52 @@
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             new KMapInterface();
-
+            // Add hamburger menu toggle
+            const hamburgerBtn = document.querySelector('.hamburger-menu');
+            const tabsWrapper = document.querySelector('.tabs-wrapper');
+            const sliderBg = document.querySelector('.slider-bg');
+            const tabBtns = document.querySelectorAll('.tab-btn');
             // Info popup functionality
             const infoBtn = document.querySelector('.info-btn');
             const closeBtn = document.querySelector('.close-btn');
             const infoPopup = document.getElementById('info-popup');
+            // Function to update slider position
+            function updateSlider(activeTab) {
+                // if (window.innerWidth > 400 && sliderBg && activeTab) {
+                if (sliderBg && activeTab) {
+                    const tabWidth = activeTab.offsetWidth;
+                    const tabLeft = activeTab.offsetLeft;
+                    sliderBg.style.width = `${tabWidth}px`;
+                    sliderBg.style.transform = `translateX(${tabLeft}px)`;
+                }
+            }
 
+            if (hamburgerBtn && tabsWrapper) {
+                hamburgerBtn.addEventListener('click', () => {
+                    tabsWrapper.classList.toggle('show');
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!tabsWrapper.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                        tabsWrapper.classList.remove('show');
+                    }
+                });
+
+                // Update slider when switching tabs
+                tabBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        tabsWrapper.classList.remove('show');
+                        setTimeout(() => updateSlider(btn), 0);
+                    });
+                });
+            }
+
+            // Initial slider position
+            const initialActiveTab = document.querySelector('.tab-btn.active');
+            updateSlider(initialActiveTab);
+
+            // Info popup functionality
             infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
             closeBtn.addEventListener('click', () => infoPopup.classList.remove('active'));
             infoPopup.addEventListener('click', (e) => {
