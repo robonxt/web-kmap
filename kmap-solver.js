@@ -1,6 +1,6 @@
 const KMapGrayCodes = new Map([
     [2, { rows: ['0', '1'], cols: ['0', '1'] }],
-    [3, { rows: ['00', '01', '11', '10'], cols: ['0', '1'] }],
+    [3, { rows: ['0', '1'], cols: ['00', '01', '11', '10'] }],
     [4, { rows: ['00', '01', '11', '10'], cols: ['00', '01', '11', '10'] }]
 ]);
 
@@ -190,7 +190,7 @@ function solve(variables, minterms, dontcares = []) {
         const term = binary.split('')
             .map((bit, i) => bit === '1' ? variables[i] : `!${variables[i]}`)
             .join('');
-        return { 
+        return {
             solutions: [term],
             groups: [{
                 cells: [{ decimal: minterms[0], binary }],
