@@ -27,6 +27,7 @@ Variable notation in solutions:
 - Two layout options:
   - Gray code layout (optimal for adjacency)
   - Normal binary layout (available for 3-4 variables)
+- Visual cell grouping with wraparound support
 - Auto-solving with Boolean algebra simplification
 - Results always in minimal SOP (Sum of Products) format
 - Support for don't care conditions (X)
@@ -34,7 +35,11 @@ Variable notation in solutions:
 - One-click copy solution to clipboard
 - Synchronized Truth Table view
 - Enhanced info guide with usage examples
-- Modern, clean UI with vector icons
+- Modern, clean UI with:
+  - Vector icons
+  - Organized action bar for controls
+  - Light/Dark/Auto theme support
+  - System theme detection
 - Quick operations:
   - Set all cells to 1
   - Set all cells to 0
@@ -45,7 +50,6 @@ Variable notation in solutions:
   - 1 (true)
   - X (don't care)
 - Responsive design for mobile and desktop
-- Toast notifications for user feedback
 - Offline support:
   - Works without internet after first visit
   - Fast loading with cached resources
@@ -73,6 +77,11 @@ Variable notation in solutions:
 - Vector-based UI elements for crisp display
 - Responsive layout with CSS Grid and Flexbox
 - Mobile-first design principles
+- Theme system:
+  - Light and Dark themes with Auto detection
+  - CSS variables for consistent styling
+  - Persistent theme preferences
+  - Optimized for readability across all K-map sizes
 
 ## Implementation Notes
 

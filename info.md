@@ -28,22 +28,6 @@ Variable notation in solutions:
    - Toggle between K-map and Truth Table
    - Switch between Gray code and normal layouts (3-4 variables only)
 
-Note: The app works offline! Once you've visited the page, you can use it anytime without internet connection. It will automatically update when you're back online.
-
-## Features
-
-- Variable selection (2-4 variables)
-- Auto-solving in SOP format
-- Support for don't care conditions (X)
-- Two layout options:
-  - Gray code (optimal adjacency)
-  - Normal binary (3-4 variables)
-- Synchronized Truth Table view
-- Copy results to clipboard
-- Offline support:
-  - Works without internet after first visit
-  - Fast loading from cache
-
 ## Source Code
 
 Available on GitHub: [robonxt/web-kmap](https://github.com/robonxt/web-kmap)

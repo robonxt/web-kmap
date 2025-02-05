@@ -5,20 +5,20 @@ class KMapInterface {
         this.elements = {
             grid: document.getElementById('kmap-grid'),
             solution: document.getElementById('solution'),
-            solutionSelect: document.querySelector('.solution-select'),
+            solutionSelect: document.getElementById('solution-select'),
             copyBtn: document.getElementById('copy-solution'),
             truthTableBody: document.getElementById('truth-table-body'),
             toggleLayoutBtn: document.getElementById('toggle-layout-btn'),
-            sliderBg: document.querySelector('.slider-bg'),
-            hamburgerBtn: document.querySelector('.hamburger-menu'),
-            tabsWrapper: document.querySelector('.tab-container .tabs-wrapper'),
+            sliderBg: document.getElementById('slider-bg'),
+            hamburgerBtn: document.getElementById('hamburger-menu-btn'),
+            tabsWrapper: document.getElementById('tabs-wrapper'),
             tabButtons: document.querySelectorAll('.tab-btn'),
-            kmapTab: document.querySelector('.tab-btn[data-tab="kmap"]'),
+            kmapTab: document.getElementById('kmap-tab-btn'),
             // Cache control buttons
             allOneBtn: document.getElementById('all-one-btn'),
             allZeroBtn: document.getElementById('all-zero-btn'),
             clearBtn: document.getElementById('clear-btn'),
-            varCycleBtn: document.getElementById('var-cycle-btn')
+            varSelect: document.getElementById('var-select')
         };
 
         // Predefined distinct colors for groups
@@ -251,7 +251,7 @@ class KMapInterface {
     addOverline(solution) {
         // Special cases
         if (solution === "0" || solution === "1") {
-            return solution;
+            return `<span>${solution}</span>`;
         }
 
         // Split into terms
@@ -330,6 +330,13 @@ class KMapInterface {
         this.grid.fill(0);
         this.elements.solution.innerHTML = '';
         this.elements.solutionSelect.style.display = 'none';
+
+        // Clear group circles by removing all path elements from the SVG
+        const svg = this.elements.grid.querySelector('.kmap-groups-svg');
+        if (svg) {
+            const paths = svg.querySelectorAll('path');
+            paths.forEach(path => path.remove());
+        }
     }
 
     setAllStates(value) {
@@ -384,6 +391,28 @@ class KMapInterface {
         }, 1000);
     }
 
+    getSolutionTextWithOverlines() {
+        const solutionDiv = this.elements.solution;
+        // If there's only text content (no spans), return it directly
+        if (solutionDiv.children.length === 0) {
+            return solutionDiv.textContent;
+        }
+        const terms = Array.from(solutionDiv.children).map(span => {
+            // Process each term's characters
+            const chars = Array.from(span.childNodes).map(node => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    return node.textContent;
+                } else if (node.nodeType === Node.ELEMENT_NODE && node.style.textDecoration === 'overline') {
+                    // Use Unicode combining overline character (U+0305)
+                    return node.textContent + '\u0305';
+                }
+                return '';
+            }).join('');
+            return chars;
+        });
+        return terms.join(' + ');
+    }
+
     copyTextFallback(text) {
         const textArea = document.createElement('textarea');
         textArea.value = text;
@@ -401,6 +430,22 @@ class KMapInterface {
         } finally {
             document.body.removeChild(textArea);
         }
+    }
+
+    setupClipboardHandlers() {
+        this.elements.copyBtn.addEventListener('click', () => {
+            const solutionText = this.getSolutionTextWithOverlines();
+
+            // Try modern clipboard API first
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(solutionText)
+                    .then(() => this.showCopySuccess())
+                    .catch(() => this.copyTextFallback(solutionText));
+            } else {
+                // Use fallback method for non-HTTPS
+                this.copyTextFallback(solutionText);
+            }
+        });
     }
 
     updateGroupsFromTerms(terms) {
@@ -561,7 +606,7 @@ class KMapInterface {
         let layoutArray;
         if (this.isGrayCodeLayout) {
             const layout = this.layouts[this.numVars].gray;
-            layoutArray = layout.rows.map(row => 
+            layoutArray = layout.rows.map(row =>
                 layout.cols.map(col => parseInt(row + col, 2))
             );
         } else {
@@ -571,7 +616,7 @@ class KMapInterface {
         // Find positions of cells in layout array
         const positions = [];
         const decimals = cells.map(cell => cell.decimal);
-        
+
         for (let r = 0; r < layoutArray.length; r++) {
             for (let c = 0; c < layoutArray[r].length; c++) {
                 if (decimals.includes(layoutArray[r][c])) {
@@ -620,18 +665,10 @@ class KMapInterface {
         this.isGrayCodeLayout = !this.isGrayCodeLayout;
         const states = this.grid.slice();
 
-        // Update layout icon
-        this.elements.toggleLayoutBtn.innerHTML = this.isGrayCodeLayout ?
-            `<svg viewBox="0 0 24 24">
-                <rect x="4" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                <rect x="13" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                <path d="M17 7l3-3-3-3M7 17l-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>` :
-            `<svg viewBox="0 0 24 24">
-                <rect x="4" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                <rect x="13" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                <path d="M7 7l-3-3 3-3M17 17l3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>`;
+        // Update layout icon using classes
+        const btn = this.elements.toggleLayoutBtn;
+        btn.classList.remove(this.isGrayCodeLayout ? 'binary-layout' : 'gray-layout');
+        btn.classList.add(this.isGrayCodeLayout ? 'gray-layout' : 'binary-layout');
 
         this.initializeUI();
 
@@ -642,6 +679,9 @@ class KMapInterface {
                 if (cell) this.applyState(cell, state, true);
             }
         });
+
+        // Update layout text
+        this.updateLayoutText();
 
         // Recalculate groups
         this.solve();
@@ -676,8 +716,8 @@ class KMapInterface {
         this.setupMenuHandlers();
         this.setupControlHandlers();
         this.setupVariableCycleHandler();
-        this.setupClipboardHandlers();
         this.setupLayoutHandlers();
+        this.setupClipboardHandlers();
     }
 
     setupTabHandlers() {
@@ -715,24 +755,38 @@ class KMapInterface {
         this.elements.clearBtn.addEventListener('click', () => this.clear());
     }
 
-    // Update toggle button visibility based on variable count and current tab
     updateToggleButton() {
         const { toggleLayoutBtn, kmapTab } = this.elements;
         const isKmapActive = kmapTab && kmapTab.classList.contains('active');
         if (toggleLayoutBtn) {
-            toggleLayoutBtn.style.display = (this.numVars !== 2 && isKmapActive) ? 'flex' : 'none';
+            toggleLayoutBtn.style.display = isKmapActive ? 'flex' : 'none';
+            toggleLayoutBtn.disabled = this.numVars === 2;
+            toggleLayoutBtn.classList.toggle('disabled', this.numVars === 2);
+            this.updateLayoutText();
+        }
+    }
+
+    updateLayoutText() {
+        const layoutText = this.elements.toggleLayoutBtn.querySelector('.layout-text');
+        if (!layoutText) return;
+
+        if (this.numVars === 2) {
+            layoutText.textContent = 'AB';
+        } else if (this.numVars === 3) {
+            layoutText.textContent = this.isGrayCodeLayout ? 'AB/C' : 'C/AB';
+        } else {
+            layoutText.textContent = this.isGrayCodeLayout ? 'AB/CD' : 'CD/AB';
         }
     }
 
     setupVariableCycleHandler() {
-        // Setup variable cycle button
-        if (this.elements.varCycleBtn) {
-            // Initial visibility
-            this.updateToggleButton();
+        if (this.elements.varSelect) {
+            // Set initial value
+            this.elements.varSelect.value = this.numVars;
 
-            this.elements.varCycleBtn.addEventListener('click', () => {
-                // Cycle between 4 -> 3 -> 2 -> 4
-                this.numVars = this.numVars > 2 ? this.numVars - 1 : 4;
+            // Handle variable changes
+            this.elements.varSelect.addEventListener('change', () => {
+                this.numVars = parseInt(this.elements.varSelect.value);
 
                 // Update variables array
                 this.variables = [...Array(this.numVars).keys()].map(i => String.fromCharCode(65 + i));
@@ -756,31 +810,13 @@ class KMapInterface {
                 // Clear all states and solution
                 this.clear();
 
-                // Update toggle button visibility
+                // Update toggle button visibility and text
                 this.updateToggleButton();
 
                 // Dispatch event for variable change
                 document.dispatchEvent(new Event('varchange'));
             });
         }
-    }
-
-    setupClipboardHandlers() {
-        // Add copy to clipboard functionality
-        this.elements.copyBtn.addEventListener('click', () => {
-            const solutionDiv = this.elements.solution;
-            const solutionText = String(solutionDiv.textContent || '');
-
-            // Try modern clipboard API first
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(solutionText)
-                    .then(() => this.showCopySuccess())
-                    .catch(() => this.copyTextFallback(solutionText));
-            } else {
-                // Use fallback method for non-HTTPS
-                this.copyTextFallback(solutionText);
-            }
-        });
     }
 
     setupLayoutHandlers() {
@@ -800,28 +836,9 @@ class KMapInterface {
         });
         resizeObserver.observe(this.elements.grid);
     }
-
-    copyTextFallback(text) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-9999px';
-        textArea.style.top = '0';
-        document.body.appendChild(textArea);
-
-        try {
-            textArea.select();
-            document.execCommand('copy');
-            this.showCopySuccess();
-        } catch (err) {
-            console.error('Failed to copy text: ', err);
-        } finally {
-            document.body.removeChild(textArea);
-        }
     }
-}
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new KMapInterface();
-});
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        new KMapInterface();
+    });
