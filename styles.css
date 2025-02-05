@@ -10,17 +10,20 @@
     --max-width: 800px;
     --mobile-max-width: 400px;
     --transition-standard: all 0.2s ease;
+    --min-height: 400px;
 
     /* Component dimensions */
     --button-height: 40px;
     --button-min-width: 40px;
     --tab-min-width: 80px;
 
-    /* Light theme (default) */
+    /* Theme-independent variables */
     --primary-color: #4CAF50;
     --primary-hover: #3498db;
     --warning-color: #FF9800;
     --danger-color: #dc3545;
+
+    /* Light theme (default) */
     --cell-selected-color: #95ef98;
     --cell-dont-care-color: #e7ca6c;
     --cell-unselected-color: none;
@@ -39,10 +42,6 @@
 
 /* Light theme */
 [data-theme="dark"] {
-    --primary-color: #5CDF60;
-    --primary-hover: #4BA8EB;
-    --warning-color: #FFA726;
-    --danger-color: #ef5350;
     --cell-selected-color: #223823;
     --cell-dont-care-color: #4c3f17;
     --cell-unselected-color: none;
@@ -87,9 +86,6 @@ body {
     margin: var(--spacing) auto;
     padding: var(--spacing);
     background-color: var(--bg-main);
-    /* min-height: 100vh; */
-    /* display: flex; */
-    /* flex-direction: column; */
 }
 
 /* Header & Navigation */
@@ -469,9 +465,6 @@ body {
     justify-content: center;
     gap: var(--spacing);
     background-color: var(--bg-surface);
-    /* border: 1px solid var(--border-color);
-    border-radius: var(--radius);
-    padding: var(--spacing); */
     margin-bottom: var(--spacing);
 }
 
