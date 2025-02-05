@@ -181,7 +181,7 @@ class KMapInterface {
             const binary = i.toString(2).padStart(this.numVars, '0');
             const cells = [
                 this.createTableCell(i, 'row-id'),
-                ...Array.from({length: 4}, (_, j) =>
+                ...Array.from({ length: 4 }, (_, j) =>
                     this.createTableCell(j < this.numVars ? binary[j] : '', '', j < this.numVars)),
                 this.createTableCell('0', '', true, i)
             ];
@@ -326,7 +326,7 @@ class KMapInterface {
             this.applyState(cell, '0', false);
         });
 
-        // Reset grid state and clear solution
+        // Reset grid state
         this.grid.fill(0);
         this.elements.solution.innerHTML = '';
         this.elements.solutionSelect.style.display = 'none';
@@ -570,8 +570,8 @@ class KMapInterface {
     }
 
     calculateGroupPath(cells, gridRect) {
-        const padding = 4;
-        const radius = 20;
+        const padding = 5;
+        const radius = 30;
 
         // Convert cell rects to relative coordinates
         const rects = cells.map(rect => ({
@@ -773,9 +773,9 @@ class KMapInterface {
         if (this.numVars === 2) {
             layoutText.textContent = 'AB';
         } else if (this.numVars === 3) {
-            layoutText.textContent = this.isGrayCodeLayout ? 'AB/C' : 'C/AB';
+            layoutText.textContent = this.isGrayCodeLayout ? 'C/AB' : 'AB/C';
         } else {
-            layoutText.textContent = this.isGrayCodeLayout ? 'AB/CD' : 'CD/AB';
+            layoutText.textContent = this.isGrayCodeLayout ? 'CD/AB' : 'AB/CD';
         }
     }
 
@@ -792,9 +792,6 @@ class KMapInterface {
                 this.variables = [...Array(this.numVars).keys()].map(i => String.fromCharCode(65 + i));
                 this.size = 1 << this.numVars;
 
-                // Reset grid state
-                this.grid = Array(this.size).fill(0);
-
                 // Update data-vars attribute
                 document.body.setAttribute('data-vars', this.numVars);
 
@@ -807,14 +804,11 @@ class KMapInterface {
                 this.initializeUI();
                 this.initializeTruthTable();
 
-                // Clear all states and solution
-                this.clear();
-
                 // Update toggle button visibility and text
                 this.updateToggleButton();
 
-                // Dispatch event for variable change
-                document.dispatchEvent(new Event('varchange'));
+                // Clear all states and solution
+                this.clear();
             });
         }
     }
@@ -836,9 +830,9 @@ class KMapInterface {
         });
         resizeObserver.observe(this.elements.grid);
     }
-    }
+}
 
-    // Initialize when DOM is loaded
-    document.addEventListener('DOMContentLoaded', () => {
-        new KMapInterface();
-    });
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new KMapInterface();
+});
