@@ -252,7 +252,7 @@
                 // Switch TO the theme that matches the visible icon
                 const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
-                console.log(`Switching to ${newTheme} theme`);
+                // console.log(`Switching to ${newTheme} theme`);
                 document.body.setAttribute('data-theme', newTheme);
                 themeToggle.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
