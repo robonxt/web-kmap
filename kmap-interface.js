@@ -12,19 +12,25 @@ class KMapInterface {
             sliderBg: document.querySelector('.slider-bg'),
             hamburgerBtn: document.querySelector('.hamburger-menu'),
             tabsWrapper: document.querySelector('.tab-container .tabs-wrapper'),
-            tabButtons: document.querySelectorAll('.tab-btn')
+            tabButtons: document.querySelectorAll('.tab-btn'),
+            kmapTab: document.querySelector('.tab-btn[data-tab="kmap"]'),
+            // Cache control buttons
+            allOneBtn: document.getElementById('all-one-btn'),
+            allZeroBtn: document.getElementById('all-zero-btn'),
+            clearBtn: document.getElementById('clear-btn'),
+            varCycleBtn: document.getElementById('var-cycle-btn')
         };
 
         // Predefined distinct colors for groups
         this.groupColors = [
-            'hsla(0, 80%, 50%, 0.8)',    // Red
-            'hsla(210, 80%, 50%, 0.8)',  // Blue
-            'hsla(120, 80%, 50%, 0.8)',  // Green
-            'hsla(45, 80%, 50%, 0.8)',   // Orange
-            'hsla(280, 80%, 50%, 0.8)',  // Purple
-            'hsla(180, 80%, 50%, 0.8)',  // Cyan
-            'hsla(330, 80%, 50%, 0.8)',  // Pink
-            'hsla(150, 80%, 50%, 0.8)'   // Teal
+            'hsla(0, 100%, 60%, 0.8)',    // Red
+            'hsla(210, 100%, 60%, 0.8)',  // Blue
+            'hsla(120, 100%, 60%, 0.8)',  // Green
+            'hsla(45, 100%, 60%, 0.8)',   // Orange
+            'hsla(280, 100%, 60%, 0.8)',  // Purple
+            'hsla(180, 100%, 60%, 0.8)',  // Cyan
+            'hsla(330, 100%, 60%, 0.8)',  // Pink
+            'hsla(150, 100%, 60%, 0.8)'   // Teal
         ];
 
         // Initialize state
@@ -95,8 +101,8 @@ class KMapInterface {
         svg.classList.add('kmap-groups-svg');
         grid.appendChild(svg);
 
-        // Initial update after a short delay to ensure grid is rendered
-        setTimeout(() => this.updateSvgViewBox(svg), 0);
+        // Update SVG viewBox
+        this.updateSvgViewBox(svg);
     }
 
     updateSvgViewBox(svg) {
@@ -131,7 +137,7 @@ class KMapInterface {
         }
 
         cell.append(binDiv, valDiv);
-        cell.addEventListener('click', () => this.toggleCell(cell));
+        cell.addEventListener('click', () => this.toggleKMap(cell));
         return cell;
     }
 
@@ -194,22 +200,22 @@ class KMapInterface {
         if (index !== null) {
             td.dataset.index = index;
             td.dataset.state = '0';
-            td.addEventListener('click', () => this.toggleTruthTableCell(td));
+            td.addEventListener('click', () => this.toggleTruth(td));
         }
         return td;
     }
 
-    toggleCell(cell) {
-        this.updateCellAndLinkedCell(cell, true);
+    toggleKMap(cell) {
+        this.syncViews(cell, true);
     }
 
-    toggleTruthTableCell(cell) {
-        this.updateCellAndLinkedCell(cell, false);
+    toggleTruth(cell) {
+        this.syncViews(cell, false);
     }
 
-    updateCellAndLinkedCell(cell, isKMapCell) {
-        const newState = this.getNextState(cell.dataset.state);
-        this.updateCellState(cell, newState, isKMapCell);
+    syncViews(cell, isKMapCell) {
+        const newState = this.cycleState(cell.dataset.state);
+        this.applyState(cell, newState, isKMapCell);
 
         const index = parseInt(cell.dataset.index);
         const linkedSelector = isKMapCell ?
@@ -220,7 +226,7 @@ class KMapInterface {
             this.elements.grid.querySelector(linkedSelector);
 
         if (linkedCell) {
-            this.updateCellState(linkedCell, newState, !isKMapCell);
+            this.applyState(linkedCell, newState, !isKMapCell);
         }
 
         this.grid[index] = newState;
@@ -312,12 +318,12 @@ class KMapInterface {
     clear() {
         // Clear K-map cells
         this.elements.grid.querySelectorAll('.cell').forEach(cell => {
-            this.updateCellState(cell, '0', true);
+            this.applyState(cell, '0', true);
         });
 
         // Clear truth table cells
         this.elements.truthTableBody.querySelectorAll('td[data-index]').forEach(cell => {
-            this.updateCellState(cell, '0', false);
+            this.applyState(cell, '0', false);
         });
 
         // Reset grid state and clear solution
@@ -326,189 +332,20 @@ class KMapInterface {
         this.elements.solutionSelect.style.display = 'none';
     }
 
-    setAllCells(value) {
+    setAllStates(value) {
         // Update K-Map and Truth Table cells
         this.elements.grid.querySelectorAll('.cell').forEach(cell =>
-            this.updateCellState(cell, value, true));
+            this.applyState(cell, value, true));
 
         this.elements.truthTableBody.querySelectorAll('td[data-index]').forEach(cell =>
-            this.updateCellState(cell, value, false));
+            this.applyState(cell, value, false));
 
         // Update grid state and solve
         this.grid = Array(this.size).fill(value);
         this.solve();
     }
 
-    toggleLayout() {
-        if (this.numVars === 2) return; // Disable for 2 variables
-
-        this.isGrayCodeLayout = !this.isGrayCodeLayout;
-        const states = this.grid.slice();
-
-        // Update layout icon
-        this.elements.toggleLayoutBtn.innerHTML = this.isGrayCodeLayout ?
-            `<svg viewBox="0 0 24 24">
-                <rect x="4" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                <rect x="13" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                <path d="M17 7l3-3-3-3M7 17l-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>` :
-            `<svg viewBox="0 0 24 24">
-                <rect x="4" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                <rect x="13" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                <path d="M7 7l-3-3 3-3M17 17l3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>`;
-
-        this.initializeUI();
-
-        // Restore states
-        states.forEach((state, index) => {
-            if (state !== '0') {
-                const cell = this.elements.grid.querySelector(`.cell[data-index="${index}"]`);
-                if (cell) this.updateCellState(cell, state, true);
-            }
-        });
-    }
-
-    switchTab(tabName) {
-        // Update active tab
-        document.querySelectorAll('.tab-btn').forEach(button => {
-            button.classList.toggle('active', button.dataset.tab === tabName);
-
-            // Update slider position if this is the active button
-            if (button.dataset.tab === tabName) {
-                this.updateSliderPosition(button);
-            }
-        });
-
-        // Show/hide content
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.toggle('active', content.id === tabName);
-        });
-
-        // Show/hide layout button based on tab and variable count
-        const layoutBtn = this.elements.toggleLayoutBtn;
-        if (layoutBtn) {
-            // Only show layout button if we're in kmap tab AND not in 2-variable mode
-            layoutBtn.style.display = (tabName === 'kmap' && this.numVars !== 2) ? 'flex' : 'none';
-        }
-    }
-
-    setupEventListeners() {
-        // Tab switching
-        this.elements.tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                this.switchTab(button.dataset.tab);
-                this.elements.tabsWrapper.classList.remove('show');
-                // Update slider after tab switch animation
-                setTimeout(() => this.updateSliderPosition(button), 0);
-            });
-        });
-
-        // Hamburger menu
-        if (this.elements.hamburgerBtn && this.elements.tabsWrapper) {
-            this.elements.hamburgerBtn.addEventListener('click', () => {
-                this.elements.tabsWrapper.classList.toggle('show');
-            });
-
-            // Close menu when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!this.elements.tabsWrapper.contains(e.target) &&
-                    !this.elements.hamburgerBtn.contains(e.target)) {
-                    this.elements.tabsWrapper.classList.remove('show');
-                }
-            });
-        }
-
-        // Controls
-        document.getElementById('all-one-btn').addEventListener('click', () => this.setAllCells('1'));
-        document.getElementById('all-zero-btn').addEventListener('click', () => this.setAllCells('0'));
-        document.getElementById('clear-btn').addEventListener('click', () => this.clear());
-
-        // Setup variable cycle button
-        const varCycleBtn = document.getElementById('var-cycle-btn');
-        if (varCycleBtn) {
-            // Update toggle button visibility based on variable count and current tab
-            const updateToggleButton = () => {
-                const toggleLayoutBtn = this.elements.toggleLayoutBtn;
-                const kmapTab = document.querySelector('.tab-btn[data-tab="kmap"]');
-                const isKmapActive = kmapTab && kmapTab.classList.contains('active');
-                if (toggleLayoutBtn) {
-                    toggleLayoutBtn.style.display = (this.numVars !== 2 && isKmapActive) ? 'flex' : 'none';
-                }
-            };
-
-            // Initial visibility
-            updateToggleButton();
-
-            varCycleBtn.addEventListener('click', () => {
-                // Cycle between 4 -> 3 -> 2 -> 4
-                this.numVars = this.numVars > 2 ? this.numVars - 1 : 4;
-
-                // Update variables array
-                this.variables = [...Array(this.numVars).keys()].map(i => String.fromCharCode(65 + i));
-                this.size = 1 << this.numVars;
-
-                // Reset grid state
-                this.grid = Array(this.size).fill(0);
-
-                // Update data-vars attribute
-                document.body.setAttribute('data-vars', this.numVars);
-
-                // Force Gray code layout for 2 variables
-                if (this.numVars === 2) {
-                    this.isGrayCodeLayout = true;
-                }
-
-                // Reinitialize UI with new variable count
-                this.initializeUI();
-                this.initializeTruthTable();
-
-                // Clear all states and solution
-                this.clear();
-
-                // Update toggle button visibility
-                updateToggleButton();
-
-                // Dispatch event for variable change
-                document.dispatchEvent(new Event('varchange'));
-            });
-        }
-
-        // Add copy to clipboard functionality
-        this.elements.copyBtn.addEventListener('click', () => {
-            const solutionDiv = this.elements.solution;
-            const solutionText = String(solutionDiv.textContent || '');
-
-            // Try modern clipboard API first
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(solutionText)
-                    .then(() => this.showCopySuccess())
-                    .catch(() => this.copyTextFallback(solutionText));
-            } else {
-                // Use fallback method for non-HTTPS
-                this.copyTextFallback(solutionText);
-            }
-        });
-
-        // Setup variable cycle button
-        const toggleLayoutBtn = this.elements.toggleLayoutBtn;
-        if (toggleLayoutBtn) {
-            toggleLayoutBtn.addEventListener('click', () => this.toggleLayout());
-        }
-
-        // Add resize observer for SVG updates
-        const resizeObserver = new ResizeObserver(() => {
-            const svg = this.elements.grid.querySelector('.kmap-groups-svg');
-            if (svg) {
-                this.updateSvgViewBox(svg);
-                this.solve(); // This will trigger group updates
-            }
-        });
-        resizeObserver.observe(this.elements.grid);
-    }
-
-    // Helper method to update cell state and appearance
-    updateCellState(cell, newState, isKMapCell = true) {
+    applyState(cell, newState, isKMapCell = true) {
         const display = isKMapCell ? cell.querySelector('.value-display') : cell;
         if (isKMapCell) {
             display.textContent = newState;
@@ -530,8 +367,7 @@ class KMapInterface {
         }
     }
 
-    // Helper method to get next state in the cycle
-    getNextState(currentState) {
+    cycleState(currentState) {
         switch (currentState) {
             case '0': return '1';
             case '1': return 'X';
@@ -601,6 +437,11 @@ class KMapInterface {
             return;
         }
 
+        // Get current layout
+        const layout = this.isGrayCodeLayout ?
+            window.KMapSolver.KMapGrayCodes.get(this.numVars) :
+            this.layouts[this.numVars].normal;
+
         // Process each term
         terms.forEach((term, index) => {
             // Skip if term is just "1"
@@ -622,12 +463,15 @@ class KMapInterface {
 
             // Find cells that match this term
             const matchingCells = [];
-            const KMap = getKMap(this.variables.slice(0, this.numVars));
+            const rows = this.isGrayCodeLayout ? layout.rows : layout;
+            const cols = this.isGrayCodeLayout ? layout.cols : layout[0];
 
-            for (let row = 0; row < KMap.length; row++) {
-                for (let col = 0; col < KMap[0].length; col++) {
-                    const cell = KMap[row][col];
-                    const binary = cell.binary.split('');
+            for (let row = 0; row < rows.length; row++) {
+                for (let col = 0; col < cols.length; col++) {
+                    const cellValue = this.isGrayCodeLayout ?
+                        parseInt(`${rows[row]}${cols[col]}`, 2) :
+                        layout[row][col];
+                    const binary = cellValue.toString(2).padStart(this.numVars, '0');
                     let matches = true;
 
                     // Check if cell matches all variables in term
@@ -643,7 +487,7 @@ class KMapInterface {
                     }
 
                     if (matches) {
-                        matchingCells.push(cell);
+                        matchingCells.push({ decimal: cellValue, row, col });
                     }
                 }
             }
@@ -651,8 +495,7 @@ class KMapInterface {
             // Create path for matching cells
             if (matchingCells.length > 0) {
                 const cells = matchingCells.map(cell => {
-                    const pos = findDecimalPos(cell.decimal, KMap);
-                    const element = this.getCellElement(pos.row, pos.col);
+                    const element = this.getCellElement(cell.row, cell.col);
                     return element.getBoundingClientRect();
                 }).filter(rect => rect);
 
@@ -660,7 +503,7 @@ class KMapInterface {
 
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.classList.add('kmap-group-path');
-                path.dataset.wrap = this.isWraparound(matchingCells) ? 'true' : 'false';
+                path.dataset.wrap = this.isWrapped(matchingCells) ? 'true' : 'false';
                 path.style.stroke = this.groupColors[index % this.groupColors.length];
 
                 const pathData = this.calculateGroupPath(cells, gridRect);
@@ -673,7 +516,7 @@ class KMapInterface {
 
     getCellElement(row, col) {
         const layout = this.isGrayCodeLayout ?
-            this.layouts[this.numVars].gray :
+            window.KMapSolver.KMapGrayCodes.get(this.numVars) :
             this.layouts[this.numVars].normal;
 
         const colLength = this.isGrayCodeLayout ? layout.cols.length : layout[0].length;
@@ -713,27 +556,268 @@ class KMapInterface {
             Q ${bounds.left} ${bounds.top} ${bounds.left + radius} ${bounds.top}`;
     }
 
-    isWraparound(cells) {
-        // Check if cells are not adjacent in the grid
-        const positions = cells.map(cell =>
-            findDecimalPos(cell.decimal, getKMap(this.variables.slice(0, this.numVars)))
-        );
+    isWrapped(cells) {
+        // Get current layout and convert Gray code to 2D array if needed
+        let layoutArray;
+        if (this.isGrayCodeLayout) {
+            const layout = this.layouts[this.numVars].gray;
+            layoutArray = layout.rows.map(row => 
+                layout.cols.map(col => parseInt(row + col, 2))
+            );
+        } else {
+            layoutArray = this.layouts[this.numVars].normal;
+        }
+
+        // Find positions of cells in layout array
+        const positions = [];
+        const decimals = cells.map(cell => cell.decimal);
+        
+        for (let r = 0; r < layoutArray.length; r++) {
+            for (let c = 0; c < layoutArray[r].length; c++) {
+                if (decimals.includes(layoutArray[r][c])) {
+                    positions.push({ row: r, col: c });
+                }
+            }
+        }
 
         // Sort positions by row and column
         positions.sort((a, b) => a.row - b.row || a.col - b.col);
 
-        // Check for gaps larger than 1 in rows or columns
+        // Check for wraparound in rows or columns
         for (let i = 1; i < positions.length; i++) {
             const prev = positions[i - 1];
             const curr = positions[i];
 
-            const rowGap = Math.abs(curr.row - prev.row);
-            const colGap = Math.abs(curr.col - prev.col);
+            // Check if cells are adjacent in the grid
+            const rowDiff = Math.abs(curr.row - prev.row);
+            const colDiff = Math.abs(curr.col - prev.col);
 
-            if (rowGap > 1 || colGap > 1) return true;
+            // If cells aren't directly adjacent in either direction
+            if (rowDiff > 1 || colDiff > 1) {
+                // Check if they're adjacent through wraparound
+                const wrapRowDiff = Math.min(
+                    Math.abs(curr.row - prev.row + layoutArray.length),
+                    Math.abs(curr.row - prev.row - layoutArray.length)
+                );
+                const wrapColDiff = Math.min(
+                    Math.abs(curr.col - prev.col + layoutArray[0].length),
+                    Math.abs(curr.col - prev.col - layoutArray[0].length)
+                );
+
+                // If cells are adjacent through wraparound
+                if (wrapRowDiff <= 1 || wrapColDiff <= 1) {
+                    return true;
+                }
+            }
         }
 
         return false;
+    }
+
+    toggleLayout() {
+        if (this.numVars === 2) return; // Disable for 2 variables
+
+        this.isGrayCodeLayout = !this.isGrayCodeLayout;
+        const states = this.grid.slice();
+
+        // Update layout icon
+        this.elements.toggleLayoutBtn.innerHTML = this.isGrayCodeLayout ?
+            `<svg viewBox="0 0 24 24">
+                <rect x="4" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                <rect x="13" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M17 7l3-3-3-3M7 17l-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>` :
+            `<svg viewBox="0 0 24 24">
+                <rect x="4" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                <rect x="13" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M7 7l-3-3 3-3M17 17l3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>`;
+
+        this.initializeUI();
+
+        // Restore states
+        states.forEach((state, index) => {
+            if (state !== '0') {
+                const cell = this.elements.grid.querySelector(`.cell[data-index="${index}"]`);
+                if (cell) this.applyState(cell, state, true);
+            }
+        });
+
+        // Recalculate groups
+        this.solve();
+    }
+
+    switchTab(tabName) {
+        // Update active tab
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.classList.toggle('active', button.dataset.tab === tabName);
+
+            // Update slider position if this is the active button
+            if (button.dataset.tab === tabName) {
+                this.updateSliderPosition(button);
+            }
+        });
+
+        // Show/hide content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.toggle('active', content.id === tabName);
+        });
+
+        // Show/hide layout button based on tab and variable count
+        const layoutBtn = this.elements.toggleLayoutBtn;
+        if (layoutBtn) {
+            // Only show layout button if we're in kmap tab AND not in 2-variable mode
+            layoutBtn.style.display = (tabName === 'kmap' && this.numVars !== 2) ? 'flex' : 'none';
+        }
+    }
+
+    setupEventListeners() {
+        this.setupTabHandlers();
+        this.setupMenuHandlers();
+        this.setupControlHandlers();
+        this.setupVariableCycleHandler();
+        this.setupClipboardHandlers();
+        this.setupLayoutHandlers();
+    }
+
+    setupTabHandlers() {
+        // Tab switching
+        this.elements.tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                this.switchTab(button.dataset.tab);
+                this.elements.tabsWrapper.classList.remove('show');
+                this.updateSliderPosition(button);
+            });
+        });
+    }
+
+    setupMenuHandlers() {
+        // Hamburger menu
+        if (this.elements.hamburgerBtn && this.elements.tabsWrapper) {
+            this.elements.hamburgerBtn.addEventListener('click', () => {
+                this.elements.tabsWrapper.classList.toggle('show');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!this.elements.tabsWrapper.contains(e.target) &&
+                    !this.elements.hamburgerBtn.contains(e.target)) {
+                    this.elements.tabsWrapper.classList.remove('show');
+                }
+            });
+        }
+    }
+
+    setupControlHandlers() {
+        // Controls
+        this.elements.allOneBtn.addEventListener('click', () => this.setAllStates('1'));
+        this.elements.allZeroBtn.addEventListener('click', () => this.setAllStates('0'));
+        this.elements.clearBtn.addEventListener('click', () => this.clear());
+    }
+
+    // Update toggle button visibility based on variable count and current tab
+    updateToggleButton() {
+        const { toggleLayoutBtn, kmapTab } = this.elements;
+        const isKmapActive = kmapTab && kmapTab.classList.contains('active');
+        if (toggleLayoutBtn) {
+            toggleLayoutBtn.style.display = (this.numVars !== 2 && isKmapActive) ? 'flex' : 'none';
+        }
+    }
+
+    setupVariableCycleHandler() {
+        // Setup variable cycle button
+        if (this.elements.varCycleBtn) {
+            // Initial visibility
+            this.updateToggleButton();
+
+            this.elements.varCycleBtn.addEventListener('click', () => {
+                // Cycle between 4 -> 3 -> 2 -> 4
+                this.numVars = this.numVars > 2 ? this.numVars - 1 : 4;
+
+                // Update variables array
+                this.variables = [...Array(this.numVars).keys()].map(i => String.fromCharCode(65 + i));
+                this.size = 1 << this.numVars;
+
+                // Reset grid state
+                this.grid = Array(this.size).fill(0);
+
+                // Update data-vars attribute
+                document.body.setAttribute('data-vars', this.numVars);
+
+                // Force Gray code layout for 2 variables
+                if (this.numVars === 2) {
+                    this.isGrayCodeLayout = true;
+                }
+
+                // Reinitialize UI with new variable count
+                this.initializeUI();
+                this.initializeTruthTable();
+
+                // Clear all states and solution
+                this.clear();
+
+                // Update toggle button visibility
+                this.updateToggleButton();
+
+                // Dispatch event for variable change
+                document.dispatchEvent(new Event('varchange'));
+            });
+        }
+    }
+
+    setupClipboardHandlers() {
+        // Add copy to clipboard functionality
+        this.elements.copyBtn.addEventListener('click', () => {
+            const solutionDiv = this.elements.solution;
+            const solutionText = String(solutionDiv.textContent || '');
+
+            // Try modern clipboard API first
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(solutionText)
+                    .then(() => this.showCopySuccess())
+                    .catch(() => this.copyTextFallback(solutionText));
+            } else {
+                // Use fallback method for non-HTTPS
+                this.copyTextFallback(solutionText);
+            }
+        });
+    }
+
+    setupLayoutHandlers() {
+        // Setup layout toggle button
+        const toggleLayoutBtn = this.elements.toggleLayoutBtn;
+        if (toggleLayoutBtn) {
+            toggleLayoutBtn.addEventListener('click', () => this.toggleLayout());
+        }
+
+        // Add resize observer for SVG updates
+        const resizeObserver = new ResizeObserver(() => {
+            const svg = this.elements.grid.querySelector('.kmap-groups-svg');
+            if (svg) {
+                this.updateSvgViewBox(svg);
+                this.solve(); // This will trigger group updates
+            }
+        });
+        resizeObserver.observe(this.elements.grid);
+    }
+
+    copyTextFallback(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        textArea.style.top = '0';
+        document.body.appendChild(textArea);
+
+        try {
+            textArea.select();
+            document.execCommand('copy');
+            this.showCopySuccess();
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        } finally {
+            document.body.removeChild(textArea);
+        }
     }
 }
 
