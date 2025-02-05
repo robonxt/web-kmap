@@ -16,30 +16,14 @@
     --button-min-width: 40px;
     --tab-min-width: 80px;
 
-    /* Dark theme (default) */
-    --primary-color: #5CDF60;
-    --primary-hover: #4BA8EB;
-    --warning-color: #FFA726;
-    --danger-color: #ef5350;
-    --bg-main: #121212;
-    --bg-surface: #1E1E1E;
-    --border-color: #333;
-    --text-primary: #FFFFFF;
-    --text-secondary: #AAAAAA;
-    --shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    --surface-hover: #2A2A2A;
-    --soft-border: rgba(255, 255, 255, 0.08);
-    --header-btn-border: rgba(255, 255, 255, 0.2);
-    --header-btn-hover-border: rgba(255, 255, 255, 0.4);
-    --header-btn-hover-bg: rgba(255, 255, 255, 0.05);
-}
-
-/* Light theme */
-[data-theme="light"] {
+    /* Light theme (default) */
     --primary-color: #4CAF50;
     --primary-hover: #3498db;
     --warning-color: #FF9800;
     --danger-color: #dc3545;
+    --cell-selected-color: #95ef98;
+    --cell-dont-care-color: #e7ca6c;
+    --cell-unselected-color: none;
     --bg-main: #f5f5f5;
     --bg-surface: #f8f9fa;
     --border-color: #ccc;
@@ -51,6 +35,28 @@
     --header-btn-border: rgba(255, 255, 255, 0.3);
     --header-btn-hover-border: rgba(255, 255, 255, 0.5);
     --header-btn-hover-bg: rgba(255, 255, 255, 0.1);
+}
+
+/* Light theme */
+[data-theme="dark"] {
+    --primary-color: #5CDF60;
+    --primary-hover: #4BA8EB;
+    --warning-color: #FFA726;
+    --danger-color: #ef5350;
+    --cell-selected-color: #223823;
+    --cell-dont-care-color: #4c3f17;
+    --cell-unselected-color: none;
+    --bg-main: #121212;
+    --bg-surface: #1E1E1E;
+    --border-color: #333;
+    --text-primary: #FFFFFF;
+    --text-secondary: #AAAAAA;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --surface-hover: #2A2A2A;
+    --soft-border: rgba(255, 255, 255, 0.08);
+    --header-btn-border: rgba(255, 255, 255, 0.2);
+    --header-btn-hover-border: rgba(255, 255, 255, 0.4);
+    --header-btn-hover-bg: rgba(255, 255, 255, 0.05);
 }
 
 /* CSS Reset and Base Styles */
@@ -244,19 +250,19 @@ body {
 }
 
 .cell.selected {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--cell-selected-color);
+    /* color: white; */
 }
 
 .cell.dont-care {
-    background-color: var(--warning-color);
-    color: white;
+    background-color: var(--cell-dont-care-color);
+    /* color: white; */
 }
 
-.cell.selected .binary-display,
+/* .cell.selected .binary-display,
 .cell.dont-care .binary-display {
     color: rgba(255, 255, 255, 0.8);
-}
+} */
 
 .binary-display {
     font-size: var(--font-sm);
@@ -315,16 +321,16 @@ body {
 
 .truth-table td.selected,
 .truth-table tr td.selected:last-child {
-    background-color: var(--primary-color);
+    background-color: var(--cell-selected-color);
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--cell-selected-color);
 }
 
 .truth-table td.dont-care,
 .truth-table tr td.dont-care:last-child {
-    background-color: var(--warning-color);
+    background-color: var(--cell-dont-care-color);
     color: white;
-    border-color: var(--warning-color);
+    border-color: var(--cell-dont-care-color);
 }
 
 .truth-table td.row-id {

@@ -249,8 +249,10 @@
             // Handle theme toggle click
             themeToggle.addEventListener('click', () => {
                 const currentTheme = document.body.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                // Switch TO the theme that matches the visible icon
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
+                console.log(`Switching to ${newTheme} theme`);
                 document.body.setAttribute('data-theme', newTheme);
                 themeToggle.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
