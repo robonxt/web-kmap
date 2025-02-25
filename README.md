@@ -1,100 +1,95 @@
 # Web K-Map Solver
 
-A lightweight Karnaugh map solver implemented in pure HTML5, CSS3, and minimal JavaScript. This tool helps simplify Boolean algebraic expressions using the K-map method, always providing results in Sum of Products (SOP) format.
+A lightweight, dependency-free Karnaugh map solver that provides interactive visualization and Boolean function minimization for 2-4 variables. Features color-coded grouping, multiple solution display, and real-time synchronization between K-map and truth table views.
 
 ## What is a Karnaugh Map?
 
-A Karnaugh map (K-map) is a method to simplify Boolean algebra expressions. It provides a visual way to minimize Boolean functions to their simplest form, which is essential in digital logic design and circuit optimization. The map arranges Boolean variables in a grid where adjacent cells differ by only one bit (Gray code order).
+A Karnaugh map (K-map) is a graphical method for Boolean function simplification that reduces the need for extensive computation. Developed by Maurice Karnaugh in 1953, it uses adjacent squares in a grid to represent Boolean variables arranged in Gray code order, where adjacent cells differ by only one bit. By identifying and grouping adjacent 1's in powers of 2, K-maps allow quick identification of the minimal Boolean expression in sum-of-products (SOP) form.
 
-## Variables and Notation
-
-The K-map supports 2-4 variables, which can be selected via the variable selector:
-
-- **2 variables**: A, B (2×2 grid)
-- **3 variables**: A, B, C (2×4 grid)
-- **4 variables**: A, B, C, D (4×4 grid)
-
-Variables are arranged in Gray code order (where adjacent values differ by only one bit).
-
-Variable notation in solutions:
-- Regular letter (A): Variable is 1 (TRUE)
-- Letter with prime (A'): Variable is 0 (FALSE)
-- Example: A'BC'D = A=0, B=1, C=0, D=1
+*Sources:*
+1. Karnaugh, M. "The Map Method for Synthesis of Combinational Logic Circuits." Transactions of the American Institute of Electrical Engineers, Part I: Communications and Electronics 72, no. 5 (1953): 593-599.
+2. Edward W. Veitch, "A Chart Method for Simplifying Truth Functions," Proceedings of the 1952 ACM Annual Meeting (Pittsburgh), pp. 127-133.
+3. Willard Van Orman Quine, "The Problem of Simplifying Truth Functions," American Mathematical Monthly, Vol. 59, No. 8 (Oct. 1952), pp. 521-531.
 
 ## Features
 
-- Interactive K-Map interface with variable selection (2-4 variables)
-- Two layout options:
-  - Gray code layout (optimal for adjacency)
-  - Normal binary layout (available for 3-4 variables)
-- Visual cell grouping with wraparound support
-- Auto-solving with Boolean algebra simplification
-- Results always in minimal SOP (Sum of Products) format
-- Support for don't care conditions (X)
+### Core Functionality
+- Interactive K-map grid with 2-4 variable support
+- Real-time Boolean expression minimization
 - Multiple solution display when available
-- One-click copy solution to clipboard
-- Synchronized Truth Table view
-- Enhanced info guide with usage examples
-- Modern, clean UI with:
-  - Vector icons
-  - Organized action bar for controls
-  - Light/Dark/Auto theme support
-  - System theme detection
-- Quick operations:
-  - Set all cells to 1
-  - Set all cells to 0
-  - Clear the map
-  - Copy solution
-- Triple-state cells:
-  - 0 (false)
-  - 1 (true)
-  - X (don't care)
-- Responsive design for mobile and desktop
-- Offline support:
-  - Works without internet after first visit
-  - Fast loading with cached resources
+- Don't care (X) condition support
+- Synchronized truth table view
 
-## How to Use
+### Visualization
+- Color-coded term grouping
+- Dynamic SVG group visualization
+- Wraparound group highlighting
+- Gray code and binary layout options
+- Light/Dark theme support
 
-1. Select the number of variables (2-4) using the variable selector
-2. Click on cells to cycle through values:
-   - 0 → 1 → X (don't care) → 0
-3. The solution updates automatically in SOP format
-4. Click the copy icon to copy the result
-5. Use "All 1" or "All 0" buttons for quick setup
-6. Use "Clear" to reset the map
-7. Switch between K-map and Truth Table views
-8. Use the layout toggle to switch between Gray code and normal layouts (3-4 variables only)
-9. Click the info icon for the usage guide
+### User Interface
+- Intuitive cell state cycling (0 → 1 → X)
+- Binary and decimal index display
+- Tab-based view switching
+- Mobile-responsive design
+- One-click operations:
+  - Set all cells to 1/0
+  - Clear map
+  - Copy solution with proper notation
+
+## Usage Guide
+
+1. **Variable Selection**
+   - Choose 2-4 variables from the dropdown
+   - Grid automatically adjusts to selected size
+   - Variables are labeled A, B, C, D from most to least significant
+
+2. **Cell Manipulation**
+   - Click cells to cycle states: 0 → 1 → X
+   - Use quick actions to set all cells or clear
+   - Watch real-time solution updates
+
+3. **Solution Reading**
+   - Results shown in minimal SOP form
+   - Overlined variables (A̅) represent negation
+   - Multiple solutions shown when available
+   - Click copy button for formatted output
+
+4. **Layout Options**
+   - Toggle between Gray code and binary layouts
+   - Gray code optimizes for adjacency
+   - Binary shows traditional ordering
 
 ## Technical Details
 
 - Built with vanilla HTML5, CSS3, and JavaScript
 - No external dependencies
-- Boolean algebra simplification using Quine-McCluskey algorithm
-- Gray code implementation for optimal cell adjacency
+- Custom implementation of:
+  - Quine-McCluskey algorithm for Boolean minimization
+  - Gray code generation and handling
+  - Prime implicant identification
+  - Group visualization with SVG paths
 - Real-time synchronization between K-map and Truth Table
 - Vector-based UI elements for crisp display
 - Responsive layout with CSS Grid and Flexbox
 - Mobile-first design principles
-- Theme system:
-  - Light and Dark themes with Auto detection
-  - CSS variables for consistent styling
-  - Persistent theme preferences
-  - Optimized for readability across all K-map sizes
+- Theme system with CSS variables
 
 ## Implementation Notes
 
-The solver uses the following process:
-1. Identifies prime implicants using the Quine-McCluskey algorithm
-2. Finds essential prime implicants
-3. Solves the covering problem for remaining implicants
-4. Simplifies the expression using Boolean algebra
-5. Presents the result in minimal SOP format
+The solver follows this process:
+1. Generates optimal Gray code layouts for 2-4 variables
+2. Identifies all possible prime implicant groups
+3. Finds minimal solutions using Quine-McCluskey algorithm
+4. Extracts Boolean expressions from group patterns
+5. Visualizes groups using dynamic SVG paths
+6. Presents results in minimal SOP format
 
-## TODO:
+## Variable Notation
 
-- Try to get it working on browsers as old as Chrome 104+, Safari 12+. [Compare working features here](https://caniuse.com/?compare=chrome+104,safari+12&compareCats=CSS,HTML5,JS,JS%20API,Other,Security,SVG)
+- Regular letter (A): Variable is 1 (TRUE)
+- Overlined letter (A̅): Variable is 0 (FALSE)
+- Example: A̅BC̅D means A=0, B=1, C=0, D=1
 
 ## Credits
 
@@ -102,6 +97,12 @@ Created by [robonxt](https://github.com/robonxt).
 
 Assisted by [Claude Sonnet 3.5](https://www.anthropic.com) in [Windsurf IDE](https://www.windsurf.ai/).
 
-Logic inspired by https://github.com/obsfx/kmap-solver-lib
+Logic inspired by [obsfx/kmap-solver-lib](https://github.com/obsfx/kmap-solver-lib)
 
 Icon generated by [Perchance](https://perchance.org/ai-icon-generator)
+
+## TODO:
+
+- Try to get it working on browsers as old as Chrome 104+, Safari 12+. [Compare working features here](https://caniuse.com/?compare=chrome+104,safari+12&compareCats=CSS,HTML5,JS,JS%20API,Other,Security,SVG)
+- Get PWA working with a install button on mobile devices for a fullscreen, sandboxed webapp.
+- Build working circuit diagram tab.

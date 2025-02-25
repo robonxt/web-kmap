@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K-Map Solver Webapp</title>
+    <title>K-Map Solver</title>
     <meta name="description"
-        content="A lightweight Karnaugh map solver with Truth Table visualization. Features include SOP format solutions, truth table generation and offline support. No external dependencies required.">
-    <meta property="og:title" content="K-Map Solver Webapp">
-    <meta property="og:description" content="A lightweight Karnaugh map solver with Truth Table visualization. Features include SOP format solutions, truth table generation and offline support. No external dependencies required.">
+        content="A lightweight, dependency-free Karnaugh map solver with truth table visualization and 2-4 variable support. Features color-coded term grouping with wraparound highlighting. Works offline and includes light/dark themes for enhanced usability.">
+    <meta property="og:title" content="K-Map Solver">
+    <meta property="og:description" content="A lightweight, dependency-free Karnaugh map solver with truth table visualization and 2-4 variable support. Features color-coded term grouping with wraparound highlighting. Works offline and includes light/dark themes for enhanced usability.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://kmap.robonxt.xyz/assets/logo/kmap-logo-v1.jpeg">
     <meta property="og:url" content="https://kmap.robonxt.xyz">
@@ -287,7 +287,7 @@
                 })
                 .catch(error => {
                     console.error('Error loading info.md:', error);
-                    document.getElementById('info-content').innerHTML = '<p>Error loading content. Please try again later.</p>';
+                    document.getElementById('info-content').innerHTML = '<p></p><p>Error loading content. Please <a href="https://github.com/robonxt/web-kmap/blob/main/info.md" target="_blank" rel="noopener noreferrer">view INFO.md on GitHub</a> for information.</p><p></p>';
                 });
         });
     </script>
