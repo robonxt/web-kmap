@@ -30,3 +30,6 @@ Thumbs.db
 # VSCode files
 .vscode/
 *.code-workspace
+
+# test certs
+.cert/

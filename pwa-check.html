@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Installation Check</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ffffff">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully');
+                    })
+                    .catch(error => {
+                        console.warn('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        .card {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #28a745;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .warning {
+            color: #ffc107;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        code {
+            background-color: #f1f1f1;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>K-Map Solver PWA Installation Check</h1>
+    
+    <div class="card">
+        <h2>Service Worker Status</h2>
+        <div id="sw-status">Checking...</div>
+    </div>
+    
+    <div class="card">
+        <h2>Manifest Status</h2>
+        <div id="manifest-status">Checking...</div>
+    </div>
+    
+    <div class="card">
+        <h2>Installability</h2>
+        <div id="install-status">Checking...</div>
+        <div id="install-button-container" style="display: none;">
+            <button id="install-button">Install K-Map Solver</button>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>Offline Capability</h2>
+        <div id="offline-status">
+            To test offline capability:
+            <ol>
+                <li>Load the main app once to cache resources</li>
+                <li>Turn off your internet connection</li>
+                <li>Reload the page</li>
+                <li>If it loads, the PWA is working correctly offline!</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Display Mode</h2>
+        <div id="display-mode-status">Checking...</div>
+    </div>
+
+    <script>
+        // Check service worker
+        const swStatus = document.getElementById('sw-status');
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration()
+                .then(registration => {
+                    if (registration) {
+                        swStatus.innerHTML = '<span class="success">✓ Service Worker is registered</span>';
+                    } else {
+                        swStatus.innerHTML = '<span class="error">✗ Service Worker is not registered</span>';
+                    }
+                })
+                .catch(error => {
+                    swStatus.innerHTML = `<span class="error">✗ Error checking Service Worker: ${error}</span>`;
+                });
+        } else {
+            swStatus.innerHTML = '<span class="error">✗ Service Worker is not supported in this browser</span>';
+        }
+
+        // Check manifest
+        const manifestStatus = document.getElementById('manifest-status');
+        fetch('manifest.json')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Manifest file not found');
+            })
+            .then(data => {
+                let manifestInfo = '<span class="success">✓ Manifest file found</span><br>';
+                manifestInfo += `<strong>Name:</strong> ${data.name}<br>`;
+                manifestInfo += `<strong>Short Name:</strong> ${data.short_name}<br>`;
+                manifestInfo += `<strong>Display Mode:</strong> ${data.display}<br>`;
+                if (data.display_override) {
+                    manifestInfo += `<strong>Display Override:</strong> ${data.display_override.join(', ')}<br>`;
+                }
+                manifestInfo += `<strong>Icons:</strong> ${data.icons ? data.icons.length : 0} defined<br>`;
+                manifestStatus.innerHTML = manifestInfo;
+            })
+            .catch(error => {
+                manifestStatus.innerHTML = `<span class="error">✗ ${error.message}</span>`;
+            });
+
+        // Check installability
+        const installStatus = document.getElementById('install-status');
+        const installButtonContainer = document.getElementById('install-button-container');
+        const installButton = document.getElementById('install-button');
+        
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Update UI to notify the user they can add to home screen
+            installStatus.innerHTML = '<span class="success">✓ App is installable</span>';
+            installButtonContainer.style.display = 'block';
+        });
+        
+        installButton.addEventListener('click', (e) => {
+            // Hide our user interface that shows our A2HS button
+            installButtonContainer.style.display = 'none';
+            // Show the prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    installStatus.innerHTML = '<span class="success">✓ App was installed</span>';
+                } else {
+                    installStatus.innerHTML = '<span class="error">✗ App installation was declined</span>';
+                }
+                deferredPrompt = null;
+            });
+        });
+        
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            installStatus.innerHTML = '<span class="success">✓ App is already installed</span>';
+        } else {
+            // Check if it meets the installability criteria
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                installStatus.innerHTML = '<span class="success">✓ App meets technical requirements for installation</span>';
+            } else {
+                installStatus.innerHTML = '<span class="error">✗ App does not meet all technical requirements for installation</span>';
+            }
+        }
+
+        // Check display mode
+        const displayModeStatus = document.getElementById('display-mode-status');
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            displayModeStatus.innerHTML = '<span class="success">✓ Standalone mode</span>';
+        } else if (window.matchMedia('(display-mode: minimal-ui)').matches) {
+            displayModeStatus.innerHTML = '<span class="success">✓ Minimal UI mode</span>';
+        } else if (window.matchMedia('(display-mode: browser)').matches) {
+            displayModeStatus.innerHTML = '<span class="warning">⚠ Browser mode (not installed as PWA)</span>';
+        } else {
+            displayModeStatus.innerHTML = '<span class="warning">⚠ Unknown display mode</span>';
+        }
+    </script>
+</body>
+</html>
