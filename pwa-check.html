@@ -105,11 +105,32 @@
     </div>
 
     <div class="card">
+        <h2>Updates</h2>
+        <div id="update-status">No updates available</div>
+        <div id="update-button-container" style="display: none;">
+            <button id="update-button" onclick="window.location.reload()">Reload to Update</button>
+        </div>
+    </div>
+
+    <div class="card">
         <h2>Display Mode</h2>
         <div id="display-mode-status">Checking...</div>
     </div>
 
     <script>
+        // Add update check listener
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data.type === 'UPDATE_AVAILABLE') {
+                    const updateStatus = document.getElementById('update-status');
+                    const updateButtonContainer = document.getElementById('update-button-container');
+                    
+                    updateStatus.innerHTML = '<span class="warning">⚠ New version available!</span>';
+                    updateButtonContainer.style.display = 'block';
+                }
+            });
+        }
+
         // Check service worker
         const swStatus = document.getElementById('sw-status');
         if ('serviceWorker' in navigator) {

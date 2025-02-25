@@ -31,5 +31,10 @@ A K-map helps simplify Boolean expressions by grouping similar terms. This tool 
 - Light/Dark theme support
 - Color-coded grouping
 - Mobile-friendly design
+- Progressive Web App (PWA) support:
+  - Works offline
+  - Installable on mobile and desktop
+  - App-like experience
+  - [Check PWA Status](pwa-check.html)
 
 [View Source on GitHub](https://github.com/robonxt/web-kmap)

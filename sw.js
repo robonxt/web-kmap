@@ -43,6 +43,27 @@ self.addEventListener('fetch', e => {
         .then(r => {
           if (r && r.status === 200) {
             const clone = r.clone();
+            
+            // If we have a cached version, compare it with the network version
+            if (cached) {
+              Promise.all([clone.text(), cached.text()]).then(([newContent, cachedContent]) => {
+                if (newContent !== cachedContent) {
+                  // Only notify PWA check page about updates
+                  clients.matchAll().then(clients => {
+                    clients.forEach(client => {
+                      // Only send update message to the PWA check page
+                      if (client.url.includes('pwa-check.html')) {
+                        client.postMessage({ 
+                          type: 'UPDATE_AVAILABLE',
+                          url: e.request.url
+                        });
+                      }
+                    });
+                  });
+                }
+              });
+            }
+            
             caches.open(CACHE)
               .then(c => c.put(e.request, clone));
           }
