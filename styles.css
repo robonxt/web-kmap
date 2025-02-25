@@ -24,8 +24,8 @@
     --danger-color: #dc3545;
 
     /* Light theme (default) */
-    --cell-selected-color: #ccffce;
-    --cell-dont-care-color: #fff4d0;
+    --cell-selected-color: #bdffbd;
+    --cell-dont-care-color: #fff0bf;
     --cell-unselected-color: none;
     --bg-main: #f5f5f5;
     --bg-surface: #f8f9fa;
@@ -42,8 +42,8 @@
 
 /* Dark theme */
 [data-theme="dark"] {
-    --cell-selected-color: #233023;
-    --cell-dont-care-color: #3c382b;
+    --cell-selected-color: #395c39;
+    --cell-dont-care-color: #5a4f33;
     --cell-unselected-color: none;
     --bg-main: #121212;
     --bg-surface: #1E1E1E;
@@ -263,18 +263,11 @@ body {
 
 .cell.selected {
     background-color: var(--cell-selected-color);
-    /* color: white; */
 }
 
 .cell.dont-care {
     background-color: var(--cell-dont-care-color);
-    /* color: white; */
 }
-
-/* .cell.selected .binary-display,
-.cell.dont-care .binary-display {
-    color: rgba(255, 255, 255, 0.8);
-} */
 
 .binary-display {
     font-size: var(--font-sm);
@@ -322,6 +315,7 @@ body {
     cursor: pointer;
     transition: var(--transition-standard);
     background-color: var(--bg-surface);
+    color: var(--text-primary);
 }
 
 .truth-table td:last-child:hover {
@@ -334,14 +328,12 @@ body {
 .truth-table td.selected,
 .truth-table tr td.selected:last-child {
     background-color: var(--cell-selected-color);
-    color: white;
     border-color: var(--cell-selected-color);
 }
 
 .truth-table td.dont-care,
 .truth-table tr td.dont-care:last-child {
     background-color: var(--cell-dont-care-color);
-    color: white;
     border-color: var(--cell-dont-care-color);
 }
 
@@ -429,10 +421,18 @@ body {
     color: white;
 }
 
+#all-one-btn {
+    background: var(--cell-selected-color);
+}
+
 #all-one-btn:hover {
     background: var(--primary-color);
     border-color: var(--primary-color);
     color: white;
+}
+
+#all-zero-btn {
+    background: var(--cell-unselected-color);
 }
 
 #all-zero-btn:hover {
@@ -552,7 +552,6 @@ body {
 }
 
 .popup-content {
-    background-color: var(--bg-surface);
     padding: var(--spacing);
     border-radius: var(--radius);
     max-height: 80vh;
@@ -560,76 +559,88 @@ body {
     scrollbar-width: thin;
     color: var(--text-primary);
     line-height: 1.2;
-    color: var(--text-primary);
-}
-
-.popup-content :is(h1, h2, h3) {
-    margin: 0.2em 0;
-    color: var(--text-primary);
 }
 
 .popup-content h1 {
-    font-size: 1.7em;
+    font-size: 2em;
     margin-bottom: 1em;
-    color: var(--primary-color);
 }
 
 .popup-content h2 {
-    font-size: 1.4em;
-    margin: 1.5em 0 0.8em;
+    font-size: 1.5em;
+    margin: 1em 0;
 }
 
 .popup-content h3 {
     font-size: 1.2em;
-    margin: 1.2em 0 0.6em;
+    margin: 1em 0;
 }
 
 .popup-content p {
-    margin-bottom: var(--spacing);
-    line-height: 1.5;
-    color: var(--text-secondary);
+    margin: 0.8em 0;
+    line-height: 1.6;
 }
 
 .popup-content ul,
 .popup-content ol {
-    margin: 0 0 1em 1.5em;
-    padding-left: 0.1em;
+    margin: 1em 0;
+    padding-left: 2em;
 }
 
 .popup-content li {
-    margin: 0.1em 0 0.5em;
+    margin: 0.1em 0;
+}
+
+.popup-content a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.popup-content a:hover {
+    text-decoration: underline;
 }
 
 .popup-content code {
     background: var(--bg-surface);
-    padding: 0.1em 0.4em;
+    padding: 0.2em 0.4em;
     border-radius: 3px;
     font-family: monospace;
+    font-size: 0.9em;
 }
 
-.popup-content::-webkit-scrollbar {
-    width: 2px;
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
-.popup-content::-webkit-scrollbar-track {
+.popup-overlay.show {
+    display: flex;
+}
+
+.popup-wrapper {
     background: var(--bg-surface);
-    border-radius: 4px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    max-width: 90%;
+    width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
 }
 
-.popup-content::-webkit-scrollbar-thumb {
-    background: var(--text-secondary);
-    border-radius: 4px;
-}
-
-.popup-content::-webkit-scrollbar-thumb:hover {
-    background: var(--text-primary);
-}
-
-.popup-content .note {
-    background-color: #f8f9fa;
-    padding: .5em;
-    border-left: 4px solid #007bff;
-    margin: 1em 0;
+.close-btn {
+    position: absolute;
+    top: var(--spacing);
+    right: var(--spacing);
+    z-index: 1;
 }
 
 /* Layout toggle button icons */

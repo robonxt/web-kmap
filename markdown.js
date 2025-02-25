@@ -1,86 +1,106 @@
-// Simple markdown parser
-function mdToHtml(md) {
+const mdToHtml = md => {
     if (!md) return '';
-    
-    // First process headers
-    let html = md
-        .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gm, '<h1>$1</h1>');
 
-    // Process lists and paragraphs
+    // Normalize newlines
+    let html = md.replace(/\r\n|\r/g, '\n');
+
+    // Store code blocks temporarily
+    const codeBlocks = [];
+    html = html.replace(/^```(\w*)\n([\s\S]*?)^```$/gm, (match, lang, code) => {
+        const placeholder = `\n<CODE_BLOCK_${codeBlocks.length}>\n`;
+        codeBlocks.push({ lang, code: code.trimEnd() });
+        return placeholder;
+    });
+
+    // Process regular markdown
+    html = html
+        .replace(/^>\s+(.+)$/gm, '<blockquote>$1</blockquote>')
+        .replace(/^(#{1,3})\s*(.+)$/gm, (_, h, t) => `<h${h.length}>${t}</h${h.length}>`);
+
     const lines = html.split('\n');
-    let processed = [];
-    let listStack = [];
-    let lastLevel = -1;
+    const out = [];
+    const stack = [];
+    let level = -1;
 
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i].trimEnd();
-        if (!line) {
-            closeAllLists();
-            continue;
+    const closeList = () => {
+        while (stack.length) {
+            const [t, l] = stack.pop();
+            out.push('  '.repeat(l) + `</${t}>`);
         }
+        level = -1;
+    };
 
-        // Skip already processed headers
-        if (line.startsWith('<h')) {
-            closeAllLists();
-            processed.push(line);
-            continue;
-        }
+    for (let line of lines) {
+        line = line.trimEnd();
+        if (!line) { closeList(); continue; }
+        if (line.startsWith('<')) { closeList(); out.push(line); continue; }
 
-        // Handle lists
-        const listMatch = line.match(/^(\s*)(?:[-*]|\d+\.)\s+(.+)$/);
-        if (listMatch) {
-            const [_, indent, content] = listMatch;
-            const level = Math.floor(indent.length / 2);
-            const isOrdered = /^\s*\d+\./.test(line);
+        const list = line.match(/^(\s*)(?:([-*])|(\d+)\.)[ \t]+(.+)$/);
+        if (list) {
+            const [_, space, bullet, num, text] = list;
+            const depth = Math.floor(space.length / 2);
+            const ordered = num !== undefined;
 
-            // Close lists if we're going back up the hierarchy
-            while (lastLevel >= level) {
-                const [type, _] = listStack.pop();
-                processed.push('  '.repeat(lastLevel) + `</${type}>`);
-                lastLevel--;
+            while (level >= depth) {
+                const [t, l] = stack.pop();
+                out.push('  '.repeat(l) + `</${t}>`);
+                level--;
             }
 
-            // Start new list if needed
-            if (lastLevel < level) {
-                const type = isOrdered ? 'ol' : 'ul';
-                listStack.push([type, level]);
-                processed.push('  '.repeat(level) + `<${type}>`);
-                lastLevel = level;
+            if (level < depth) {
+                const type = ordered ? 'ol' : 'ul';
+                stack.push([type, depth]);
+                out.push('  '.repeat(depth) + `<${type}>`);
+                level = depth;
             }
 
-            // Add list item
-            processed.push('  '.repeat(level + 1) + `<li>${processInline(content)}</li>`);
+            out.push('  '.repeat(depth + 1) +
+                `<li${ordered?` value="${num}"`:''}>${inline(text.trim())}</li>`);
         } else {
-            closeAllLists();
-            if (!line.startsWith('<')) {
-                processed.push(`<p>${processInline(line)}</p>`);
-            } else {
-                processed.push(line);
-            }
+            closeList();
+            out.push(`<p>${inline(line)}</p>`);
         }
     }
 
-    closeAllLists();
+    closeList();
+    html = out.join('\n');
 
-    function closeAllLists() {
-        while (listStack.length > 0) {
-            const [type, level] = listStack.pop();
-            processed.push('  '.repeat(level) + `</${type}>`);
-        }
-        lastLevel = -1;
-    }
+    // Restore code blocks
+    html = html.replace(/<CODE_BLOCK_(\d+)>/g, (_, i) => {
+        const { lang, code } = codeBlocks[i];
+        return `<pre><code${lang?` class="language-${lang}"`:''}>${escapeHtml(code)}</code></pre>`;
+    });
 
-    return processed.join('\n');
-}
+    return html;
+};
 
-// Process inline elements
-function processInline(text) {
-    return text
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-        .replace(/→/g, '&rarr;');
-}
+const inline = text => {
+    const codes = new Map();
+    text = text.replace(/`([^`]+)`/g, (_, c) => {
+        const k = `%%${codes.size}%%`;
+        codes.set(k, `<code>${escapeHtml(c)}</code>`);
+        return k;
+    });
+
+    text = text.replace(/!\[([^\]]*?)]\(([^)]+?)\)/g, '<img src="$2" alt="$1">')
+        .replace(/\[([^\]]+)]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+        .replace(/(\*\*|__)([^*_]+?)\1/g, '<strong>$2</strong>')
+        .replace(/([*_])([^*_]+?)\1/g, '<em>$2</em>')
+        .replace(/~~([^~]+?)~~/g, '<s>$1</s>')
+        .replace(/→/g, '&rarr;')
+        .replace(/  $/gm, '<br />');
+
+    codes.forEach((v, k) => text = text.replace(k, v));
+    return text;
+};
+
+const escapeHtml = text => text
+    .replace(/[&<>"']/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    })[c]);
+
+module.exports = { mdToHtml };
