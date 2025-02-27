@@ -109,10 +109,19 @@
 
     <div class="card">
         <h2>Updates</h2>
-        <div id="update-status">No updates available</div>
+        <div id="update-status">No updates detected</div>
+        <div id="update-info">
+            <p>The app will now automatically check for updates when you use it. When updates are available:</p>
+            <ol>
+                <li>A notification will appear at the bottom of the screen</li>
+                <li>Click "Reload" to apply the update immediately</li>
+                <li>Or dismiss the notification to update later</li>
+            </ol>
+        </div>
         <div id="update-button-container" style="display: none;">
             <button id="update-button" onclick="window.location.reload()">Reload to Update</button>
         </div>
+        <button id="check-updates-button" style="margin-top: 10px;">Check for Updates Now</button>
     </div>
 
     <div class="card">
@@ -131,6 +140,33 @@
                     updateStatus.innerHTML = '<span class="warning">⚠ New version available!</span>';
                     updateButtonContainer.style.display = 'block';
                 }
+            });
+            
+            // Add manual update check button functionality
+            document.getElementById('check-updates-button').addEventListener('click', () => {
+                const updateStatus = document.getElementById('update-status');
+                updateStatus.innerHTML = '<span class="warning">⚠ Checking for updates...</span>';
+                
+                // Unregister and re-register service worker to force update check
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    if (registration) {
+                        registration.update().then(() => {
+                            // Force a network request to trigger update check
+                            fetch('index.html', { cache: 'no-store' })
+                                .then(() => {
+                                    // Wait a bit for the service worker to process
+                                    setTimeout(() => {
+                                        updateStatus.innerHTML = '<span class="success">✓ Update check completed</span>';
+                                    }, 1000);
+                                })
+                                .catch(error => {
+                                    updateStatus.innerHTML = `<span class="error">✗ Error checking for updates: ${error}</span>`;
+                                });
+                        });
+                    } else {
+                        updateStatus.innerHTML = '<span class="error">✗ No service worker registration found</span>';
+                    }
+                });
             });
         }
 
