@@ -7,7 +7,7 @@
   "display_override": ["standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
-  "orientation": "any",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "assets/icons/favicon.ico",
