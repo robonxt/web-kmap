@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=portrait">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="screen-orientation" content="portrait">
     <meta name="x5-orientation" content="portrait">
     <title>K-Map Solver</title>
@@ -121,6 +121,11 @@
         @keyframes slide-up {
             from { transform: translate(-50%, 100px); opacity: 0; }
             to { transform: translate(-50%, 0); opacity: 1; }
+        }
+    </style>
+    <style>
+        .notification {
+            /* Add your styles here */
         }
     </style>
 </head>
@@ -263,6 +268,25 @@
     <script src="kmap-interface.js" defer></script>
     <script src="markdown.js" defer></script>
     <script>
+        // Prevent pull-to-refresh but keep normal scrolling
+        let lastTouchY = 0;
+        
+        document.addEventListener('touchstart', function(e) {
+            lastTouchY = e.touches[0].clientY;
+        });
+        
+        document.addEventListener('touchmove', function(e) {
+            const touchY = e.touches[0].clientY;
+            const touchYDelta = touchY - lastTouchY;
+            
+            // Prevent overscroll only when at the top of the page
+            if (window.scrollY === 0 && touchYDelta > 0) {
+                e.preventDefault();
+            }
+            
+            lastTouchY = touchY;
+        }, { passive: false });
+        
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             new KMapInterface();
@@ -277,7 +301,6 @@
             const infoPopup = document.getElementById('info-popup');
             // Function to update slider position
             function updateSlider(activeTab) {
-                // if (window.innerWidth > 400 && sliderBg && activeTab) {
                 if (sliderBg && activeTab) {
                     const tabWidth = activeTab.offsetWidth;
                     const tabLeft = activeTab.offsetLeft;
