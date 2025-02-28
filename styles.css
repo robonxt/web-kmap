@@ -71,11 +71,20 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
 body {
     line-height: 1.6;
     color: var(--text-primary);
     background-color: var(--bg-main);
-    max-height: 100vh;
+    min-height: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
 }
 
 /* Layout & Container Styles */

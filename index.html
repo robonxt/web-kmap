@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=portrait">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="screen-orientation" content="portrait">
     <meta name="x5-orientation" content="portrait">
     <title>K-Map Solver</title>
@@ -37,9 +37,97 @@
                     .catch(error => {
                         console.warn('Service Worker registration failed:', error);
                     });
+                
+                // Listen for messages from service worker
+                navigator.serviceWorker.addEventListener('message', event => {
+                    if (event.data.type === 'UPDATE_AVAILABLE') {
+                        showUpdateNotification();
+                    }
+                });
+            });
+        }
+        
+        // Function to show update notification
+        function showUpdateNotification() {
+            // Check if notification already exists
+            if (document.getElementById('update-notification')) {
+                return;
+            }
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.id = 'update-notification';
+            notification.className = 'update-notification';
+            notification.innerHTML = `
+                <span>New version available!</span>
+                <button id="update-reload-btn">Reload</button>
+                <button id="update-dismiss-btn" class="svg-button" aria-label="Dismiss">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </button>
+            `;
+            
+            // Add notification to the DOM
+            document.body.appendChild(notification);
+            
+            // Add event listeners
+            document.getElementById('update-reload-btn').addEventListener('click', () => {
+                window.location.reload();
+            });
+            
+            document.getElementById('update-dismiss-btn').addEventListener('click', () => {
+                notification.remove();
             });
         }
     </script>
+    <style>
+        .update-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent-color, #4285f4);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slide-up 0.3s ease-out;
+        }
+        
+        .update-notification button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .update-notification .svg-button {
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @keyframes slide-up {
+            from { transform: translate(-50%, 100px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+    </style>
+    <style>
+        .notification {
+            /* Add your styles here */
+        }
+    </style>
 </head>
 
 <body>
@@ -132,7 +220,7 @@
                         <path d="M3 6h18" />
                         <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                     </svg>
-                    Clear All
+                    Clear
                 </button>
             </div>
         </div>
@@ -180,6 +268,25 @@
     <script src="kmap-interface.js" defer></script>
     <script src="markdown.js" defer></script>
     <script>
+        // Prevent pull-to-refresh but keep normal scrolling
+        let lastTouchY = 0;
+        
+        document.addEventListener('touchstart', function(e) {
+            lastTouchY = e.touches[0].clientY;
+        });
+        
+        document.addEventListener('touchmove', function(e) {
+            const touchY = e.touches[0].clientY;
+            const touchYDelta = touchY - lastTouchY;
+            
+            // Prevent overscroll only when at the top of the page
+            if (window.scrollY === 0 && touchYDelta > 0) {
+                e.preventDefault();
+            }
+            
+            lastTouchY = touchY;
+        }, { passive: false });
+        
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             new KMapInterface();
@@ -194,7 +301,6 @@
             const infoPopup = document.getElementById('info-popup');
             // Function to update slider position
             function updateSlider(activeTab) {
-                // if (window.innerWidth > 400 && sliderBg && activeTab) {
                 if (sliderBg && activeTab) {
                     const tabWidth = activeTab.offsetWidth;
                     const tabLeft = activeTab.offsetLeft;
