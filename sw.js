@@ -1,17 +1,19 @@
 const CACHE = 'kmap-solver-cache';
 const ASSETS = [
   '.',
-  'index.html',
-  'styles.css',
-  'kmap-interface.js',
-  'kmap-solver.js',
-  'info.md',
-  'manifest.json',
-  'assets/icons/favicon.ico',
   'assets/icons/android-chrome-192.png',
   'assets/icons/android-chrome-512.png',
   'assets/icons/apple-touch-icon.png',
-  'assets/icons/mstile.png'
+  'assets/icons/favicon.ico',
+  'assets/icons/favicon.svg',
+  'assets/icons/mstile.png',
+  'index.html',
+  'kmap-interface.js',
+  'kmap-solver.js',
+  'manifest.json',
+  'pwa-check.html',
+  'styles.css',
+  'sw.js'
 ];
 
 self.addEventListener('install', e => {
