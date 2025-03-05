@@ -112,7 +112,7 @@ class KMapInterface {
         svg.setAttribute('viewBox', `0 0 ${gridRect.width} ${gridRect.height}`);
     }
 
-    createCell(index, binaryDisplay) {
+    createCell(index) {
         const cell = document.createElement('div');
         cell.className = 'cell';
         cell.dataset.index = index;
@@ -121,13 +121,23 @@ class KMapInterface {
         const state = this.grid[index] || '0';
         cell.dataset.state = state;
 
-        const binDiv = document.createElement('div');
-        binDiv.className = 'binary-display';
-        binDiv.textContent = binaryDisplay;
-
+        // Extract binary representation from binaryDisplay
+        const binaryPart = index.toString(2).padStart(this.numVars, '0');
+        
+        // Create decimal display
+        const decDiv = document.createElement('div');
+        decDiv.className = 'decimal-display';
+        decDiv.textContent = index;
+        
+        // Create value display (center)
         const valDiv = document.createElement('div');
         valDiv.className = 'value-display';
         valDiv.textContent = state;
+        
+        // Create binary display
+        const binDiv = document.createElement('div');
+        binDiv.className = 'binary-display';
+        binDiv.textContent = binaryPart;
 
         // Add appropriate classes based on state
         if (state === '1') {
@@ -136,7 +146,12 @@ class KMapInterface {
             cell.classList.add('dont-care');
         }
 
-        cell.append(binDiv, valDiv);
+        // Create a wrapper for the value display to center it
+        const centerWrapper = document.createElement('div');
+        centerWrapper.className = 'center-wrapper';
+        centerWrapper.appendChild(valDiv);
+
+        cell.append(decDiv, centerWrapper, binDiv);
         cell.addEventListener('click', () => this.toggleKMap(cell));
         return cell;
     }
@@ -148,7 +163,7 @@ class KMapInterface {
                 const rowBits = parseInt(row, 2);
                 const colBits = parseInt(col, 2);
                 const index = (rowBits << Math.log2(layout.cols.length)) | colBits;
-                fragment.appendChild(this.createCell(index, `${row}${col} (${index})`));
+                fragment.appendChild(this.createCell(index));
             });
         });
         this.elements.grid.appendChild(fragment);
@@ -158,8 +173,7 @@ class KMapInterface {
         const fragment = document.createDocumentFragment();
         layout.forEach(row => {
             row.forEach(index => {
-                fragment.appendChild(this.createCell(index,
-                    index.toString(2).padStart(this.numVars, '0') + ` (${index})`));
+                fragment.appendChild(this.createCell(index));
             });
         });
         this.elements.grid.appendChild(fragment);
@@ -353,9 +367,11 @@ class KMapInterface {
     }
 
     applyState(cell, newState, isKMapCell = true) {
-        const display = isKMapCell ? cell.querySelector('.value-display') : cell;
         if (isKMapCell) {
-            display.textContent = newState;
+            const valueDisplay = cell.querySelector('.value-display');
+            if (valueDisplay) {
+                valueDisplay.textContent = newState;
+            }
         } else {
             cell.textContent = newState;
         }
