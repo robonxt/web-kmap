@@ -22,7 +22,7 @@
     <meta name="msapplication-TileImage" content="assets/icons/mstile.png">
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="theme-color" content="#ffffff">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
@@ -52,6 +52,62 @@
                     </svg>
                 </button>
                 <div class="popup-content" id="info-content">
+                    <h2>K-Map Solver Guide</h2>
+
+                    <p>A K-map helps simplify Boolean expressions by grouping similar terms. This tool provides an interactive way to build and solve K-maps, automatically finding the simplest solution.</p>
+                    
+                    <h3>Quick Start</h3>
+                    
+                    <ol>
+                        <li><strong>Choose Variables</strong> (2-4)
+                            <ul>
+                                <li>Select from dropdown</li>
+                                <li>Grid adjusts automatically</li>
+                            </ul>
+                        </li>
+                        <li><strong>Set Values</strong>
+                            <ul>
+                                <li>Click cells to toggle: 0 → 1 → X</li>
+                                <li>X = "don't care" condition</li>
+                                <li>Quick buttons: Set All 1/0, Clear</li>
+                            </ul>
+                        </li>
+                        <li><strong>View Solution</strong>
+                            <ul>
+                                <li>Updates in real-time</li>
+                                <li>Copy button for easy sharing</li>
+                                <li>Multiple solutions when available</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    
+                    <h3>Reading Solutions</h3>
+                    
+                    <ul>
+                        <li>A = variable is 1 (true)</li>
+                        <li>A̅ = variable is 0 (false)</li>
+                        <li>Example: A̅BC̅ means A=0, B=1, C=0</li>
+                    </ul>
+                    
+                    <h3>Features</h3>
+                    
+                    <ul>
+                        <li>Switch between K-map and Truth Table views</li>
+                        <li>Toggle Gray/Binary layouts (3-4 vars)</li>
+                        <li>Light/Dark theme support</li>
+                        <li>Color-coded grouping</li>
+                        <li>Mobile-friendly design</li>
+                        <li>Progressive Web App (PWA) support:
+                            <ul>
+                                <li>Works offline</li>
+                                <li>Installable on mobile and desktop</li>
+                                <li>App-like experience</li>
+                                <li><a href="pwa-check.html">Check PWA Status</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    
+                    <p><a href="https://github.com/robonxt/web-kmap" target="_blank">View Source on GitHub</a></p>
                 </div>
             </div>
         </div>
@@ -178,7 +234,6 @@
     </div>
     <script src="kmap-solver.js" defer></script>
     <script src="kmap-interface.js" defer></script>
-    <script src="markdown.js" defer></script>
     <script>
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
@@ -280,20 +335,6 @@
                     themeToggle.setAttribute('data-theme', theme);
                 }
             });
-
-            // Load and convert markdown content
-            fetch('info.md')
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to load info.md');
-                    return response.text();
-                })
-                .then(content => {
-                    document.getElementById('info-content').innerHTML = mdToHtml(content);
-                })
-                .catch(error => {
-                    console.error('Error loading info.md:', error);
-                    document.getElementById('info-content').innerHTML = '<p></p><p>Error loading content. Please <a href="https://github.com/robonxt/web-kmap/blob/main/info.md" target="_blank" rel="noopener noreferrer">view INFO.md on GitHub</a> for information.</p><p></p>';
-                });
         });
     </script>
 </body>
