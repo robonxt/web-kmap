@@ -42,11 +42,16 @@ self.addEventListener('fetch', e => {
       const networked = fetch(e.request, {cache: 'no-store'})
         .then(r => {
           if (r && r.status === 200) {
-            const clone = r.clone();
+            // Create a clone for caching regardless of whether we have a cached version
+            const cacheClone = r.clone();
             
             // If we have a cached version, compare it with the network version
             if (cached) {
-              Promise.all([clone.text(), cached.text()]).then(([newContent, cachedContent]) => {
+              // Clone the cached response before reading its text
+              const cachedClone = cached.clone();
+              const textClone = r.clone();
+              
+              Promise.all([textClone.text(), cachedClone.text()]).then(([newContent, cachedContent]) => {
                 if (newContent !== cachedContent) {
                   // Only notify PWA check page about updates
                   clients.matchAll().then(clients => {
@@ -62,10 +67,14 @@ self.addEventListener('fetch', e => {
                   });
                 }
               });
+              
+              caches.open(CACHE)
+                .then(c => c.put(e.request, cacheClone));
+            } else {
+              // If no cached version, just cache the response
+              caches.open(CACHE)
+                .then(c => c.put(e.request, cacheClone));
             }
-            
-            caches.open(CACHE)
-              .then(c => c.put(e.request, clone));
           }
           return r;
         })
