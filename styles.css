@@ -698,7 +698,7 @@ body {
     }
 
     .tab-btn:hover {
-        color: white;
+        color: var(--text-primary);
     }
 
     .hamburger-menu:hover {
