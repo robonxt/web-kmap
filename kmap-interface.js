@@ -715,7 +715,7 @@ class KMapInterface {
         });
 
         // Show/hide content
-        document.querySelectorAll('.tab-content').forEach(content => {
+        document.querySelectorAll('.tab-content-container').forEach(content => {
             content.classList.toggle('active', content.id === tabName);
         });
 
