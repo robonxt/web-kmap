@@ -129,12 +129,6 @@ body {
     border: 1px solid var(--header-btn-border);
 }
 
-.header-actions .svg-button:hover {
-    color: rgba(255, 255, 255, 0.8);
-    background: var(--header-btn-hover-bg);
-    border-color: var(--header-btn-hover-border);
-}
-
 /* Tab Navigation */
 .tab-container {
     background: rgba(255, 255, 255, 0.1);
@@ -156,10 +150,6 @@ body {
     transition: var(--transition-standard);
     min-width: var(--tab-min-width);
     user-select: none;
-}
-
-.tab-btn:hover {
-    color: white;
 }
 
 .tab-btn.active {
@@ -201,11 +191,6 @@ body {
     background: none;
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
-}
-
-.hamburger-menu:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .kmap-grid {
@@ -252,13 +237,6 @@ body {
     background-color: var(--bg-surface);
     color: var(--text-primary);
     transition: var(--transition-standard);
-}
-
-.cell:hover {
-    background-color: var(--surface-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-    border-color: var(--primary-hover);
 }
 
 .cell.selected {
@@ -317,14 +295,6 @@ body {
     background-color: var(--bg-surface);
     color: var(--text-primary);
 }
-
-.truth-table td:last-child:hover {
-    border-color: var(--primary-color);
-    box-shadow: var(--shadow);
-    transform: translateY(-1px);
-    background-color: var(--bg-surface);
-}
-
 .truth-table td.selected,
 .truth-table tr td.selected:last-child {
     background-color: var(--cell-selected-color);
@@ -343,12 +313,6 @@ body {
     color: var(--text-secondary);
     cursor: default;
     border: none;
-}
-
-.truth-table td.row-id:hover {
-    background-color: var(--bg-surface);
-    transform: none;
-    box-shadow: none;
 }
 
 /* UI Elements - Buttons & Controls */
@@ -379,12 +343,6 @@ body {
     margin-right: 0;
 }
 
-.svg-button:hover {
-    background: var(--surface-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-}
-
 .close-btn {
     position: absolute;
     top: 10px;
@@ -393,10 +351,6 @@ body {
     color: var(--text-primary);
     box-shadow: var(--shadow);
     z-index: 1;
-}
-
-.close-btn:hover {
-    border-color: var(--primary-color) !important;
 }
 
 .control-toolbar {
@@ -415,30 +369,12 @@ body {
     background-color: var(--cell-dont-care-color);
 }
 
-#clear-btn:hover {
-    background-color: var(--danger-color);
-    border-color: var(--danger-color);
-    color: white;
-}
-
 #all-one-btn {
     background: var(--cell-selected-color);
 }
 
-#all-one-btn:hover {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-}
-
 #all-zero-btn {
     background: var(--cell-unselected-color);
-}
-
-#all-zero-btn:hover {
-    background: var(--text-secondary);
-    border-color: var(--text-secondary);
-    color: white;
 }
 
 /* Disabled button state */
@@ -448,11 +384,6 @@ body {
     cursor: not-allowed;
     filter: grayscale(100%) blur(0.5px);
     pointer-events: none;
-}
-
-.svg-button:disabled:hover,
-.svg-button.disabled:hover {
-    background-color: transparent;
 }
 
 /* Solution Components */
@@ -515,10 +446,6 @@ body {
     cursor: pointer;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.var-select:hover {
-    border-color: var(--text-secondary);
 }
 
 .var-select:focus {
@@ -594,10 +521,6 @@ body {
 .popup-content a {
     color: var(--primary-color);
     text-decoration: none;
-}
-
-.popup-content a:hover {
-    text-decoration: underline;
 }
 
 .popup-content code {
@@ -764,5 +687,83 @@ body {
 
     .slider-bg {
         display: block;
+    }
+}
+
+@media (hover: hover) {
+    .header-actions .svg-button:hover {
+        color: rgba(255, 255, 255, 0.8);
+        background: var(--header-btn-hover-bg);
+        border-color: var(--header-btn-hover-border);
+    }
+
+    .tab-btn:hover {
+        color: white;
+    }
+
+    .hamburger-menu:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .cell:hover {
+        background-color: var(--surface-hover);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow);
+        border-color: var(--primary-hover);
+    }
+
+    .truth-table td:last-child:hover {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow);
+        transform: translateY(-1px);
+        background-color: var(--bg-surface);
+    }
+
+    .truth-table td.row-id:hover {
+        background-color: var(--bg-surface);
+        transform: none;
+        box-shadow: none;
+    }
+
+    .svg-button:hover {
+        background: var(--surface-hover);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow);
+    }
+
+    .svg-button:disabled:hover,
+    .svg-button.disabled:hover {
+        background-color: transparent;
+    }
+
+    .close-btn:hover {
+        border-color: var(--primary-color) !important;
+    }
+
+    #clear-btn:hover {
+        background-color: var(--danger-color);
+        border-color: var(--danger-color);
+        color: white;
+    }
+
+    #all-one-btn:hover {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    #all-zero-btn:hover {
+        background: var(--text-secondary);
+        border-color: var(--text-secondary);
+        color: white;
+    }
+
+    .var-select:hover {
+        border-color: var(--text-secondary);
+    }
+
+    .popup-content a:hover {
+        text-decoration: underline;
     }
 }
