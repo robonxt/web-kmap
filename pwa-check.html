@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PWA Installation Check</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#ffffff">
     <script>
@@ -47,7 +47,7 @@
             color: #dc3545;
         }
         .warning {
-            color: #ffc107;
+            color: #cb9a06;
         }
         button {
             background-color: #4CAF50;
@@ -68,56 +68,126 @@
             border-radius: 4px;
             font-family: monospace;
         }
+        .pwa-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing);
+            padding: var(--spacing);
+            max-width: none;
+        }
+
+        .pwa-status {
+            grid-column: 1 / -1;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .pwa-card {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 150px;
+        }
+
+        .pwa-card h2 {
+            margin-bottom: 20px;
+        }
+
+        details {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            transition: all 0.2s ease;
+        }
+
+        details[open] {
+            background-color: #eee;
+        }
+
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+            padding: 20px;
+            margin: -20px;
+            border-radius: 8px;
+        }
+
+        summary:hover {
+            background-color: #eee;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing);
+            margin-bottom: var(--spacing);
+        }
     </style>
 </head>
 <body>
-    <div style="margin-bottom: 20px;">
-        <button onclick="window.location.href='index.html'" style="background-color: #666;">← Back to K-Map Solver</button>
-    </div>
-    <h1>K-Map Solver PWA Installation Check</h1>
-    
-    <div class="card">
-        <h2>Service Worker Status</h2>
-        <div id="sw-status">Checking...</div>
-    </div>
-    
-    <div class="card">
-        <h2>Manifest Status</h2>
-        <div id="manifest-status">Checking...</div>
-    </div>
-    
-    <div class="card">
-        <h2>Installability</h2>
-        <div id="install-status">Checking...</div>
-        <div id="install-button-container" style="display: none;">
-            <button id="install-button">Install K-Map Solver</button>
+    <div class="container">
+        <div class="header-bar-container">
+            <button onclick="window.location.href='index.html'" style="background-color: #666;">← Back to K-Map Solver</button>
         </div>
-    </div>
-    
-    <div class="card">
-        <h2>Offline Capability</h2>
-        <div id="offline-status">
-            To test offline capability:
-            <ol>
-                <li>Load the main app once to cache resources</li>
-                <li>Turn off your internet connection</li>
-                <li>Reload the page</li>
-                <li>If it loads, the PWA is working correctly offline!</li>
-            </ol>
-        </div>
-    </div>
 
-    <div class="card">
-        <h2>Updates</h2>
-        <div id="update-status">No updates available</div>
-        <div id="update-button-container" style="display: none;">
-            <button id="update-button" onclick="window.location.reload()">Reload to Update</button>
-        </div>
-    </div>
+        <div class="pwa-status">
+            <h1>K-Map Solver PWA Status</h1>
+            
+            <div class="status-grid">
+                <div>
+                    <h2>Service Worker</h2>
+                    <div id="sw-status">Checking...</div>
+                </div>
+                
+                <div>
+                    <h2>Manifest</h2>
+                    <div id="manifest-status">Checking...</div>
+                </div>
+                
+                <div>
+                    <h2>Installability</h2>
+                    <div id="install-status">Checking...</div>
+                    <div id="install-button-container" style="display: none;">
+                        <button id="install-button">Install K-Map Solver</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h2>Display Mode</h2>
+                    <div id="display-mode-status">Checking...</div>
+                </div>
+            </div>
 
-    <div class="card">
-        <h2>Display Mode</h2>
-        <div id="display-mode-status">Checking...</div>
+            <div>
+                <h2>Updates</h2>
+                <div id="update-status">No updates available</div>
+                <div id="update-button-container">
+                    <button id="update-button" onclick="window.location.reload()">Reload to Update</button>
+                    <button id="force-update-button" onclick="forceUpdate()" style="margin-left: var(--spacing); background-color: var(--warning-color);">Force Update</button>
+                </div>
+            </div>
+
+            <div>
+                <h2>Offline Capability</h2>
+                <details>
+                    <summary>How to test offline capability</summary>
+                    <div id="offline-status">
+                        <ol>
+                            <li>Load the main app once to cache resources</li>
+                            <li>Turn off your internet connection</li>
+                            <li>Reload the page</li>
+                            <li>If it loads, the PWA is working correctly offline!</li>
+                        </ol>
+                    </div>
+                </details>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -178,6 +248,7 @@
 
         // Check installability
         const installStatus = document.getElementById('install-status');
+        const installStatusCard = document.getElementById('install-status-card');
         const installButtonContainer = document.getElementById('install-button-container');
         const installButton = document.getElementById('install-button');
         
@@ -230,6 +301,26 @@
             displayModeStatus.innerHTML = '<span class="warning">⚠ Browser mode (not installed as PWA)</span>';
         } else {
             displayModeStatus.innerHTML = '<span class="warning">⚠ Unknown display mode</span>';
+        }
+
+        async function forceUpdate() {
+            if (!confirm('This will clear all cached data and force a fresh update. Continue?')) return;
+
+            try {
+                // Clear cache
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+
+                // Unregister service worker
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) await registration.unregister();
+
+                // Force reload
+                window.location.reload(true);
+            } catch (error) {
+                console.error('Force update failed:', error);
+                alert('Force update failed. Please try again.');
+            }
         }
     </script>
 </body>
