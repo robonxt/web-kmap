@@ -5,7 +5,8 @@
     --mobile-spacing: 0.25rem;
     --radius: 8px;
     --font-sm: 0.75rem;
-    --font-lg: 1.2rem;
+    --font-md: 1.1rem;
+    --font-lg: 1.3rem;
     --font-family: "DejaVu Sans", "DejaVu Sans Book", "DejaVu Sans Condensed", sans-serif;
     --max-width: 800px;
     --mobile-max-width: 400px;
@@ -245,19 +246,20 @@ body {
 }
 
 .binary-display, .decimal-display {
-    font-size: var(--font-sm);
     font-family: monospace;
     text-align: center;
     user-select: none;
 }
 
 .binary-display {
+    font-size: var(--font-sm);
     color: var(--text-secondary);
     grid-area: botcenter;
     align-self: end;
 }
 
 .decimal-display {
+    font-size: var(--font-md);
     color: var(--primary-color);
     grid-area: topleft;
     align-self: start;
