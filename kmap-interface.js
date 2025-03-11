@@ -869,7 +869,8 @@ class KMapInterface {
     }
 }
 
-// // Initialize when DOM is loaded
-// document.addEventListener('DOMContentLoaded', () => {
-//     new KMapInterface();
-// });
+// Initialize when DOM is loaded
+// This one is needed for the hamburger menu
+document.addEventListener('DOMContentLoaded', () => {
+    new KMapInterface();
+});
