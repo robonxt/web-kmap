@@ -77,6 +77,7 @@ body {
     color: var(--text-primary);
     background-color: var(--bg-main);
     max-height: 100vh;
+    overscroll-behavior-y: contain;
 }
 
 /* Layout & Container Styles */

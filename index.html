@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=portrait">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=portrait, maximum-scale=1.0, user-scalable=no">
     <meta name="screen-orientation" content="portrait">
     <meta name="x5-orientation" content="portrait">
     <title>K-Map Solver</title>
@@ -69,7 +69,9 @@
                         </li>
                         <li><strong>Set Values</strong>
                             <ul>
-                                <li>Click cells to toggle: 0 → 1 → X</li>
+                                <li>Click cells to toggle: 0 → 1 → X
+                                    <ul><li>A blank cell (ㅤ) is 0</li></ul>
+                                </li>
                                 <li>X = "don't care" condition</li>
                                 <li>Quick buttons: Set All 1/0, Clear</li>
                             </ul>
@@ -88,7 +90,7 @@
                     <ul>
                         <li>A = variable is 1 (true)</li>
                         <li>A̅ = variable is 0 (false). 
-                            <ul><li>A blank cell (ㅤ) is also 0</li></ul>
+                           
                         </li>
                         <li>Example: A̅BC̅ means A=0, B=1, C=0</li>
                     </ul>
