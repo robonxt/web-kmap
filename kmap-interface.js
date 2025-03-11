@@ -40,7 +40,7 @@ class KMapInterface {
         this.size = 1 << numVars; // 2^numVars
         this.grid = Array(this.size).fill(0);
         this.isGrayCodeLayout = true;
-        this.hideZeros = false; // Add toggle for hiding zero values
+        this.hideZeros = true; // Add toggle for hiding zero values
         this.layouts = this.initializeLayouts();
 
         // Update variable count attribute
@@ -198,7 +198,7 @@ class KMapInterface {
                 this.createTableCell(i, 'row-id'),
                 ...Array.from({ length: 4 }, (_, j) =>
                     this.createTableCell(j < this.numVars ? binary[j] : '', '', j < this.numVars)),
-                this.createTableCell('0', '', true, i)
+                this.createTableCell(this.hideZeros && '0' === '0' ? 'ㅤ' : '0', '', true, i)
             ];
 
             row.append(...cells);
@@ -374,7 +374,7 @@ class KMapInterface {
                 valueDisplay.textContent = this.hideZeros && newState === '0' ? 'ㅤ' : newState;
             }
         } else {
-            cell.textContent = newState;
+            cell.textContent = this.hideZeros && newState === '0' ? 'ㅤ' : newState;
         }
 
         cell.dataset.state = newState;
@@ -470,7 +470,7 @@ class KMapInterface {
         if (!svg) return;
 
         this.updateSvgViewBox(svg);
-        svg.innerHTML = '';
+        svg.innerHTML = 'ㅤ';
 
         // Handle special cases
         if (!terms || terms.length === 0 || terms[0] === "0") {
@@ -746,6 +746,12 @@ class KMapInterface {
                     const state = cell.dataset.state;
                     const valDisplay = cell.querySelector('.value-display');
                     valDisplay.textContent = this.hideZeros && state === '0' ? 'ㅤ' : state;
+                });
+                // Update truth table cell displays
+                const truthTableCells = this.elements.truthTableBody.querySelectorAll('td[data-index]');
+                truthTableCells.forEach(cell => {
+                    const state = cell.dataset.state;
+                    cell.textContent = this.hideZeros && state === '0' ? 'ㅤ' : state;
                 });
             });
         }

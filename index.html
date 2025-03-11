@@ -10,7 +10,8 @@
     <meta name="description"
         content="A lightweight, dependency-free Karnaugh map solver with truth table visualization and 2-4 variable support. Features color-coded term grouping with wraparound highlighting. Works offline and includes light/dark themes for enhanced usability.">
     <meta property="og:title" content="K-Map Solver">
-    <meta property="og:description" content="A lightweight, dependency-free Karnaugh map solver with truth table visualization and 2-4 variable support. Features color-coded term grouping with wraparound highlighting. Works offline and includes light/dark themes for enhanced usability.">
+    <meta property="og:description"
+        content="A lightweight, dependency-free Karnaugh map solver with truth table visualization and 2-4 variable support. Features color-coded term grouping with wraparound highlighting. Works offline and includes light/dark themes for enhanced usability.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://kmap.robonxt.xyz/assets/logo/kmap-logo-v1.jpeg">
     <meta property="og:url" content="https://kmap.robonxt.xyz">
@@ -54,10 +55,11 @@
                 <div class="popup-content" id="info-content">
                     <h2>K-Map Solver Guide</h2>
 
-                    <p>A K-map helps simplify Boolean expressions by grouping similar terms. This tool provides an interactive way to build and solve K-maps, automatically finding the simplest solution.</p>
-                    
+                    <p>A K-map helps simplify Boolean expressions by grouping similar terms. This tool provides an
+                        interactive way to build and solve K-maps, automatically finding the simplest solution.</p>
+
                     <h3>Quick Start</h3>
-                    
+
                     <ol>
                         <li><strong>Choose Variables</strong> (2-4)
                             <ul>
@@ -80,20 +82,23 @@
                             </ul>
                         </li>
                     </ol>
-                    
+
                     <h3>Reading Solutions</h3>
-                    
+
                     <ul>
                         <li>A = variable is 1 (true)</li>
-                        <li>A̅ = variable is 0 (false). A blank cell is also 0</li>
+                        <li>A̅ = variable is 0 (false). 
+                            <ul><li>A blank cell (ㅤ) is also 0</li></ul>
+                        </li>
                         <li>Example: A̅BC̅ means A=0, B=1, C=0</li>
                     </ul>
-                    
+
                     <h3>Features</h3>
-                    
+
                     <ul>
                         <li>Switch between K-map and Truth Table views</li>
                         <li>Toggle Gray/Binary layouts (3-4 vars)</li>
+                        <li>Hide zeros in cells for cleaner display</li>
                         <li>Light/Dark theme support</li>
                         <li>Color-coded grouping</li>
                         <li>Mobile-friendly design</li>
@@ -106,7 +111,7 @@
                             </ul>
                         </li>
                     </ul>
-                    
+
                     <p><a href="https://github.com/robonxt/web-kmap" target="_blank">View Source on GitHub</a></p>
                 </div>
             </div>
@@ -115,7 +120,8 @@
             <div class="header-tab-menu">
                 <button class="hamburger-menu svg-button" id="hamburger-menu-btn" aria-label="Menu">
                     <svg viewBox="0 0 24 24">
-                        <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" />
                     </svg>
                 </button>
                 <div class="tabs-wrapper" id="tabs-wrapper">
@@ -125,15 +131,23 @@
                 </div>
             </div>
             <div class="header-controls">
+                <button class="svg-button" id="hide-zeros-btn" title="Toggle zero visibility">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <ellipse cx="12" cy="12" rx="7" ry="10" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                </button>
                 <button class="svg-button" id="theme-toggle" aria-label="Toggle theme">
                     <svg class="light-theme-icon" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2" />
-                        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            fill="none" />
                     </svg>
                     <svg class="dark-theme-icon" viewBox="0 0 24 24">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </button>
                 <button class="svg-button info-btn" id="info-btn" aria-label="Show Information">
@@ -166,17 +180,19 @@
                 <option value="3">3 Vars</option>
                 <option value="2">2 Vars</option>
             </select>
-            <button id="toggle-layout-btn" class="svg-button gray-layout" aria-label="Toggle Layout" title="Switch Layout">
+            <button id="toggle-layout-btn" class="svg-button gray-layout" aria-label="Toggle Layout"
+                title="Switch Layout">
                 <svg class="gray-layout-icon" viewBox="0 0 24 24">
                     <rect x="4" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2" />
                     <rect x="13" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2" />
-                    <path d="M17 7l3-3-3-3M7 17l-3 3 3 3" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                    <path d="M17 7l3-3-3-3M7 17l-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" fill="none" />
                 </svg>
                 <svg class="binary-layout-icon" viewBox="0 0 24 24">
-                    <rect x="4" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <rect x="13" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <path d="M7 7l-3-3 3-3M17 17l3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <rect x="4" y="13" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2" />
+                    <rect x="13" y="4" width="7" height="7" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M7 7l-3-3 3-3M17 17l3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" fill="none" />
                 </svg>
                 <span class="layout-text">CD/AB</span>
             </button>
@@ -203,37 +219,36 @@
                 </svg>
                 Clear All
             </button>
-            <button class="svg-button" id="hide-zeros-btn" title="Toggle zero visibility">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                    <line x1="1" y1="1" x2="23" y2="23"/>
+            <!-- DO NOT DELETE THE FOLLOWING COMMENTED OUT CODE -->
+            <!-- <button class="svg-button" id="hide-zeros-btn" title="Toggle zero visibility">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path
+                        d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
                 </svg>
                 Hide 0s
-            </button>
+            </button> -->
         </div>
-        
+
         <div class="tab-content-container active" id="kmap">
-            <!-- <div class="kmap-container"> -->
-                <div class="kmap-grid" id="kmap-grid"></div>
-            <!-- </div> -->
+            <div class="kmap-grid" id="kmap-grid"></div>
         </div>
         <div class="tab-content-container" id="truthtable">
-            <!-- <div class="truthtable-container"> -->
-                <table class="truth-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>A</th>
-                            <th>B</th>
-                            <th class="var-c">C</th>
-                            <th class="var-d">D</th>
-                            <th>Output</th>
-                        </tr>
-                    </thead>
-                    <tbody id="truth-table-body"></tbody>
-                </table>
-            <!-- </div> -->
+            <table class="truth-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th class="var-c">C</th>
+                        <th class="var-d">D</th>
+                        <th>Output</th>
+                    </tr>
+                </thead>
+                <tbody id="truth-table-body"></tbody>
+            </table>
         </div>
 
     </div>
