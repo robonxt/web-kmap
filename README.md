@@ -34,6 +34,7 @@ A Karnaugh map (K-map) is a graphical method for Boolean function simplification
 - Tab-based view switching
 - Mobile-responsive design
 - PWA installation support for app-like experience
+- ~~Toggle zero value visibility in cells~~ IN PROGRESS
 - One-click operations:
   - Set all cells to 1/0
   - Clear map
@@ -49,6 +50,7 @@ A Karnaugh map (K-map) is a graphical method for Boolean function simplification
 2. **Cell Manipulation**
    - Click cells to cycle states: 0 → 1 → X
    - Use quick actions to set all cells or clear
+   - ~~Toggle visibility of zero values in cells~~ IN PROGRESS
    - Watch real-time solution updates
 
 3. **Solution Reading**

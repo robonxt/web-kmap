@@ -1,19 +1,19 @@
 const CACHE = 'kmap-solver-cache';
 const ASSETS = [
   '.',
-  'assets/icons/android-chrome-192.png',
-  'assets/icons/android-chrome-512.png',
-  'assets/icons/apple-touch-icon.png',
-  'assets/icons/favicon.ico',
-  'assets/icons/favicon.svg',
-  'assets/icons/mstile.png',
-  'index.html',
-  'kmap-interface.js',
-  'kmap-solver.js',
-  'manifest.json',
-  'pwa-check.html',
-  'styles.css',
-  'sw.js'
+  './assets/icons/android-chrome-192.png',
+  './assets/icons/android-chrome-512.png',
+  './assets/icons/apple-touch-icon.png',
+  './assets/icons/favicon.ico',
+  './assets/icons/favicon.svg',
+  './assets/icons/mstile.png',
+  './index.html',
+  './kmap-interface.js',
+  './kmap-solver.js',
+  './manifest.json',
+  './pwa-check.html',
+  './styles.css',
+  './sw.js'
 ];
 
 self.addEventListener('install', e => {
@@ -44,21 +44,18 @@ self.addEventListener('fetch', e => {
       const networked = fetch(e.request, {cache: 'no-store'})
         .then(r => {
           if (r && r.status === 200) {
-            // Create a clone for caching regardless of whether we have a cached version
+            // Create a clone for caching
             const cacheClone = r.clone();
-            
-            // If we have a cached version, compare it with the network version
+            caches.open(CACHE).then(c => c.put(e.request, cacheClone));
+
+            // Create another clone for comparison
             if (cached) {
-              // Clone the cached response before reading its text
+              const compareClone = r.clone();
               const cachedClone = cached.clone();
-              const textClone = r.clone();
-              
-              Promise.all([textClone.text(), cachedClone.text()]).then(([newContent, cachedContent]) => {
-                if (newContent !== cachedContent) {
-                  // Only notify PWA check page about updates
+              Promise.all([compareClone.text(), cachedClone.text()]).then(([newContent, cachedContent]) => {
+                if (newContent !== cachedContent && clients) {
                   clients.matchAll().then(clients => {
                     clients.forEach(client => {
-                      // Only send update message to the PWA check page
                       if (client.url.includes('pwa-check.html')) {
                         client.postMessage({ 
                           type: 'UPDATE_AVAILABLE',
@@ -69,13 +66,6 @@ self.addEventListener('fetch', e => {
                   });
                 }
               });
-              
-              caches.open(CACHE)
-                .then(c => c.put(e.request, cacheClone));
-            } else {
-              // If no cached version, just cache the response
-              caches.open(CACHE)
-                .then(c => c.put(e.request, cacheClone));
             }
           }
           return r;

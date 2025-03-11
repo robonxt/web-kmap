@@ -18,7 +18,8 @@ class KMapInterface {
             allOneBtn: document.getElementById('all-one-btn'),
             allZeroBtn: document.getElementById('all-zero-btn'),
             clearBtn: document.getElementById('clear-btn'),
-            varSelect: document.getElementById('var-select')
+            varSelect: document.getElementById('var-select'),
+            hideZerosBtn: document.getElementById('hide-zeros-btn')
         };
 
         // Predefined distinct colors for groups
@@ -39,6 +40,7 @@ class KMapInterface {
         this.size = 1 << numVars; // 2^numVars
         this.grid = Array(this.size).fill(0);
         this.isGrayCodeLayout = true;
+        this.hideZeros = false; // Add toggle for hiding zero values
         this.layouts = this.initializeLayouts();
 
         // Update variable count attribute
@@ -132,8 +134,7 @@ class KMapInterface {
         // Create value display (center)
         const valDiv = document.createElement('div');
         valDiv.className = 'value-display';
-        valDiv.textContent = state;
-        
+        valDiv.textContent = this.hideZeros && state === '0' ? 'ㅤ' : state;
         // Create binary display
         const binDiv = document.createElement('div');
         binDiv.className = 'binary-display';
@@ -370,7 +371,7 @@ class KMapInterface {
         if (isKMapCell) {
             const valueDisplay = cell.querySelector('.value-display');
             if (valueDisplay) {
-                valueDisplay.textContent = newState;
+                valueDisplay.textContent = this.hideZeros && newState === '0' ? 'ㅤ' : newState;
             }
         } else {
             cell.textContent = newState;
@@ -734,6 +735,20 @@ class KMapInterface {
         this.setupVariableCycleHandler();
         this.setupLayoutHandlers();
         this.setupClipboardHandlers();
+
+        // Add event listener for hide zeros toggle
+        if (this.elements.hideZerosBtn) {
+            this.elements.hideZerosBtn.addEventListener('click', () => {
+                this.hideZeros = !this.hideZeros;
+                this.elements.hideZerosBtn.classList.toggle('active');
+                // Update all cell displays
+                this.elements.grid.querySelectorAll('.cell').forEach(cell => {
+                    const state = cell.dataset.state;
+                    const valDisplay = cell.querySelector('.value-display');
+                    valDisplay.textContent = this.hideZeros && state === '0' ? 'ㅤ' : state;
+                });
+            });
+        }
     }
 
     setupTabHandlers() {
@@ -848,7 +863,7 @@ class KMapInterface {
     }
 }
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new KMapInterface();
-});
+// // Initialize when DOM is loaded
+// document.addEventListener('DOMContentLoaded', () => {
+//     new KMapInterface();
+// });
