@@ -72,12 +72,12 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-body {
+html,body {
     line-height: 1.6;
     color: var(--text-primary);
     background-color: var(--bg-main);
     max-height: 100vh;
-    overscroll-behavior-y: contain;
+    overscroll-behavior-y: none;
 }
 
 /* Layout & Container Styles */
@@ -770,11 +770,11 @@ body {
         color: white;
     }
 
-    #all-zero-btn:hover {
+    /* #all-zero-btn:hover {
         background: var(--text-secondary);
         border-color: var(--text-secondary);
         color: white;
-    }
+    } */
 
     .var-select:hover {
         border-color: var(--text-secondary);
@@ -793,6 +793,6 @@ body {
     background: var(--cell-selected-color);
 }
 
-#all-zero-btn {
+/* #all-zero-btn {
     background: var(--cell-unselected-color);
-}
+} */

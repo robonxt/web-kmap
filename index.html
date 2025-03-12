@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=portrait, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, orientation=portrait, maximum-scale=1.0, user-scalable=no">
     <meta name="screen-orientation" content="portrait">
     <meta name="x5-orientation" content="portrait">
     <title>K-Map Solver</title>
@@ -52,6 +53,37 @@
                         <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     </svg>
                 </button>
+                <div class="popup-overlay" id="settings-popup">
+                    <div class="popup-wrapper">
+                        <button class="close-btn svg-button" id="close-settings-btn" aria-label="Close">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </button>
+
+                        <div class="popup-content" id="settings-content">
+                            <h2>Settings</h2>
+                            <div class="settings-group">
+                                <h3>Display Options</h3>
+                                <div class="setting-item">
+                                    <label for="theme-toggle">Dark Mode</label>
+                                    <div class="toggle-switch" id="theme-toggle">
+                                        <input type="checkbox" id="theme-checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-group">
+                                <h3>App Information</h3>
+                                <p>K-Map Solver v1.0</p>
+                                <p><a href="pwa-check.html">Check PWA Status</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="popup-content" id="info-content">
                     <h2>K-Map Solver Guide</h2>
 
@@ -70,7 +102,9 @@
                         <li><strong>Set Values</strong>
                             <ul>
                                 <li>Click cells to toggle: 0 → 1 → X
-                                    <ul><li>A blank cell (ㅤ) is 0</li></ul>
+                                    <ul>
+                                        <li>A blank cell (ㅤ) is 0</li>
+                                    </ul>
                                 </li>
                                 <li>X = "don't care" condition</li>
                                 <li>Quick buttons: Set All 1/0, Clear</li>
@@ -89,8 +123,8 @@
 
                     <ul>
                         <li>A = variable is 1 (true)</li>
-                        <li>A̅ = variable is 0 (false). 
-                           
+                        <li>A̅ = variable is 0 (false).
+
                         </li>
                         <li>Example: A̅BC̅ means A=0, B=1, C=0</li>
                     </ul>
@@ -133,12 +167,21 @@
                 </div>
             </div>
             <div class="header-controls">
+                <!-- DO NOT DELETE THE FOLLOWING COMMENTED OUT CODE -->
                 <!-- <button class="svg-button" id="hide-zeros-btn" title="Toggle zero visibility">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <ellipse cx="12" cy="12" rx="7" ry="10" />
                         <line x1="1" y1="1" x2="23" y2="23" />
                     </svg>
                 </button> -->
+                <button class="svg-button" id="settings-btn" title="Settings" aria-label="Settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                </button>
                 <button class="svg-button" id="theme-toggle" aria-label="Toggle theme">
                     <svg class="light-theme-icon" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2" />
