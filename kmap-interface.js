@@ -17,7 +17,6 @@ class KMapInterface {
             // Cache control buttons
             allOneBtn: document.getElementById('all-one-btn'),
             allZeroBtn: document.getElementById('all-zero-btn'),
-            clearBtn: document.getElementById('clear-btn'),
             varSelect: document.getElementById('var-select'),
             hideZerosBtn: document.getElementById('hide-zeros-btn')
         };
@@ -198,7 +197,7 @@ class KMapInterface {
                 this.createTableCell(i, 'row-id'),
                 ...Array.from({ length: 4 }, (_, j) =>
                     this.createTableCell(j < this.numVars ? binary[j] : '', '', j < this.numVars)),
-                this.createTableCell(this.hideZeros && '0' === '0' ? 'ㅤ' : '0', '', true, i)
+                this.createTableCell(this.hideZeros ? 'ㅤ' : '0', '', true, i)
             ];
 
             row.append(...cells);
@@ -691,10 +690,8 @@ class KMapInterface {
 
         // Restore states
         states.forEach((state, index) => {
-            if (state !== '0') {
-                const cell = this.elements.grid.querySelector(`.cell[data-index="${index}"]`);
-                if (cell) this.applyState(cell, state, true);
-            }
+            const cell = this.elements.grid.querySelector(`.cell[data-index="${index}"]`);
+            if (cell) this.applyState(cell, state, true);
         });
 
         // Update layout text
@@ -789,7 +786,6 @@ class KMapInterface {
         // Controls
         this.elements.allOneBtn.addEventListener('click', () => this.setAllStates('1'));
         this.elements.allZeroBtn.addEventListener('click', () => this.setAllStates('0'));
-        this.elements.clearBtn.addEventListener('click', () => this.clear());
     }
 
     updateToggleButton() {

@@ -758,12 +758,6 @@ body {
         border-color: var(--primary-color) !important;
     }
 
-    #clear-btn:hover {
-        background-color: var(--danger-color);
-        border-color: var(--danger-color);
-        color: white;
-    }
-
     #all-one-btn:hover {
         background: var(--primary-color);
         border-color: var(--primary-color);
@@ -771,8 +765,8 @@ body {
     }
 
     #all-zero-btn:hover {
-        background: var(--text-secondary);
-        border-color: var(--text-secondary);
+        background-color: var(--danger-color);
+        border-color: var(--danger-color);
         color: white;
     }
 
@@ -783,16 +777,4 @@ body {
     .popup-content a:hover {
         text-decoration: underline;
     }
-}
-
-#clear-btn {
-    background-color: var(--cell-dont-care-color);
-}
-
-#all-one-btn {
-    background: var(--cell-selected-color);
-}
-
-#all-zero-btn {
-    background: var(--cell-unselected-color);
 }
