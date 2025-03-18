@@ -133,7 +133,8 @@ class KMapInterface {
         // Create value display (center)
         const valDiv = document.createElement('div');
         valDiv.className = 'value-display';
-        valDiv.textContent = this.hideZeros && state === '0' ? 'ㅤ' : state;
+        valDiv.textContent = (state === '1' || state === 'X') ? state : 
+            (this.hideZeros ? 'ㅤ' : '0');
         // Create binary display
         const binDiv = document.createElement('div');
         binDiv.className = 'binary-display';
@@ -370,10 +371,12 @@ class KMapInterface {
         if (isKMapCell) {
             const valueDisplay = cell.querySelector('.value-display');
             if (valueDisplay) {
-                valueDisplay.textContent = this.hideZeros && newState === '0' ? 'ㅤ' : newState;
+                valueDisplay.textContent = (newState === '1' || newState === 'X') ? newState : 
+                    (this.hideZeros ? 'ㅤ' : '0');
             }
         } else {
-            cell.textContent = this.hideZeros && newState === '0' ? 'ㅤ' : newState;
+            cell.textContent = (newState === '1' || newState === 'X') ? newState : 
+                (this.hideZeros ? 'ㅤ' : '0');
         }
 
         cell.dataset.state = newState;
@@ -742,13 +745,15 @@ class KMapInterface {
                 this.elements.grid.querySelectorAll('.cell').forEach(cell => {
                     const state = cell.dataset.state;
                     const valDisplay = cell.querySelector('.value-display');
-                    valDisplay.textContent = this.hideZeros && state === '0' ? 'ㅤ' : state;
+                    valDisplay.textContent = (state === '1' || state === 'X') ? state : 
+                        (this.hideZeros ? 'ㅤ' : '0');
                 });
                 // Update truth table cell displays
                 const truthTableCells = this.elements.truthTableBody.querySelectorAll('td[data-index]');
                 truthTableCells.forEach(cell => {
                     const state = cell.dataset.state;
-                    cell.textContent = this.hideZeros && state === '0' ? 'ㅤ' : state;
+                    cell.textContent = (state === '1' || state === 'X') ? state : 
+                        (this.hideZeros ? 'ㅤ' : '0');
                 });
             });
         }

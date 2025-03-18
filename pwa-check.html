@@ -128,6 +128,9 @@
             gap: var(--spacing);
             margin-bottom: var(--spacing);
         }
+        .warning-bg {
+            background-color: #ed5252;
+        }
     </style>
 </head>
 <body>
@@ -169,7 +172,7 @@
                 <div id="update-status">No updates available</div>
                 <div id="update-button-container">
                     <button id="update-button" onclick="window.location.reload()">Reload to Update</button>
-                    <button id="force-update-button" onclick="forceUpdate()" style="margin-left: var(--spacing); background-color: var(--warning-color);">Force Update</button>
+                    <button id="force-update-button" onclick="forceUpdate()" class="warning-bg">Force Update</button>
                 </div>
             </div>
 
