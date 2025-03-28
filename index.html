@@ -33,7 +33,7 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
                     .then(registration => {
-                        console.log('Service Worker registered successfully');
+                        console.log('Service Worker registered successfully:', registration.scope);
                     })
                     .catch(error => {
                         console.warn('Service Worker registration failed:', error);
@@ -47,7 +47,7 @@
     <div class="container">
         <div class="popup-overlay" id="settings-popup">
             <div class="popup-wrapper">
-                <button class="close-btn svg-button" id="close-settings-popup-btn" aria-label="Close">
+                <button class="close-btn svg-button" id="close-settings-popup-btn" aria-label="Close Settings">
                     <svg viewBox="0 0 24 24">
                         <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     </svg>
@@ -55,42 +55,35 @@
                 <div class="popup-content" id="settings-content">
                     <h2>Settings</h2>
                     <div class="setting-group">
-                        <label>
-                            <label for="show-zero-toggle">Show 0/blank space</label>
-                            <label class="switch" id="show-zero-toggle">
-                                <input type="checkbox" id="show-zero-toggle">
-                                <span class="slider"></span>
-                            </label>
+                        <label for="show-zero-toggle-input">Show 0/blank space</label>
+                        <label class="switch">
+                            <input type="checkbox" id="show-zero-toggle-input">
+                            <span class="slider"></span>
                         </label>
                     </div>
                     <div class="setting-group">
-                        <label>
-                            <label for="theme-select">Theme:</label>
-                            <select id="theme-select" name="theme-select">
-                                <option value="system">System</option>
-                                <option value="light">Light</option>
-                                <option value="dark">Dark</option>
-                            </select>
-                        </label>
+                        <label for="theme-select">Theme:</label>
+                        <select id="theme-select" name="theme-select">
+                            <option value="system">System</option>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
                     </div>
                 </div>
             </div>
         </div>
         <div class="popup-overlay" id="info-popup">
             <div class="popup-wrapper">
-                <button class="close-btn svg-button" id="close-popup-btn" aria-label="Close">
+                <button class="close-btn svg-button" id="close-info-popup-btn" aria-label="Close Information">
                     <svg viewBox="0 0 24 24">
                         <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     </svg>
                 </button>
                 <div class="popup-content" id="info-content">
                     <h2>K-Map Solver Guide</h2>
-
                     <p>A K-map helps simplify Boolean expressions by grouping similar terms. This tool provides an
                         interactive way to build and solve K-maps, automatically finding the simplest solution.</p>
-
                     <h3>Quick Start</h3>
-
                     <ol>
                         <li><strong>Choose Variables</strong> (2-4)
                             <ul>
@@ -100,9 +93,7 @@
                         </li>
                         <li><strong>Set Values</strong>
                             <ul>
-                                <li>Click cells to toggle: 0 → 1 → X
-                                    <ul><li>A blank cell (ㅤ) is 0</li></ul>
-                                </li>
+                                <li>Click cells to toggle: 0 → 1 → X (A blank cell is 0)</li>
                                 <li>X = "don't care" condition</li>
                                 <li>Quick buttons: Set All 1, 0 (Clear)</li>
                             </ul>
@@ -115,19 +106,13 @@
                             </ul>
                         </li>
                     </ol>
-
                     <h3>Reading Solutions</h3>
-
                     <ul>
                         <li>A = variable is 1 (true)</li>
-                        <li>A̅ = variable is 0 (false). 
-                           
-                        </li>
+                        <li>A̅ = variable is 0 (false)</li>
                         <li>Example: A̅BC̅ means A=0, B=1, C=0</li>
                     </ul>
-
                     <h3>Features</h3>
-
                     <ul>
                         <li>Switch between K-map and Truth Table views</li>
                         <li>Toggle Gray/Binary layouts (3-4 vars)</li>
@@ -144,7 +129,6 @@
                             </ul>
                         </li>
                     </ul>
-
                     <p><a href="https://github.com/robonxt/web-kmap" target="_blank">View Source on GitHub</a></p>
                 </div>
             </div>
@@ -256,21 +240,27 @@
     <script src="kmap-solver.js"></script>
     <script src="kmap-interface.js"></script>
     <script>
-        // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            new KMapInterface();
-            // Add hamburger menu toggle
+            const kmapInterface = new KMapInterface();
+
+            // --- Element References ---
             const hamburgerBtn = document.getElementById('hamburger-menu-btn');
             const tabsWrapper = document.getElementById('tabs-wrapper');
             const sliderBg = document.getElementById('slider-bg');
             const tabBtns = document.querySelectorAll('.tab-btn');
-            // Info popup functionality
             const infoBtn = document.getElementById('info-btn');
-            const closeBtn = document.getElementById('close-popup-btn');
+            const closeInfoBtn = document.getElementById('close-info-popup-btn');
             const infoPopup = document.getElementById('info-popup');
-            // Function to update slider position
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsPopup = document.getElementById('settings-popup');
+            const closeSettingsBtn = document.getElementById('close-settings-popup-btn');
+            const showZeroToggleInput = document.getElementById('show-zero-toggle-input');
+            const themeSelect = document.getElementById('theme-select');
+            const body = document.body;
+            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+            // --- Utility Functions ---
             function updateSlider(activeTab) {
-                // if (window.innerWidth > 400 && sliderBg && activeTab) {
                 if (sliderBg && activeTab) {
                     const tabWidth = activeTab.offsetWidth;
                     const tabLeft = activeTab.offsetLeft;
@@ -279,122 +269,112 @@
                 }
             }
 
-            if (hamburgerBtn && tabsWrapper) {
-                hamburgerBtn.addEventListener('click', () => {
-                    tabsWrapper.classList.toggle('show');
+            function applyTheme(selectedTheme) {
+                let themeToApply;
+                if (selectedTheme === 'system') {
+                    themeToApply = prefersDarkScheme.matches ? 'dark' : 'light';
+                } else {
+                    themeToApply = selectedTheme;
+                }
+                body.setAttribute('data-theme', themeToApply);
+                // Sync theme-color meta tag if needed (optional, depends on desired PWA bar color)
+                // document.querySelector('meta[name="theme-color"]').setAttribute('content', themeToApply === 'dark' ? '#222' : '#ffffff');
+            }
+
+            function updateShowZeroState(show) {
+                 body.classList.toggle('show-zeros', show);
+                 // You might need to call a method on kmapInterface if it needs to redraw
+                 // e.g., kmapInterface.setShowZeros(show);
+            }
+
+            // --- Initialization Functions ---
+            function initTheme() {
+                if (!themeSelect) return;
+
+                const storedTheme = localStorage.getItem('theme') || 'system';
+                themeSelect.value = storedTheme;
+                applyTheme(storedTheme);
+
+                themeSelect.addEventListener('change', (e) => {
+                    const newTheme = e.target.value;
+                    localStorage.setItem('theme', newTheme);
+                    applyTheme(newTheme);
                 });
 
-                // Close menu when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!tabsWrapper.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-                        tabsWrapper.classList.remove('show');
+                prefersDarkScheme.addEventListener('change', () => {
+                    if (themeSelect.value === 'system') {
+                        applyTheme('system');
                     }
                 });
+            }
 
-                // Update slider when switching tabs
-                tabBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        tabsWrapper.classList.remove('show');
-                        setTimeout(() => updateSlider(btn), 0);
+            function initPopups() {
+                if (infoBtn && infoPopup && closeInfoBtn) {
+                    infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
+                    closeInfoBtn.addEventListener('click', () => infoPopup.classList.remove('active'));
+                    infoPopup.addEventListener('click', (e) => {
+                        if (e.target === infoPopup) infoPopup.classList.remove('active');
                     });
-                });
-            }
-
-            // Initial slider position
-            const initialActiveTab = document.querySelector('.tab-btn.active');
-            updateSlider(initialActiveTab);
-
-            // Info popup functionality
-            infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
-            closeBtn.addEventListener('click', () => infoPopup.classList.remove('active'));
-            infoPopup.addEventListener('click', (e) => {
-                if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
-            });
-
-            // Theme handling
-            const themeToggle = document.getElementById('theme-toggle');
-            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-            const prefersLightScheme = window.matchMedia('(prefers-color-scheme: light)');
-
-            // Initialize theme
-            function initializeTheme() {
-                const storedTheme = localStorage.getItem('theme');
-                let theme = 'light'; // Default theme
-
-                if (storedTheme) {
-                    theme = storedTheme;
-                } else if (prefersLightScheme.matches) {
-                    theme = 'light';
-                } else if (prefersDarkScheme.matches) {
-                    theme = 'dark';
                 }
 
-                document.body.setAttribute('data-theme', theme);
-                themeToggle.setAttribute('data-theme', theme);
-            }
-
-            // Initialize theme on load
-            initializeTheme();
-
-            // Handle theme toggle click
-            themeToggle.addEventListener('click', () => {
-                const currentTheme = document.body.getAttribute('data-theme');
-                // Switch TO the theme that matches the visible icon
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-                // console.log(`Switching to ${newTheme} theme`);
-                document.body.setAttribute('data-theme', newTheme);
-                themeToggle.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-            });
-
-            // Handle system theme changes
-            prefersLightScheme.addEventListener('change', (e) => {
-                if (!localStorage.getItem('theme')) {
-                    const theme = e.matches ? 'light' : 'dark';
-                    document.body.setAttribute('data-theme', theme);
-                    themeToggle.setAttribute('data-theme', theme);
+                if (settingsBtn && settingsPopup && closeSettingsBtn) {
+                    settingsBtn.addEventListener('click', () => settingsPopup.classList.add('active'));
+                    closeSettingsBtn.addEventListener('click', () => settingsPopup.classList.remove('active'));
+                    settingsPopup.addEventListener('click', (e) => {
+                        if (e.target === settingsPopup) settingsPopup.classList.remove('active');
+                    });
                 }
-            });
-
-            // Handle settings button click
-            const settingsBtn = document.getElementById('settings-btn');
-            const settingsPopup = document.getElementById('settings-popup');
-            const closeSettingsBtn = document.getElementById('close-settings-popup-btn');
-
-            if (settingsBtn && settingsPopup && closeSettingsBtn) {
-                settingsBtn.addEventListener('click', () => {
-                    settingsPopup.classList.add('show');
-                });
-
-                closeSettingsBtn.addEventListener('click', () => {
-                    settingsPopup.classList.remove('show');
-                });
             }
 
-            // Initialize settings controls
-            const showZeroToggle = document.getElementById('show-zero-toggle');
-            const themeSelect = document.getElementById('theme-select');
+            function initMenu() {
+                if (hamburgerBtn && tabsWrapper && tabBtns.length > 0) {
+                    hamburgerBtn.addEventListener('click', () => {
+                        tabsWrapper.classList.toggle('show');
+                    });
 
-            if (showZeroToggle) {
-                showZeroToggle.checked = localStorage.getItem('showZero') !== 'false';
-                showZeroToggle.addEventListener('change', (e) => {
-                    localStorage.setItem('showZero', e.target.checked);
-                    // Add code here to update the display
-                });
+                    document.addEventListener('click', (e) => {
+                        if (!tabsWrapper.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                            tabsWrapper.classList.remove('show');
+                        }
+                    });
+
+                    tabBtns.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            tabsWrapper.classList.remove('show');
+                            // Use requestAnimationFrame for smoother UI updates if needed
+                            // requestAnimationFrame(() => updateSlider(btn));
+                             setTimeout(() => updateSlider(btn), 0); // Defer slider update
+                        });
+                    });
+
+                    const initialActiveTab = document.querySelector('.tab-btn.active');
+                    if (initialActiveTab) {
+                       updateSlider(initialActiveTab);
+                    }
+                }
             }
 
-            if (themeSelect) {
-                themeSelect.value = localStorage.getItem('theme') || 'system';
-                themeSelect.addEventListener('change', (e) => {
-                    const theme = e.target.value;
-                    localStorage.setItem('theme', theme);
-                    document.body.setAttribute('data-theme', theme === 'system' ? (prefersLightScheme.matches ? 'light' : 'dark') : theme);
-                    themeToggle.setAttribute('data-theme', theme);
-                });
+            function initSettingsControls() {
+                 if (showZeroToggleInput) {
+                    const showZero = localStorage.getItem('showZero') !== 'false'; // Default to true
+                    showZeroToggleInput.checked = showZero;
+                    updateShowZeroState(showZero); // Apply initial state
+
+                    showZeroToggleInput.addEventListener('change', (e) => {
+                        const isChecked = e.target.checked;
+                        localStorage.setItem('showZero', isChecked);
+                        updateShowZeroState(isChecked);
+                    });
+                }
             }
+
+            // --- Run Initializations ---
+            initTheme();
+            initPopups();
+            initMenu();
+            initSettingsControls();
+
         });
     </script>
 </body>
-
 </html>
