@@ -55,14 +55,7 @@
                 <div class="popup-content" id="settings-content">
                     <h2>Settings</h2>
                     <div class="setting-group">
-                        <label for="show-zero-toggle-input">Show 0/blank space</label>
-                        <label class="switch">
-                            <input type="checkbox" id="show-zero-toggle-input">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-group">
-                        <label for="theme-select">Theme:</label>
+                        <span>Theme:</span>
                         <select id="theme-select" name="theme-select">
                             <option value="system">System</option>
                             <option value="light">Light</option>
@@ -254,7 +247,7 @@
             const settingsBtn = document.getElementById('settings-btn');
             const settingsPopup = document.getElementById('settings-popup');
             const closeSettingsBtn = document.getElementById('close-settings-popup-btn');
-            const showZeroToggleInput = document.getElementById('show-zero-toggle-input');
+            // const showZeroToggleInput = document.getElementById('show-zero-toggle-input');
             const themeSelect = document.getElementById('theme-select');
             const body = document.body;
             const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
@@ -281,11 +274,6 @@
                 // document.querySelector('meta[name="theme-color"]').setAttribute('content', themeToApply === 'dark' ? '#222' : '#ffffff');
             }
 
-            function updateShowZeroState(show) {
-                 body.classList.toggle('show-zeros', show);
-                 // You might need to call a method on kmapInterface if it needs to redraw
-                 // e.g., kmapInterface.setShowZeros(show);
-            }
 
             // --- Initialization Functions ---
             function initTheme() {
@@ -354,25 +342,10 @@
                 }
             }
 
-            function initSettingsControls() {
-                 if (showZeroToggleInput) {
-                    const showZero = localStorage.getItem('showZero') !== 'false'; // Default to true
-                    showZeroToggleInput.checked = showZero;
-                    updateShowZeroState(showZero); // Apply initial state
-
-                    showZeroToggleInput.addEventListener('change', (e) => {
-                        const isChecked = e.target.checked;
-                        localStorage.setItem('showZero', isChecked);
-                        updateShowZeroState(isChecked);
-                    });
-                }
-            }
-
             // --- Run Initializations ---
             initTheme();
             initPopups();
             initMenu();
-            initSettingsControls();
 
         });
     </script>
