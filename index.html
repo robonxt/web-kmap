@@ -34,6 +34,26 @@
                 navigator.serviceWorker.register('sw.js')
                     .then(registration => {
                         console.log('Service Worker registered successfully');
+                        // Add update check handler
+                        document.getElementById('update-app').addEventListener('click', async () => {
+                            if (!confirm('This will clear all cached data and force a fresh update. Continue?')) return;
+
+                            try {
+                                // Clear cache
+                                const cacheNames = await caches.keys();
+                                await Promise.all(cacheNames.map(name => caches.delete(name)));
+
+                                // Unregister service worker
+                                const registration = await navigator.serviceWorker.getRegistration();
+                                if (registration) await registration.unregister();
+
+                                // Force reload
+                                window.location.reload(true);
+                            } catch (error) {
+                                console.error('Force update failed:', error);
+                                alert('Force update failed. Please try again.');
+                            }
+                        });
                     })
                     .catch(error => {
                         console.warn('Service Worker registration failed:', error);
@@ -113,6 +133,9 @@
                             </ul>
                         </li>
                     </ul>
+
+                    <h3>Updates</h3>
+                    <button id="update-app" style="background-color: #4CAF50; border: none; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px;">Check for Updates</button>
 
                     <p><a href="https://github.com/robonxt/web-kmap" target="_blank">View Source on GitHub</a></p>
                 </div>

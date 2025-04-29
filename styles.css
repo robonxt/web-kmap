@@ -19,6 +19,7 @@
     --tab-min-width: 80px;
 
     /* Theme-independent variables */
+    --link-color: #0066cc;
     --primary-color: #4CAF50;
     --primary-hover: #3498db;
     --warning-color: #FF9800;
@@ -43,6 +44,7 @@
 
 /* Dark theme */
 [data-theme="dark"] {
+    --link-color: #66b3ff;
     --cell-selected-color: #395c39;
     --cell-dont-care-color: #5a4f33;
     --cell-unselected-color: none;
