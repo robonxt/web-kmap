@@ -16,6 +16,7 @@ class KMapInterface {
             kmapTab: document.getElementById('kmap-tab-btn'),
             // Cache control buttons
             allOneBtn: document.getElementById('all-one-btn'),
+            allXBtn: document.getElementById('all-x-btn'),
             allZeroBtn: document.getElementById('all-zero-btn'),
             varSelect: document.getElementById('var-select'),
             hideZerosBtn: document.getElementById('hide-zeros-btn')
@@ -790,6 +791,7 @@ class KMapInterface {
     setupControlHandlers() {
         // Controls
         this.elements.allOneBtn.addEventListener('click', () => this.setAllStates('1'));
+        this.elements.allXBtn.addEventListener('click', () => this.setAllStates('X'));
         this.elements.allZeroBtn.addEventListener('click', () => this.setAllStates('0'));
     }
 
