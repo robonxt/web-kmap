@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=portrait, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, orientation=portrait, maximum-scale=1.0, user-scalable=no">
     <meta name="screen-orientation" content="portrait">
     <meta name="x5-orientation" content="portrait">
     <title>K-Map Solver</title>
@@ -73,71 +74,33 @@
                     </svg>
                 </button>
                 <div class="popup-content" id="info-content">
-                    <h2>K-Map Solver Guide</h2>
-
-                    <p>A K-map helps simplify Boolean expressions by grouping similar terms. This tool provides an
-                        interactive way to build and solve K-maps, automatically finding the simplest solution.</p>
-
-                    <h3>Quick Start</h3>
-
-                    <ol>
-                        <li><strong>Choose Variables</strong> (2-4)
-                            <ul>
-                                <li>Select from dropdown</li>
-                                <li>Grid adjusts automatically</li>
-                            </ul>
-                        </li>
-                        <li><strong>Set Values</strong>
-                            <ul>
-                                <li>Click cells to toggle: 0 → 1 → X
-                                    <ul><li>A blank cell (ㅤ) is 0</li></ul>
-                                </li>
-                                <li>X = "don't care" condition</li>
-                                <li>Quick buttons: Set All 1, 0 (Clear)</li>
-                            </ul>
-                        </li>
-                        <li><strong>View Solution</strong>
-                            <ul>
-                                <li>Updates in real-time</li>
-                                <li>Copy button for easy sharing</li>
-                                <li>Multiple solutions when available</li>
-                            </ul>
-                        </li>
-                    </ol>
-
-                    <h3>Reading Solutions</h3>
-
+                    <h2>K-Map Solver</h2>
+                    <p>
+                        Quickly simplify Boolean logic with an interactive Karnaugh map (K-map) for 2–4 variables.
+                        Toggle cells, see solutions instantly, and switch between K-map and truth table views.
+                    </p>
                     <ul>
-                        <li>A = variable is 1 (true)</li>
-                        <li>A̅ = variable is 0 (false). 
-                           
-                        </li>
+                        <li><b>Set Variables:</b> Choose 2–4 variables. The grid updates automatically.</li>
+                        <li><b>Edit Cells:</b> Click cells to cycle: 0 → 1 → X (“don’t care”).</li>
+                        <li><b>Features:</b> Color-coded groups, Gray/Binary layouts, hide zeros, light/dark themes, PWA
+                            offline support.</li>
+                        <li><b>Solution:</b> Minimal SOP form, copyable, multiple solutions if available.</li>
+                    </ul>
+                    <ul>
+                        <li><b>A</b> = 1 (true), <b>A̅</b> = 0 (false), blank = 0</li>
                         <li>Example: A̅BC̅ means A=0, B=1, C=0</li>
                     </ul>
-
-                    <h3>Features</h3>
-
-                    <ul>
-                        <li>Switch between K-map and Truth Table views</li>
-                        <li>Toggle Gray/Binary layouts (3-4 vars)</li>
-                        <li>Hide zeros in cells for cleaner display</li>
-                        <li>Light/Dark theme support</li>
-                        <li>Color-coded grouping</li>
-                        <li>Mobile-friendly design</li>
-                        <li>Progressive Web App (PWA) support:
-                            <ul>
-                                <li>Works offline</li>
-                                <li>Installable on mobile and desktop</li>
-                                <li>App-like experience</li>
-                                <li><a href="pwa-check.html">Check PWA Status</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-
-                    <h3>Updates</h3>
-                    <button id="update-app" style="background-color: #4CAF50; border: none; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px;">Check for Updates</button>
-
-                    <p><a href="https://github.com/robonxt/web-kmap" target="_blank">View Source on GitHub</a></p>
+                    <p>
+                        <a href="https://github.com/robonxt/web-kmap" target="_blank">View source code on GitHub</a>
+                    </p>
+                    <button id="update-app"
+                        class="svg-button"
+                        style="background-color: var(--primary-color); color: var(--text-primary); padding: 10px 20px; font-size: 16px; margin: 4px 2px;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" style="margin-right: 8px;">
+                            <path fill="currentColor" d="M21 10.12h-6.78l2.74-2.82c-2.73-2.7-7.15-2.8-9.88-.1-2.73 2.71-2.73 7.08 0 9.79s7.15 2.71 9.88 0C18.32 15.65 19 14.08 19 12.1h2c0 1.98-.88 4.55-2.64 6.29-3.51 3.48-9.21 3.48-12.72 0-3.5-3.47-3.53-9.11-.02-12.58 3.51-3.47 9.14-3.47 12.65 0L21 3v7.12zM12.5 8v4.25l3.5 2.08-.72 1.21L11 13V8h1.5z"/>
+                        </svg>
+                        Install Updates
+                    </button>
                 </div>
             </div>
         </div>
@@ -156,12 +119,12 @@
                 </div>
             </div>
             <div class="header-controls">
-                <!-- <button class="svg-button" id="hide-zeros-btn" title="Toggle zero visibility">
+                <button class="svg-button" id="hide-zeros-btn" title="Toggle zero visibility">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <ellipse cx="12" cy="12" rx="7" ry="10" />
                         <line x1="1" y1="1" x2="23" y2="23" />
                     </svg>
-                </button> -->
+                </button>
                 <button class="svg-button" id="theme-toggle" aria-label="Toggle theme">
                     <svg class="light-theme-icon" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2" />

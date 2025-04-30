@@ -738,26 +738,32 @@ class KMapInterface {
         this.setupClipboardHandlers();
 
         // Add event listener for hide zeros toggle
-        if (this.elements.hideZerosBtn) {
-            this.elements.hideZerosBtn.addEventListener('click', () => {
-                this.hideZeros = !this.hideZeros;
-                this.elements.hideZerosBtn.classList.toggle('active');
-                // Update all cell displays
-                this.elements.grid.querySelectorAll('.cell').forEach(cell => {
-                    const state = cell.dataset.state;
-                    const valDisplay = cell.querySelector('.value-display');
-                    valDisplay.textContent = (state === '1' || state === 'X') ? state : 
-                        (this.hideZeros ? 'ㅤ' : '0');
-                });
-                // Update truth table cell displays
-                const truthTableCells = this.elements.truthTableBody.querySelectorAll('td[data-index]');
-                truthTableCells.forEach(cell => {
-                    const state = cell.dataset.state;
-                    cell.textContent = (state === '1' || state === 'X') ? state : 
-                        (this.hideZeros ? 'ㅤ' : '0');
-                });
-            });
-        }
+        this.elements.hideZerosBtn?.addEventListener('click', () => {
+            this.hideZeros = !this.hideZeros;
+            this.updateAllCellDisplays();
+            this.elements.hideZerosBtn.classList.toggle('active', this.hideZeros);
+        });
+    }
+
+    updateAllCellDisplays() {
+        // Update K-Map cells
+        const kmapCells = this.elements.grid.querySelectorAll('.cell');
+        kmapCells.forEach(cell => {
+            const valDiv = cell.querySelector('.value-display');
+            if (valDiv) {
+                const state = cell.dataset.state || '0';
+                valDiv.textContent = (state === '1' || state === 'X') ? state : 
+                    (this.hideZeros ? 'ㅤ' : '0');
+            }
+        });
+        
+        // Update Truth Table cells
+        const truthTableCells = this.elements.truthTableBody?.querySelectorAll('td[data-index]');
+        truthTableCells?.forEach(cell => {
+            const state = cell.dataset.state || '0';
+            cell.textContent = (state === '1' || state === 'X') ? state : 
+                (this.hideZeros ? 'ㅤ' : '0');
+        });
     }
 
     setupTabHandlers() {

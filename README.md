@@ -1,5 +1,7 @@
 # Web K-Map Solver
-A lightweight, dependency-free Karnaugh map solver that provides interactive visualization and Boolean function minimization for 2-4 variables. Features color-coded grouping, multiple solution display, and real-time synchronization between K-map and truth table views.
+A lightweight, dependency-free Karnaugh map solver for 2–4 variables. Instantly visualize, edit, and minimize Boolean functions with color-coded groups, real-time solutions, and a modern, mobile-friendly UI.
+
+> For a quick start, see the in-app info popup. This document is the complete reference.
 
 
 ## What is a Karnaugh Map?
@@ -35,7 +37,7 @@ A Karnaugh map (K-map) is a graphical method for Boolean function simplification
 ### User Interface
 - Intuitive cell state cycling (0 → 1 → X)
 - Binary and decimal index display
-- Tab-based view switching
+- Tab-based view switching (K-Map / Truth Table)
 - Mobile-responsive design
 - PWA installation support for app-like experience
 - One-click operations:
@@ -44,7 +46,7 @@ A Karnaugh map (K-map) is a graphical method for Boolean function simplification
   - Toggle between K-map and Truth Table views
   - Toggle between Gray code and binary layouts
   - Toggle between light and dark themes
-  - ~~Toggle between zero value visibility in cells~~ DISABLED
+  - Toggle zero value visibility in cells (hide/show zeros)
 
 
 ## Usage Guide
@@ -57,7 +59,7 @@ A Karnaugh map (K-map) is a graphical method for Boolean function simplification
    - Click cells to cycle states: 0 → 1 → X
       > A blank cell (ㅤ) is also 0
    - Use quick actions to set all cells or clear
-   - ~~Toggle visibility of zero values in cells~~ DISABLED
+   - Use the "Hide Zeros" button to toggle whether zeros are shown or hidden in the grid and truth table
    - Watch real-time solution updates
 
 3. **Solution Reading**
