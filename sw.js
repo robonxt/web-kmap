@@ -7,6 +7,7 @@ const ASSETS = [
   './assets/icons/favicon.ico',
   './assets/icons/favicon.svg',
   './assets/icons/mstile.png',
+  './assets/svg-defs.svg',
   './index.html',
   './kmap-interface.js',
   './kmap-solver.js',

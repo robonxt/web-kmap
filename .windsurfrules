@@ -1,2 +1,10 @@
-1. Learn from your memories about past incidents.
-2. Follow instructions carefully.
+the main file is index.html
+assets/icons folder has some icons for the manifest
+assets/svg-defs.svg file has svg definitions
+kmap-interface.js has the UI logic
+kmap.js has the K-map logic
+styles.css has the styles
+pwa-check.html is a testing page. do not touch or edit this file unless asked
+sw.js is the service worker file. do not touch or edit this file unless asked
+README.md should be updated when a feature is added, changed, or removed.
+in index.html, there is a info popup section, that is for a very simple and concise documentation of the README.md
