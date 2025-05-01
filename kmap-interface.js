@@ -5,21 +5,21 @@ class KMapInterface {
         this.elements = {
             grid: document.getElementById('kmap-grid'),
             solution: document.getElementById('solution'),
-            solutionSelect: document.getElementById('solution-select'),
-            copyBtn: document.getElementById('copy-solution'),
+            solutionSelect: document.getElementById('dropdown-solutions'),
+            copyBtn: document.getElementById('btn-copy-solution'),
             truthTableBody: document.getElementById('truth-table-body'),
-            toggleLayoutBtn: document.getElementById('toggle-layout-btn'),
+            toggleLayoutBtn: document.getElementById('btn-toggle-layout'),
             sliderBg: document.getElementById('slider-bg'),
-            hamburgerBtn: document.getElementById('hamburger-menu-btn'),
-            tabsWrapper: document.getElementById('tabs-wrapper'),
-            tabButtons: document.querySelectorAll('.tab-btn'),
-            kmapTab: document.getElementById('kmap-tab-btn'),
+            hamburgerBtn: document.getElementById('btn-toggle-menu'),
+            tabsWrapper: document.getElementById('wrapper-tabs'),
+            tabButtons: document.querySelectorAll('.btn-tab'),
+            kmapTab: document.getElementById('btn-tab-kmap'),
             // Cache control buttons
-            allOneBtn: document.getElementById('all-one-btn'),
-            allXBtn: document.getElementById('all-x-btn'),
-            allZeroBtn: document.getElementById('all-zero-btn'),
-            varSelect: document.getElementById('var-select'),
-            hideZerosBtn: document.getElementById('hide-zeros-btn')
+            allOneBtn: document.getElementById('btn-set-ones'),
+            allXBtn: document.getElementById('btn-set-xs'),
+            allZeroBtn: document.getElementById('btn-set-zeros'),
+            varSelect: document.getElementById('dropdown-variables'),
+            hideZerosBtn: document.getElementById('btn-toggle-zeros')
         };
 
         // Predefined distinct colors for groups
@@ -72,7 +72,7 @@ class KMapInterface {
         };
     }
 
-    updateSliderPosition(activeTab = document.querySelector('.tab-btn.active')) {
+    updateSliderPosition(activeTab = document.querySelector('.btn-tab.active')) {
         const sliderBg = this.elements.sliderBg;
         if (sliderBg && activeTab) {
             const tabWidth = activeTab.offsetWidth;
@@ -707,7 +707,7 @@ class KMapInterface {
 
     switchTab(tabName) {
         // Update active tab
-        document.querySelectorAll('.tab-btn').forEach(button => {
+        document.querySelectorAll('.btn-tab').forEach(button => {
             button.classList.toggle('active', button.dataset.tab === tabName);
 
             // Update slider position if this is the active button
