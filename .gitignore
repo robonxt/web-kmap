@@ -24,9 +24,6 @@ Thumbs.db
 # Swap files
 *.swp
 
-# Test directories
-.tests/
-
 # VSCode files
 .vscode/
 *.code-workspace

@@ -1,25 +1,24 @@
 // K-Map Interface
 class KMapInterface {
     constructor(numVars = 4) {
-        // Cache frequently used DOM elements
         this.elements = {
             grid: document.getElementById('kmap-grid'),
             solution: document.getElementById('solution'),
-            solutionSelect: document.getElementById('dropdown-solutions'),
-            copyBtn: document.getElementById('btn-copy-solution'),
+            dropdownSolutions: document.getElementById('dropdown-solutions'),
+            btnCopySolution: document.getElementById('btn-copy-solution'),
             truthTableBody: document.getElementById('truth-table-body'),
-            toggleLayoutBtn: document.getElementById('btn-toggle-layout'),
+            btnToggleLayout: document.getElementById('btn-toggle-layout'),
             sliderBg: document.getElementById('slider-bg'),
-            hamburgerBtn: document.getElementById('btn-toggle-menu'),
+            btnShowMenu: document.getElementById('btn-show-menu'),
             tabsWrapper: document.getElementById('wrapper-tabs'),
-            tabButtons: document.querySelectorAll('.btn-tab'),
+            btnTab: document.querySelectorAll('.btn-tab'),
             kmapTab: document.getElementById('btn-tab-kmap'),
-            // Cache control buttons
-            allOneBtn: document.getElementById('btn-set-ones'),
-            allXBtn: document.getElementById('btn-set-xs'),
-            allZeroBtn: document.getElementById('btn-set-zeros'),
-            varSelect: document.getElementById('dropdown-variables'),
-            hideZerosBtn: document.getElementById('btn-toggle-zeros')
+            btnSetOnes: document.getElementById('btn-set-ones'),
+            btnSetXs: document.getElementById('btn-set-xs'),
+            btnSetZeros: document.getElementById('btn-set-zeros'),
+            dropdownVariables: document.getElementById('dropdown-variables'),
+            btnToggleZeros: document.getElementById('btn-toggle-zeros'),
+            btnToggleTheme: document.getElementById('btn-toggle-theme')
         };
 
         // Predefined distinct colors for groups
@@ -40,7 +39,7 @@ class KMapInterface {
         this.size = 1 << numVars; // 2^numVars
         this.grid = Array(this.size).fill(0);
         this.isGrayCodeLayout = true;
-        this.hideZeros = true; // Add toggle for hiding zero values
+        this.hideZeros = localStorage.getItem('hideZeros') !== null ? localStorage.getItem('hideZeros') === 'true' : true;
         this.layouts = this.initializeLayouts();
 
         // Update variable count attribute
@@ -51,7 +50,8 @@ class KMapInterface {
         this.initializeTruthTable();
         this.setupEventListeners();
         this.updateSliderPosition();
-        this.clear(); // Clear on initialization
+        this.elements.btnToggleZeros?.classList.toggle('active', this.hideZeros);
+        this.clear();
     }
 
     initializeLayouts() {
@@ -300,21 +300,21 @@ class KMapInterface {
     }
 
     updateSolution(result) {
-        const { solution, solutionSelect } = this.elements;
+        const { solution, dropdownSolutions } = this.elements;
         const solutions = result.solutions || [result];
 
         if (solutions.length > 1) {
-            solutionSelect.innerHTML = solutions.map((sol, i) =>
+            dropdownSolutions.innerHTML = solutions.map((sol, i) =>
                 `<option value="${sol}">#${i + 1} of ${solutions.length}</option>`).join('');
-            solutionSelect.style.display = 'block';
-            solutionSelect.value = solutions[0];
-            solutionSelect.onchange = () => {
-                solution.innerHTML = this.addOverline(solutionSelect.value);
-                const terms = solutionSelect.value.split(' + ');
+            dropdownSolutions.style.display = 'block';
+            dropdownSolutions.value = solutions[0];
+            dropdownSolutions.onchange = () => {
+                solution.innerHTML = this.addOverline(dropdownSolutions.value);
+                const terms = dropdownSolutions.value.split(' + ');
                 this.updateGroupsFromTerms(terms);
             };
         } else {
-            solutionSelect.style.display = 'none';
+            dropdownSolutions.style.display = 'none';
         }
 
         // Use innerHTML since we're adding styled spans
@@ -345,7 +345,7 @@ class KMapInterface {
         // Reset grid state
         this.grid.fill(0);
         this.elements.solution.innerHTML = '';
-        this.elements.solutionSelect.style.display = 'none';
+        this.elements.dropdownSolutions.style.display = 'none';
 
         // Clear group circles by removing all path elements from the SVG
         const svg = this.elements.grid.querySelector('.kmap-groups-svg');
@@ -404,10 +404,10 @@ class KMapInterface {
     }
 
     showCopySuccess() {
-        const copyBtn = this.elements.copyBtn;
-        copyBtn.style.color = 'var(--primary-color)';
+        const btnCopySolution = this.elements.btnCopySolution;
+        btnCopySolution.style.color = 'var(--primary-color)';
         setTimeout(() => {
-            copyBtn.style.color = 'var(--text-color)';
+            btnCopySolution.style.color = 'var(--text-color)';
         }, 1000);
     }
 
@@ -453,7 +453,7 @@ class KMapInterface {
     }
 
     setupClipboardHandlers() {
-        this.elements.copyBtn.addEventListener('click', () => {
+        this.elements.btnCopySolution.addEventListener('click', () => {
             const solutionText = this.getSolutionTextWithOverlines();
 
             // Try modern clipboard API first
@@ -686,7 +686,7 @@ class KMapInterface {
         const states = this.grid.slice();
 
         // Update layout icon using classes
-        const btn = this.elements.toggleLayoutBtn;
+        const btn = this.elements.btnToggleLayout;
         btn.classList.remove(this.isGrayCodeLayout ? 'binary-layout' : 'gray-layout');
         btn.classList.add(this.isGrayCodeLayout ? 'gray-layout' : 'binary-layout');
 
@@ -722,7 +722,7 @@ class KMapInterface {
         });
 
         // Show/hide layout button based on tab and variable count
-        const layoutBtn = this.elements.toggleLayoutBtn;
+        const layoutBtn = this.elements.btnToggleLayout;
         if (layoutBtn) {
             // Only show layout button if we're in kmap tab AND not in 2-variable mode
             layoutBtn.style.display = (tabName === 'kmap' && this.numVars !== 2) ? 'flex' : 'none';
@@ -738,10 +738,11 @@ class KMapInterface {
         this.setupClipboardHandlers();
 
         // Add event listener for hide zeros toggle
-        this.elements.hideZerosBtn?.addEventListener('click', () => {
+        this.elements.btnToggleZeros?.addEventListener('click', () => {
             this.hideZeros = !this.hideZeros;
+            localStorage.setItem('hideZeros', this.hideZeros);
             this.updateAllCellDisplays();
-            this.elements.hideZerosBtn.classList.toggle('active', this.hideZeros);
+            this.elements.btnToggleZeros.classList.toggle('active', this.hideZeros);
         });
     }
 
@@ -768,7 +769,7 @@ class KMapInterface {
 
     setupTabHandlers() {
         // Tab switching
-        this.elements.tabButtons.forEach(button => {
+        this.elements.btnTab.forEach(button => {
             button.addEventListener('click', () => {
                 this.switchTab(button.dataset.tab);
                 this.elements.tabsWrapper.classList.remove('show');
@@ -779,15 +780,15 @@ class KMapInterface {
 
     setupMenuHandlers() {
         // Hamburger menu
-        if (this.elements.hamburgerBtn && this.elements.tabsWrapper) {
-            this.elements.hamburgerBtn.addEventListener('click', () => {
+        if (this.elements.btnShowMenu && this.elements.tabsWrapper) {
+            this.elements.btnShowMenu.addEventListener('click', () => {
                 this.elements.tabsWrapper.classList.toggle('show');
             });
 
             // Close menu when clicking outside
             document.addEventListener('click', (e) => {
                 if (!this.elements.tabsWrapper.contains(e.target) &&
-                    !this.elements.hamburgerBtn.contains(e.target)) {
+                    !this.elements.btnShowMenu.contains(e.target)) {
                     this.elements.tabsWrapper.classList.remove('show');
                 }
             });
@@ -796,24 +797,24 @@ class KMapInterface {
 
     setupControlHandlers() {
         // Controls
-        this.elements.allOneBtn.addEventListener('click', () => this.setAllStates('1'));
-        this.elements.allXBtn.addEventListener('click', () => this.setAllStates('X'));
-        this.elements.allZeroBtn.addEventListener('click', () => this.setAllStates('0'));
+        this.elements.btnSetOnes.addEventListener('click', () => this.setAllStates('1'));
+        this.elements.btnSetXs.addEventListener('click', () => this.setAllStates('X'));
+        this.elements.btnSetZeros.addEventListener('click', () => this.setAllStates('0'));
     }
 
     updateToggleButton() {
-        const { toggleLayoutBtn, kmapTab } = this.elements;
+        const { btnToggleLayout, kmapTab } = this.elements;
         const isKmapActive = kmapTab && kmapTab.classList.contains('active');
-        if (toggleLayoutBtn) {
-            toggleLayoutBtn.style.display = isKmapActive ? 'flex' : 'none';
-            toggleLayoutBtn.disabled = this.numVars === 2;
-            toggleLayoutBtn.classList.toggle('disabled', this.numVars === 2);
+        if (btnToggleLayout) {
+            btnToggleLayout.style.display = isKmapActive ? 'flex' : 'none';
+            btnToggleLayout.disabled = this.numVars === 2;
+            btnToggleLayout.classList.toggle('disabled', this.numVars === 2);
             this.updateLayoutText();
         }
     }
 
     updateLayoutText() {
-        const layoutText = this.elements.toggleLayoutBtn.querySelector('.layout-text');
+        const layoutText = this.elements.btnToggleLayout.querySelector('.layout-text');
         if (!layoutText) return;
 
         if (this.numVars === 2) {
@@ -826,13 +827,13 @@ class KMapInterface {
     }
 
     setupVariableCycleHandler() {
-        if (this.elements.varSelect) {
+        if (this.elements.dropdownVariables) {
             // Set initial value
-            this.elements.varSelect.value = this.numVars;
+            this.elements.dropdownVariables.value = this.numVars;
 
             // Handle variable changes
-            this.elements.varSelect.addEventListener('change', () => {
-                this.numVars = parseInt(this.elements.varSelect.value);
+            this.elements.dropdownVariables.addEventListener('change', () => {
+                this.numVars = parseInt(this.elements.dropdownVariables.value);
 
                 // Update variables array
                 this.variables = [...Array(this.numVars).keys()].map(i => String.fromCharCode(65 + i));
@@ -861,9 +862,9 @@ class KMapInterface {
 
     setupLayoutHandlers() {
         // Setup layout toggle button
-        const toggleLayoutBtn = this.elements.toggleLayoutBtn;
-        if (toggleLayoutBtn) {
-            toggleLayoutBtn.addEventListener('click', () => this.toggleLayout());
+        const btnToggleLayout = this.elements.btnToggleLayout;
+        if (btnToggleLayout) {
+            btnToggleLayout.addEventListener('click', () => this.toggleLayout());
         }
 
         // Add resize observer for SVG updates

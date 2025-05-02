@@ -29,30 +29,26 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script>
-        // Register service worker for offline functionality
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
                     .then(registration => {
                         console.log('Service Worker registered successfully');
-                        // Add update check handler
-                        document.getElementById('update-app').addEventListener('click', async () => {
-                            if (!confirm('This will clear all cached data and force a fresh update. Continue?')) return;
+                        document.getElementById('btn-update-app').addEventListener('click', async () => {
+                            if (!confirm('This will clear ALL cached data (including preferences) and force a fresh update. Continue?')) return;
 
                             try {
-                                // Clear cache
+                                localStorage.clear();
                                 const cacheNames = await caches.keys();
                                 await Promise.all(cacheNames.map(name => caches.delete(name)));
 
-                                // Unregister service worker
                                 const registration = await navigator.serviceWorker.getRegistration();
                                 if (registration) await registration.unregister();
 
-                                // Force reload
                                 window.location.reload(true);
                             } catch (error) {
-                                console.error('Force update failed:', error);
-                                alert('Force update failed. Please try again.');
+                                console.error('Update failed:', error);
+                                alert('Update failed. Please check console for details.');
                             }
                         });
                     })
@@ -66,25 +62,60 @@
 
 <body>
     <svg style="display: none;">
-        <use href="assets/svg-defs.svg#icon-close"/>
-        <use href="assets/svg-defs.svg#icon-menu"/>
-        <use href="assets/svg-defs.svg#icon-hide-zeros"/>
-        <use href="assets/svg-defs.svg#icon-light-theme"/>
-        <use href="assets/svg-defs.svg#icon-dark-theme"/>
-        <use href="assets/svg-defs.svg#icon-info"/>
-        <use href="assets/svg-defs.svg#icon-copy"/>
-        <use href="assets/svg-defs.svg#icon-gray-layout"/>
-        <use href="assets/svg-defs.svg#icon-binary-layout"/>
-        <use href="assets/svg-defs.svg#icon-check"/>
-        <use href="assets/svg-defs.svg#icon-x"/>
-        <use href="assets/svg-defs.svg#icon-update"/>
-        <use href="assets/svg-defs.svg#icon-clear"/>
+        <use href="assets/icons/interface-icons.svg#icon-menu" />
+        <use href="assets/icons/interface-icons.svg#icon-hide-zeros" />
+        <use href="assets/icons/interface-icons.svg#icon-sun" />
+        <use href="assets/icons/interface-icons.svg#icon-moon" />
+        <use href="assets/icons/interface-icons.svg#icon-info" />
+        <use href="assets/icons/interface-icons.svg#icon-copy" />
+        <use href="assets/icons/interface-icons.svg#icon-layout-diagonal-a" />
+        <use href="assets/icons/interface-icons.svg#icon-layout-diagonal-b" />
+        <use href="assets/icons/interface-icons.svg#icon-check" />
+        <use href="assets/icons/interface-icons.svg#icon-close" />
+        <use href="assets/icons/interface-icons.svg#icon-refresh" />
+        <use href="assets/icons/interface-icons.svg#icon-trash" />
+        <use href="assets/icons/interface-icons.svg#icon-settings" />
     </svg>
     <div class="container">
+        <div class="overlay-popup" id="popup-settings">
+            <div class="wrapper-popup">
+                <button class="btn-popup-close svg-button" id="btn-popup-close-settings" aria-label="Close">
+                    <svg viewBox="0 0 24 24">
+                        <use href="assets/icons/interface-icons.svg#icon-close" />
+                    </svg>
+                </button>
+                <div class="content-popup" id="content-settings">
+                    <h2>Settings</h2>
+                    <div class="settings-grid">
+                        <button id="btn-toggle-theme" class="svg-button settings-button">
+                            <svg viewBox="0 0 24 24" width="18" height="18">
+                                <use class="icon-theme-light" href="assets/icons/interface-icons.svg#icon-sun" />
+                                <use class="icon-theme-dark" href="assets/icons/interface-icons.svg#icon-moon" />
+                            </svg>
+                            Toggle Theme
+                        </button>
+                        <button id="btn-toggle-zeros" class="svg-button settings-button">
+                            <svg viewBox="0 0 24 24" width="18" height="18">
+                                <use href="assets/icons/interface-icons.svg#icon-hide-zeros" />
+                            </svg>
+                            Toggle Zeros
+                        </button>
+                        <button id="btn-update-app" class="svg-button settings-button">
+                            <svg viewBox="0 0 24 24" width="18" height="18">
+                                <use href="assets/icons/interface-icons.svg#icon-refresh" />
+                            </svg>
+                            Install Updates
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="overlay-popup" id="popup-info">
             <div class="wrapper-popup">
-                <button class="btn-popup-close svg-button" id="close-popup-btn" aria-label="Close">
-                    <svg viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-close"/></svg>
+                <button class="btn-popup-close svg-button" id="btn-popup-close-info" aria-label="Close">
+                    <svg viewBox="0 0 24 24">
+                        <use href="assets/icons/interface-icons.svg#icon-close" />
+                    </svg>
                 </button>
                 <div class="content-popup" id="content-info">
                     <h2>K-Map Solver</h2>
@@ -106,19 +137,15 @@
                     <p>
                         <a href="https://github.com/robonxt/web-kmap" target="_blank">View source code on GitHub</a>
                     </p>
-                    <button id="update-app"
-                        class="svg-button"
-                        style="background-color: var(--primary-color); color: var(--text-primary); padding: 10px 20px; font-size: 16px; margin: 4px 2px;">
-                        <svg viewBox="0 0 24 24" width="18" height="18" style="margin-right: 8px;"><use href="assets/svg-defs.svg#icon-update"/></svg>
-                        Install Updates
-                    </button>
                 </div>
             </div>
         </div>
         <div class="container-header-bar">
             <div class="header-tab-menu">
-                <button class="btn-toggle-menu svg-button" id="btn-toggle-menu" aria-label="Menu">
-                    <svg viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-menu"/></svg>
+                <button class="btn-show-menu svg-button" id="btn-show-menu" aria-label="Menu">
+                    <svg viewBox="0 0 24 24">
+                        <use href="assets/icons/interface-icons.svg#icon-menu" />
+                    </svg>
                 </button>
                 <div class="wrapper-tabs" id="wrapper-tabs">
                     <button class="btn-tab active" id="btn-tab-kmap" data-tab="kmap">K-Map</button>
@@ -127,15 +154,15 @@
                 </div>
             </div>
             <div class="controls-header">
-                <button class="svg-button" id="btn-toggle-zeros" title="Toggle zero visibility">
-                    <svg viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-hide-zeros"/></svg>
+                <button class="svg-button" id="btn-show-settings" aria-label="Show Settings">
+                    <svg viewBox="0 0 24 24">
+                        <use href="assets/icons/interface-icons.svg#icon-settings" />
+                    </svg>
                 </button>
-                <button class="svg-button" id="btn-toggle-theme" aria-label="Toggle theme">
-                    <svg class="icon-theme-light" viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-light-theme"/></svg>
-                    <svg class="icon-theme-dark" viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-dark-theme"/></svg>
-                </button>
-                <button class="svg-button btn-show-info" id="btn-show-info" aria-label="Show Information">
-                    <svg viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-info"/></svg>
+                <button class="svg-button" id="btn-show-info" aria-label="Show Information">
+                    <svg viewBox="0 0 24 24">
+                        <use href="assets/icons/interface-icons.svg#icon-info" />
+                    </svg>
                 </button>
             </div>
         </div>
@@ -146,7 +173,9 @@
             <div class="toolbar-solution">
                 <div id="solution"></div>
                 <button id="btn-copy-solution" class="svg-button" title="Copy to clipboard">
-                    <svg viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-copy"/></svg>
+                    <svg viewBox="0 0 24 24">
+                        <use href="assets/icons/interface-icons.svg#icon-copy" />
+                    </svg>
                 </button>
             </div>
         </div>
@@ -158,20 +187,30 @@
             </select>
             <button id="btn-toggle-layout" class="svg-button gray-layout" aria-label="Toggle Layout"
                 title="Switch Layout">
-                <svg class="icon-layout-gray" viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-gray-layout"/></svg>
-                <svg class="icon-layout-binary" viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-binary-layout"/></svg>
+                <svg class="icon-layout-gray" viewBox="0 0 24 24">
+                    <use href="assets/icons/interface-icons.svg#icon-layout-diagonal-a" />
+                </svg>
+                <svg class="icon-layout-binary" viewBox="0 0 24 24">
+                    <use href="assets/icons/interface-icons.svg#icon-layout-diagonal-b" />
+                </svg>
                 <span class="layout-text">CD/AB</span>
             </button>
             <button class="svg-button" id="btn-set-ones">
-                <svg viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-check"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <use href="assets/icons/interface-icons.svg#icon-check" />
+                </svg>
                 All 1
             </button>
             <button class="svg-button" id="btn-set-xs">
-                <svg viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-x"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <use href="assets/icons/interface-icons.svg#icon-close" />
+                </svg>
                 All X
             </button>
             <button class="svg-button" id="btn-set-zeros">
-                <svg viewBox="0 0 24 24"><use href="assets/svg-defs.svg#icon-clear"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <use href="assets/icons/interface-icons.svg#icon-trash" />
+                </svg>
                 Clear
             </button>
         </div>
@@ -199,21 +238,21 @@
     <script src="kmap-solver.js" defer></script>
     <script src="kmap-interface.js" defer></script>
     <script>
-        // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             new KMapInterface();
-            // Add hamburger menu toggle
-            const hamburgerBtn = document.getElementById('btn-toggle-menu');
+            const btnShowMenu = document.getElementById('btn-show-menu');
             const tabsWrapper = document.getElementById('wrapper-tabs');
             const sliderBg = document.getElementById('slider-bg');
             const tabBtns = document.querySelectorAll('.btn-tab');
-            // Info popup functionality
+
+            const closeBtnInfo = document.getElementById('btn-popup-close-info');
+            const closeBtnSettings = document.getElementById('btn-popup-close-settings');
             const infoBtn = document.getElementById('btn-show-info');
-            const closeBtn = document.getElementById('close-popup-btn');
             const infoPopup = document.getElementById('popup-info');
-            // Function to update slider position
+            const settingsBtn = document.getElementById('btn-show-settings');
+            const settingsPopup = document.getElementById('popup-settings');
+
             function updateSlider(activeTab) {
-                // if (window.innerWidth > 400 && sliderBg && activeTab) {
                 if (sliderBg && activeTab) {
                     const tabWidth = activeTab.offsetWidth;
                     const tabLeft = activeTab.offsetLeft;
@@ -222,19 +261,17 @@
                 }
             }
 
-            if (hamburgerBtn && tabsWrapper) {
-                hamburgerBtn.addEventListener('click', () => {
+            if (btnShowMenu && tabsWrapper) {
+                btnShowMenu.addEventListener('click', () => {
                     tabsWrapper.classList.toggle('show');
                 });
 
-                // Close menu when clicking outside
                 document.addEventListener('click', (e) => {
-                    if (!tabsWrapper.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                    if (!tabsWrapper.contains(e.target) && !btnShowMenu.contains(e.target)) {
                         tabsWrapper.classList.remove('show');
                     }
                 });
 
-                // Update slider when switching tabs
                 tabBtns.forEach(btn => {
                     btn.addEventListener('click', () => {
                         tabsWrapper.classList.remove('show');
@@ -243,26 +280,28 @@
                 });
             }
 
-            // Initial slider position
             const initialActiveTab = document.querySelector('.btn-tab.active');
             updateSlider(initialActiveTab);
 
-            // Info popup functionality
             infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
-            closeBtn.addEventListener('click', () => infoPopup.classList.remove('active'));
+            closeBtnInfo.addEventListener('click', () => infoPopup.classList.remove('active'));
             infoPopup.addEventListener('click', (e) => {
                 if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
             });
 
-            // Theme handling
+            settingsBtn.addEventListener('click', () => settingsPopup.classList.add('active'));
+            closeBtnSettings.addEventListener('click', () => settingsPopup.classList.remove('active'));
+            settingsPopup.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+            });
+
             const themeToggle = document.getElementById('btn-toggle-theme');
             const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
             const prefersLightScheme = window.matchMedia('(prefers-color-scheme: light)');
 
-            // Initialize theme
             function initializeTheme() {
                 const storedTheme = localStorage.getItem('theme');
-                let theme = 'light'; // Default theme
+                let theme = 'light'; 
 
                 if (storedTheme) {
                     theme = storedTheme;
@@ -276,22 +315,17 @@
                 themeToggle.setAttribute('data-theme', theme);
             }
 
-            // Initialize theme on load
             initializeTheme();
 
-            // Handle theme toggle click
             themeToggle.addEventListener('click', () => {
                 const currentTheme = document.body.getAttribute('data-theme');
-                // Switch TO the theme that matches the visible icon
                 const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
-                // console.log(`Switching to ${newTheme} theme`);
                 document.body.setAttribute('data-theme', newTheme);
                 themeToggle.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
             });
 
-            // Handle system theme changes
             prefersLightScheme.addEventListener('change', (e) => {
                 if (!localStorage.getItem('theme')) {
                     const theme = e.matches ? 'light' : 'dark';
