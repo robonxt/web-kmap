@@ -12,7 +12,6 @@ const ASSETS = [
   './kmap-interface.js',
   './kmap-solver.js',
   './manifest.json',
-  './pwa-check.html',
   './styles.css',
   './sw.js'
 ];
