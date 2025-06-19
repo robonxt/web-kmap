@@ -4,6 +4,12 @@ const KMapGrayCodes = new Map([
     [4, { rows: ['00', '01', '11', '10'], cols: ['00', '01', '11', '10'] }]
 ]);
 
+const KMapBinaryLayouts = new Map([
+    [2, [[0, 2], [1, 3]]],
+    [3, [[0, 2, 6, 4], [1, 3, 7, 5]]],
+    [4, [[0, 4, 12, 8], [1, 5, 13, 9], [3, 7, 15, 11], [2, 6, 14, 10]]]
+]);
+
 function getKMap(variables) {
     const grayCodes = KMapGrayCodes.get(variables.length);
     if (!grayCodes) return [];
@@ -240,7 +246,7 @@ function solve(variables, minterms, dontcares = []) {
 }
 
 if (typeof window !== 'undefined') {
-    window.KMapSolver = { solve, KMapGrayCodes, getKMap, findDecimalPos };
+    window.KMapSolver = { solve, KMapGrayCodes, getKMap, findDecimalPos, KMapBinaryLayouts };
 } else {
-    module.exports = { solve, KMapGrayCodes, getKMap, findDecimalPos };
+    module.exports = { solve, KMapGrayCodes, getKMap, findDecimalPos, KMapBinaryLayouts };
 }

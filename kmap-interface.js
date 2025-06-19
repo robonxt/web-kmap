@@ -54,20 +54,20 @@ class KMapInterface {
         this.clear();
     }
 
-    initializeLayouts() {
-        // Use gray code layouts from KMapSolver and only maintain normal layouts here
+        initializeLayouts() {
+        // Fetch all layouts from KMapSolver to centralize definitions
         return {
             2: {
                 gray: window.KMapSolver.KMapGrayCodes.get(2),
-                normal: window.KMapSolver.KMapGrayCodes.get(2)
+                normal: window.KMapSolver.KMapBinaryLayouts.get(2)
             },
             3: {
                 gray: window.KMapSolver.KMapGrayCodes.get(3),
-                normal: [[0, 2, 6, 4], [1, 3, 7, 5]]
+                normal: window.KMapSolver.KMapBinaryLayouts.get(3)
             },
             4: {
                 gray: window.KMapSolver.KMapGrayCodes.get(4),
-                normal: [[0, 4, 12, 8], [1, 5, 13, 9], [3, 7, 15, 11], [2, 6, 14, 10]]
+                normal: window.KMapSolver.KMapBinaryLayouts.get(4)
             }
         };
     }
@@ -884,8 +884,3 @@ class KMapInterface {
     }
 }
 
-// Initialize when DOM is loaded
-// This one is needed for the hamburger menu
-document.addEventListener('DOMContentLoaded', () => {
-    new KMapInterface();
-});
