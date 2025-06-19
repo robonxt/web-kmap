@@ -737,6 +737,8 @@ class KMapInterface {
     setupEventListeners() {
         this.setupTabHandlers();
         this.setupMenuHandlers();
+        this.setupPopupHandlers();
+        this.setupThemeHandlers();
         this.setupControlHandlers();
         this.setupVariableCycleHandler();
         this.setupLayoutHandlers();
@@ -748,6 +750,94 @@ class KMapInterface {
             localStorage.setItem('hideZeros', this.hideZeros);
             this.updateAllCellDisplays();
             this.elements.btnToggleZeros.classList.toggle('active', this.hideZeros);
+        });
+    }
+
+    setupMenuHandlers() {
+        const btnShowMenu = this.elements.btnShowMenu;
+        const tabsWrapper = this.elements.tabsWrapper;
+        const tabBtns = this.elements.btnTab;
+        const sliderBg = this.elements.sliderBg;
+        if (btnShowMenu && tabsWrapper) {
+            btnShowMenu.addEventListener('click', () => {
+                tabsWrapper.classList.toggle('show');
+            });
+            document.addEventListener('click', (e) => {
+                if (!tabsWrapper.contains(e.target) && !btnShowMenu.contains(e.target)) {
+                    tabsWrapper.classList.remove('show');
+                }
+            });
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabsWrapper.classList.remove('show');
+                    setTimeout(() => this.updateSliderPosition(btn), 0);
+                });
+            });
+            // Set initial slider position
+            const initialActiveTab = document.querySelector('.btn-tab.active');
+            this.updateSliderPosition(initialActiveTab);
+        }
+    }
+
+    setupPopupHandlers() {
+        const closeBtnInfo = document.getElementById('btn-popup-close-info');
+        const closeBtnSettings = document.getElementById('btn-popup-close-settings');
+        const infoBtn = document.getElementById('btn-show-info');
+        const infoPopup = document.getElementById('popup-info');
+        const settingsBtn = document.getElementById('btn-show-settings');
+        const settingsPopup = document.getElementById('popup-settings');
+        if (infoBtn && infoPopup) {
+            infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
+        }
+        if (closeBtnInfo && infoPopup) {
+            closeBtnInfo.addEventListener('click', () => infoPopup.classList.remove('active'));
+            infoPopup.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+            });
+        }
+        if (settingsBtn && settingsPopup) {
+            settingsBtn.addEventListener('click', () => settingsPopup.classList.add('active'));
+        }
+        if (closeBtnSettings && settingsPopup) {
+            closeBtnSettings.addEventListener('click', () => settingsPopup.classList.remove('active'));
+            settingsPopup.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+            });
+        }
+    }
+
+    setupThemeHandlers() {
+        const themeToggle = this.elements.btnToggleTheme;
+        if (!themeToggle) return;
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const prefersLightScheme = window.matchMedia('(prefers-color-scheme: light)');
+        function initializeTheme() {
+            const storedTheme = localStorage.getItem('theme');
+            let theme = 'light';
+            if (storedTheme) {
+                theme = storedTheme;
+            } else if (prefersLightScheme.matches) {
+                theme = 'light';
+            } else if (prefersDarkScheme.matches) {
+                theme = 'dark';
+            }
+            document.body.setAttribute('data-theme', theme);
+            themeToggle.setAttribute('data-theme', theme);
+        }
+        initializeTheme();
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', newTheme);
+            themeToggle.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+        prefersLightScheme.addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                const theme = e.matches ? 'light' : 'dark';
+                document.body.setAttribute('data-theme', theme);
+                themeToggle.setAttribute('data-theme', theme);
+            }
         });
     }
 
@@ -781,23 +871,6 @@ class KMapInterface {
                 this.updateSliderPosition(button);
             });
         });
-    }
-
-    setupMenuHandlers() {
-        // Hamburger menu
-        if (this.elements.btnShowMenu && this.elements.tabsWrapper) {
-            this.elements.btnShowMenu.addEventListener('click', () => {
-                this.elements.tabsWrapper.classList.toggle('show');
-            });
-
-            // Close menu when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!this.elements.tabsWrapper.contains(e.target) &&
-                    !this.elements.btnShowMenu.contains(e.target)) {
-                    this.elements.tabsWrapper.classList.remove('show');
-                }
-            });
-        }
     }
 
     setupControlHandlers() {
@@ -884,8 +957,3 @@ class KMapInterface {
     }
 }
 
-// Initialize when DOM is loaded
-// This one is needed for the hamburger menu
-document.addEventListener('DOMContentLoaded', () => {
-    new KMapInterface();
-});
