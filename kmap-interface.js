@@ -483,20 +483,25 @@ class KMapInterface {
         const gridRect = this.elements.grid.getBoundingClientRect();
         if (gridRect.width === 0 || gridRect.height === 0) return;
 
+        const allCellElements = this.elements.grid.querySelectorAll('.cell');
+        const allCellRects = new Map();
+        allCellElements.forEach(cellEl => {
+            allCellRects.set(cellEl.dataset.index, cellEl.getBoundingClientRect());
+        });
+
         // Special case for "1" - group all cells
         if (terms.length === 1 && terms[0] === "1") {
-            const allCells = Array.from(this.elements.grid.querySelectorAll('.cell'))
-                .map(cell => cell.getBoundingClientRect())
+            const allCellsForGroup1 = Array.from(allCellElements) // Use already queried elements
+                .map(cellEl => allCellRects.get(cellEl.dataset.index)) // Get pre-calculated rects
                 .filter(rect => rect);
-
-            if (allCells.length > 0) {
+            
+            if (allCellsForGroup1.length > 0) {
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.classList.add('kmap-group-path');
                 path.style.stroke = this.groupColors[0];
 
-                const pathData = this.calculateGroupPath(allCells, gridRect);
+                const pathData = this.calculateGroupPath(allCellsForGroup1, gridRect);
                 path.setAttribute('d', pathData);
-
                 svg.appendChild(path);
             }
             return;
@@ -559,19 +564,19 @@ class KMapInterface {
 
             // Create path for matching cells
             if (matchingCells.length > 0) {
-                const cells = matchingCells.map(cell => {
-                    const element = this.getCellElement(cell.row, cell.col);
-                    return element.getBoundingClientRect();
-                }).filter(rect => rect);
+                const groupCellRects = matchingCells.map(cellInfo => { // cellInfo is { decimal, row, col }
+                    return allCellRects.get(String(cellInfo.decimal)); // Get from pre-calculated Map
+                                                                    // Ensure key type matches (string if dataset.index is string)
+                }).filter(rect => rect); // Filter out any undefined if a cell wasn't found (shouldn't happen)
 
-                if (cells.length === 0) return;
+                if (groupCellRects.length === 0) return;
 
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.classList.add('kmap-group-path');
                 path.dataset.wrap = this.isWrapped(matchingCells) ? 'true' : 'false';
                 path.style.stroke = this.groupColors[index % this.groupColors.length];
 
-                const pathData = this.calculateGroupPath(cells, gridRect);
+                const pathData = this.calculateGroupPath(groupCellRects, gridRect); // Pass the rects
                 path.setAttribute('d', pathData);
 
                 svg.appendChild(path);
