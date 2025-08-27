@@ -6,7 +6,7 @@ the following files are used:
 - index.html is the main file.
   - in index.html, there is a info popup section, that is for a very simple and concise documentation of the README.md
 - assets/icons folder has some icons for the manifest.
-- assets/icons/interface-icons.svg file has svg definitions. 
+- assets/icon/interface-icons.svg file has svg definitions. 
 - ALWAYS use the powershell command Select-String to view svg files.
 - kmap-interface.js has the UI logic.
 - kmap-solver.js has the K-map logic.
