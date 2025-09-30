@@ -473,6 +473,7 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
+    backdrop-filter: blur(2px);
 }
 
 .overlay-popup.active {
@@ -486,6 +487,14 @@ body {
     max-width: var(--max-width);
     width: 90%;
     margin: 15px auto;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0, 0, 0.2, 1), opacity 0.3s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.overlay-popup.active .wrapper-popup {
+    transform: scale(1);
+    opacity: 1;
 }
 
 .content-popup {
@@ -496,6 +505,27 @@ body {
     scrollbar-width: thin;
     color: var(--text-primary);
     line-height: 1.2;
+}
+
+.footer-popup {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing);
+    padding: var(--spacing);
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-surface);
+    border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.btn-popup-action {
+    min-width: 100px;
+    padding: calc(var(--spacing) * 1.5) var(--spacing);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
 }
 
 .content-popup h1 {
@@ -819,5 +849,10 @@ body {
 
     .content-popup a:hover {
         text-decoration: underline;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
     }
 }

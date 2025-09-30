@@ -786,6 +786,12 @@ class KMapInterface {
         const infoPopup = document.getElementById('popup-info');
         const settingsBtn = document.getElementById('btn-show-settings');
         const settingsPopup = document.getElementById('popup-settings');
+        const btnUpdateApp = document.getElementById('btn-update-app');
+        const popupUpdateConfirm = document.getElementById('popup-update-confirm');
+        const closeBtnUpdateConfirm = document.getElementById('btn-popup-close-update-confirm');
+        const btnCancelUpdate = document.getElementById('btn-cancel-update');
+        const btnConfirmUpdate = document.getElementById('btn-confirm-update');
+
         if (infoBtn && infoPopup) {
             infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
         }
@@ -802,6 +808,45 @@ class KMapInterface {
             closeBtnSettings.addEventListener('click', () => settingsPopup.classList.remove('active'));
             settingsPopup.addEventListener('click', (e) => {
                 if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+            });
+        }
+
+        if (btnUpdateApp && popupUpdateConfirm) {
+            btnUpdateApp.addEventListener('click', () => {
+                settingsPopup.classList.remove('active');
+                popupUpdateConfirm.classList.add('active');
+            });
+        }
+
+        if (closeBtnUpdateConfirm && popupUpdateConfirm) {
+            closeBtnUpdateConfirm.addEventListener('click', () => popupUpdateConfirm.classList.remove('active'));
+        }
+
+        if (btnCancelUpdate && popupUpdateConfirm) {
+            btnCancelUpdate.addEventListener('click', () => popupUpdateConfirm.classList.remove('active'));
+        }
+
+        if (popupUpdateConfirm) {
+            popupUpdateConfirm.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+            });
+        }
+
+        if (btnConfirmUpdate) {
+            btnConfirmUpdate.addEventListener('click', async () => {
+                try {
+                    localStorage.clear();
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) await registration.unregister();
+
+                    window.location.reload(true);
+                } catch (error) {
+                    console.error('Update failed:', error);
+                    alert('Update failed. Please check console for details.');
+                }
             });
         }
     }

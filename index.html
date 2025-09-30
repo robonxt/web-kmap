@@ -34,23 +34,6 @@
                 navigator.serviceWorker.register('sw.js')
                     .then(registration => {
                         console.log('Service Worker registered successfully');
-                        document.getElementById('btn-update-app').addEventListener('click', async () => {
-                            if (!confirm('This will clear ALL cached data (including preferences) and force a fresh update. Continue?')) return;
-
-                            try {
-                                localStorage.clear();
-                                const cacheNames = await caches.keys();
-                                await Promise.all(cacheNames.map(name => caches.delete(name)));
-
-                                const registration = await navigator.serviceWorker.getRegistration();
-                                if (registration) await registration.unregister();
-
-                                window.location.reload(true);
-                            } catch (error) {
-                                console.error('Update failed:', error);
-                                alert('Update failed. Please check console for details.');
-                            }
-                        });
                     })
                     .catch(error => {
                         console.warn('Service Worker registration failed:', error);
@@ -233,13 +216,33 @@
                 <tbody id="truth-table-body"></tbody>
             </table>
         </div>
-
+    </div>
+    <div class="overlay-popup" id="popup-update-confirm">
+        <div class="wrapper-popup">
+            <button class="btn-popup-close svg-button" id="btn-popup-close-update-confirm" aria-label="Close">
+                <svg viewBox="0 0 24 24">
+                    <use href="assets/icon/icon-close.svg#icon-close" />
+                </svg>
+            </button>
+            <div class="content-popup" id="content-update-confirm">
+                <h2>Confirm update</h2>
+                <p>This will clear ALL cached data (including preferences) and force a fresh update. Continue?</p>
+            </div>
+            <div class="footer-popup">
+                <button class="btn-popup-action svg-button" id="btn-cancel-update">Cancel</button>
+                <button class="btn-popup-action btn-danger svg-button" id="btn-confirm-update">Update</button>
+            </div>
+        </div>
     </div>
     <script src="kmap-solver.js" defer></script>
     <script src="kmap-interface.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             new KMapInterface();
+            const btnUpdateApp = document.getElementById('btn-update-app');
+            const btnConfirmUpdate = document.getElementById('btn-confirm-update');
+            const btnCancelUpdate = document.getElementById('btn-cancel-update');
+            const popupUpdateConfirm = document.getElementById('popup-update-confirm');
         });
     </script>
 </body>
