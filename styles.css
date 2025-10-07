@@ -335,7 +335,7 @@ body {
 }
 
 .truth-table td.row-id {
-    background-color: var(--bg-surface);
+    background-color: var(--soft-border);
     font-weight: bold;
     color: var(--text-secondary);
     cursor: default;
