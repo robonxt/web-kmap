@@ -75,10 +75,8 @@ class KMapInterface {
     updateSliderPosition(activeTab = document.querySelector('.btn-tab.active')) {
         const sliderBg = this.elements.sliderBg;
         if (sliderBg && activeTab) {
-            const tabWidth = activeTab.offsetWidth;
-            const tabLeft = activeTab.offsetLeft;
-            sliderBg.style.width = `${tabWidth}px`;
-            sliderBg.style.transform = `translateX(${tabLeft}px)`;
+            sliderBg.style.setProperty('--tab-width', `${activeTab.offsetWidth}px`);
+            sliderBg.style.left = `${activeTab.offsetLeft}px`;
         }
     }
 
