@@ -1,0 +1,3 @@
+[submodule "guidelines"]
+	path = guidelines
+	url = https://github.com/robonxt/robonxt-visual-branding-guidelines.git
