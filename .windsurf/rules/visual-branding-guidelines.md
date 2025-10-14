@@ -2,8 +2,16 @@
 trigger: always_on
 ---
 
-Design system, brand identity, and how-to for components are found here in the README: https://raw.githubusercontent.com/robonxt/robonxt-visual-branding-guidelines/refs/heads/main/README.md
+Design system, brand identity, and design implementions are found in guidelines/README.md
 
-Design tokens are found here in the tokens.json: https://raw.githubusercontent.com/robonxt/robonxt-visual-branding-guidelines/refs/heads/main/tokens.json
+Design tokens in CSS are found in guidelines/tokens.css
 
-You MUST open those two pages and load the information from that page as guidelines for design.
+Design implementions in CSS are found in guidelines/components.css
+
+NEVER edit guidelines
+
+NEVER import files from guidelines/public
+
+ONLY import tokens.css and components.css from guidelines.
+
+You MUST load and FOLLOW the guidelines.
