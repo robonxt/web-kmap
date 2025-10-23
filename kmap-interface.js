@@ -4,19 +4,19 @@ class KMapInterface {
         this.elements = {
             grid: document.getElementById('kmap-grid'),
             solution: document.getElementById('solution'),
-            dropdownSolutions: document.getElementById('dropdown-solutions'),
+            dropdownSolutionsContainer: document.getElementById('dropdown-solutions-container'),
+            dropdownSolutionsToggle: document.getElementById('dropdown-solutions-toggle'),
+            dropdownSolutionsLabel: document.getElementById('dropdown-solutions-label'),
+            dropdownSolutionsMenu: document.getElementById('dropdown-solutions-menu'),
             btnCopySolution: document.getElementById('btn-copy-solution'),
             truthTableBody: document.getElementById('truth-table-body'),
             btnToggleLayout: document.getElementById('btn-toggle-layout'),
-            sliderBg: document.getElementById('slider-bg'),
-            btnShowMenu: document.getElementById('btn-show-menu'),
-            tabsWrapper: document.getElementById('wrapper-tabs'),
-            btnTab: document.querySelectorAll('.btn-tab'),
-            kmapTab: document.getElementById('btn-tab-kmap'),
             btnSetOnes: document.getElementById('btn-set-ones'),
             btnSetXs: document.getElementById('btn-set-xs'),
             btnSetZeros: document.getElementById('btn-set-zeros'),
-            dropdownVariables: document.getElementById('dropdown-variables'),
+            dropdownVariablesToggle: document.getElementById('dropdown-variables-toggle'),
+            dropdownVariablesLabel: document.getElementById('dropdown-variables-label'),
+            dropdownVariablesMenu: document.getElementById('dropdown-variables-menu'),
             btnToggleZeros: document.getElementById('btn-toggle-zeros'),
             btnToggleTheme: document.getElementById('btn-toggle-theme')
         };
@@ -49,7 +49,6 @@ class KMapInterface {
         this.initializeUI();
         this.initializeTruthTable();
         this.setupEventListeners();
-        this.updateSliderPosition();
         this.elements.btnToggleZeros?.classList.toggle('active', this.hideZeros);
         this.clear();
     }
@@ -72,18 +71,9 @@ class KMapInterface {
         };
     }
 
-    updateSliderPosition(activeTab = document.querySelector('.btn-tab.active')) {
-        const sliderBg = this.elements.sliderBg;
-        if (sliderBg && activeTab) {
-            sliderBg.style.setProperty('--tab-width', `${activeTab.offsetWidth}px`);
-            sliderBg.style.left = `${activeTab.offsetLeft}px`;
-        }
-    }
-
     initializeUI() {
         const grid = this.elements.grid;
         grid.innerHTML = '';
-
         const layout = this.isGrayCodeLayout ?
             this.layouts[this.numVars].gray :
             this.layouts[this.numVars].normal;
@@ -123,16 +113,16 @@ class KMapInterface {
 
         // Extract binary representation from binaryDisplay
         const binaryPart = index.toString(2).padStart(this.numVars, '0');
-        
+
         // Create decimal display
         const decDiv = document.createElement('div');
         decDiv.className = 'decimal-display';
         decDiv.textContent = index;
-        
+
         // Create value display (center)
         const valDiv = document.createElement('div');
         valDiv.className = 'value-display';
-        valDiv.textContent = (state === '1' || state === 'X') ? state : 
+        valDiv.textContent = (state === '1' || state === 'X') ? state :
             (this.hideZeros ? 'ㅤ' : '0');
         // Create binary display
         const binDiv = document.createElement('div');
@@ -298,21 +288,47 @@ class KMapInterface {
     }
 
     updateSolution(result) {
-        const { solution, dropdownSolutions } = this.elements;
+        const { solution, dropdownSolutionsContainer, dropdownSolutionsMenu, dropdownSolutionsLabel } = this.elements;
         const solutions = result.solutions || [result];
 
         if (solutions.length > 1) {
-            dropdownSolutions.innerHTML = solutions.map((sol, i) =>
-                `<option value="${sol}">#${i + 1} of ${solutions.length}</option>`).join('');
-            dropdownSolutions.style.display = 'block';
-            dropdownSolutions.value = solutions[0];
-            dropdownSolutions.onchange = () => {
-                solution.innerHTML = this.addOverline(dropdownSolutions.value);
-                const terms = dropdownSolutions.value.split(' + ');
-                this.updateGroupsFromTerms(terms);
+            // Populate dropdown menu
+            dropdownSolutionsMenu.innerHTML = solutions.map((sol, i) =>
+                `<button class="dropdown-item" data-solution="${sol.replace(/"/g, '&quot;')}">#${i + 1} of ${solutions.length}</button>`
+            ).join('');
+
+            dropdownSolutionsContainer.style.display = 'inline-block';
+            dropdownSolutionsLabel.textContent = `#1 of ${solutions.length}`;
+
+            // Setup dropdown handlers
+            const toggle = this.elements.dropdownSolutionsToggle;
+            const menu = dropdownSolutionsMenu;
+
+            toggle.onclick = (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('is-visible');
             };
+
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (!menu.contains(e.target) && e.target !== toggle) {
+                    menu.classList.remove('is-visible');
+                }
+            });
+
+            // Handle item clicks
+            menu.querySelectorAll('.dropdown-item').forEach((item, index) => {
+                item.onclick = () => {
+                    const sol = item.dataset.solution;
+                    solution.innerHTML = this.addOverline(sol);
+                    dropdownSolutionsLabel.textContent = `#${index + 1} of ${solutions.length}`;
+                    menu.classList.remove('is-visible');
+                    const terms = sol.split(' + ');
+                    this.updateGroupsFromTerms(terms);
+                };
+            });
         } else {
-            dropdownSolutions.style.display = 'none';
+            dropdownSolutionsContainer.style.display = 'none';
         }
 
         // Use innerHTML since we're adding styled spans
@@ -343,7 +359,7 @@ class KMapInterface {
         // Reset grid state
         this.grid.fill(0);
         this.elements.solution.innerHTML = '';
-        this.elements.dropdownSolutions.style.display = 'none';
+        this.elements.dropdownSolutionsContainer.style.display = 'none';
 
         // Clear group circles by removing all path elements from the SVG
         const svg = this.elements.grid.querySelector('.kmap-groups-svg');
@@ -370,11 +386,11 @@ class KMapInterface {
         if (isKMapCell) {
             const valueDisplay = cell.querySelector('.value-display');
             if (valueDisplay) {
-                valueDisplay.textContent = (newState === '1' || newState === 'X') ? newState : 
+                valueDisplay.textContent = (newState === '1' || newState === 'X') ? newState :
                     (this.hideZeros ? 'ㅤ' : '0');
             }
         } else {
-            cell.textContent = (newState === '1' || newState === 'X') ? newState : 
+            cell.textContent = (newState === '1' || newState === 'X') ? newState :
                 (this.hideZeros ? 'ㅤ' : '0');
         }
 
@@ -492,7 +508,7 @@ class KMapInterface {
             const allCellsForGroup1 = Array.from(allCellElements) // Use already queried elements
                 .map(cellEl => allCellRects.get(cellEl.dataset.index)) // Get pre-calculated rects
                 .filter(rect => rect);
-            
+
             if (allCellsForGroup1.length > 0) {
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.classList.add('kmap-group-path');
@@ -709,16 +725,6 @@ class KMapInterface {
     }
 
     switchTab(tabName) {
-        // Update active tab
-        document.querySelectorAll('.btn-tab').forEach(button => {
-            button.classList.toggle('active', button.dataset.tab === tabName);
-
-            // Update slider position if this is the active button
-            if (button.dataset.tab === tabName) {
-                this.updateSliderPosition(button);
-            }
-        });
-
         // Show/hide content
         document.querySelectorAll('.tab-content-container').forEach(content => {
             content.classList.toggle('active', content.id === tabName);
@@ -733,14 +739,13 @@ class KMapInterface {
     }
 
     setupEventListeners() {
-        this.setupTabHandlers();
-        this.setupMenuHandlers();
         this.setupPopupHandlers();
         this.setupThemeHandlers();
         this.setupControlHandlers();
         this.setupVariableCycleHandler();
         this.setupLayoutHandlers();
         this.setupClipboardHandlers();
+        this.setupNavigationHandlers();
 
         // Add event listener for hide zeros toggle
         this.elements.btnToggleZeros?.addEventListener('click', () => {
@@ -751,31 +756,6 @@ class KMapInterface {
         });
     }
 
-    setupMenuHandlers() {
-        const btnShowMenu = this.elements.btnShowMenu;
-        const tabsWrapper = this.elements.tabsWrapper;
-        const tabBtns = this.elements.btnTab;
-        const sliderBg = this.elements.sliderBg;
-        if (btnShowMenu && tabsWrapper) {
-            btnShowMenu.addEventListener('click', () => {
-                tabsWrapper.classList.toggle('show');
-            });
-            document.addEventListener('click', (e) => {
-                if (!tabsWrapper.contains(e.target) && !btnShowMenu.contains(e.target)) {
-                    tabsWrapper.classList.remove('show');
-                }
-            });
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    tabsWrapper.classList.remove('show');
-                    setTimeout(() => this.updateSliderPosition(btn), 0);
-                });
-            });
-            // Set initial slider position
-            const initialActiveTab = document.querySelector('.btn-tab.active');
-            this.updateSliderPosition(initialActiveTab);
-        }
-    }
 
     setupPopupHandlers() {
         const closeBtnInfo = document.getElementById('btn-popup-close-info');
@@ -864,21 +844,21 @@ class KMapInterface {
             } else if (prefersDarkScheme.matches) {
                 theme = 'dark';
             }
-            document.body.setAttribute('data-theme', theme);
+            document.documentElement.setAttribute('data-theme', theme);
             themeToggle.setAttribute('data-theme', theme);
         }
         initializeTheme();
         themeToggle.addEventListener('click', () => {
-            const currentTheme = document.body.getAttribute('data-theme');
+            const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            document.body.setAttribute('data-theme', newTheme);
+            document.documentElement.setAttribute('data-theme', newTheme);
             themeToggle.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
         });
         prefersLightScheme.addEventListener('change', (e) => {
             if (!localStorage.getItem('theme')) {
                 const theme = e.matches ? 'light' : 'dark';
-                document.body.setAttribute('data-theme', theme);
+                document.documentElement.setAttribute('data-theme', theme);
                 themeToggle.setAttribute('data-theme', theme);
             }
         });
@@ -891,30 +871,20 @@ class KMapInterface {
             const valDiv = cell.querySelector('.value-display');
             if (valDiv) {
                 const state = cell.dataset.state || '0';
-                valDiv.textContent = (state === '1' || state === 'X') ? state : 
+                valDiv.textContent = (state === '1' || state === 'X') ? state :
                     (this.hideZeros ? 'ㅤ' : '0');
             }
         });
-        
+
         // Update Truth Table cells
         const truthTableCells = this.elements.truthTableBody?.querySelectorAll('td[data-index]');
         truthTableCells?.forEach(cell => {
             const state = cell.dataset.state || '0';
-            cell.textContent = (state === '1' || state === 'X') ? state : 
+            cell.textContent = (state === '1' || state === 'X') ? state :
                 (this.hideZeros ? 'ㅤ' : '0');
         });
     }
 
-    setupTabHandlers() {
-        // Tab switching
-        this.elements.btnTab.forEach(button => {
-            button.addEventListener('click', () => {
-                this.switchTab(button.dataset.tab);
-                this.elements.tabsWrapper.classList.remove('show');
-                this.updateSliderPosition(button);
-            });
-        });
-    }
 
     setupControlHandlers() {
         // Controls
@@ -948,13 +918,35 @@ class KMapInterface {
     }
 
     setupVariableCycleHandler() {
-        if (this.elements.dropdownVariables) {
-            // Set initial value
-            this.elements.dropdownVariables.value = this.numVars;
+        const toggle = this.elements.dropdownVariablesToggle;
+        const menu = this.elements.dropdownVariablesMenu;
+        const label = this.elements.dropdownVariablesLabel;
 
-            // Handle variable changes
-            this.elements.dropdownVariables.addEventListener('change', () => {
-                this.numVars = parseInt(this.elements.dropdownVariables.value);
+        if (!toggle || !menu) return;
+
+        // Set initial label
+        label.textContent = `${this.numVars} Vars`;
+
+        // Toggle dropdown
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menu.classList.toggle('is-visible');
+        });
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!menu.contains(e.target) && e.target !== toggle) {
+                menu.classList.remove('is-visible');
+            }
+        });
+
+        // Handle item clicks
+        menu.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const value = parseInt(item.dataset.value);
+                this.numVars = value;
+                label.textContent = `${value} Vars`;
+                menu.classList.remove('is-visible');
 
                 // Update variables array
                 this.variables = [...Array(this.numVars).keys()].map(i => String.fromCharCode(65 + i));
@@ -978,7 +970,7 @@ class KMapInterface {
                 // Clear all states and solution
                 this.clear();
             });
-        }
+        });
     }
 
     setupLayoutHandlers() {
@@ -997,6 +989,106 @@ class KMapInterface {
             }
         });
         resizeObserver.observe(this.elements.grid);
+    }
+
+    setupNavigationHandlers() {
+        const headerNav = document.getElementById('header-nav');
+        const navToggle = document.getElementById('nav-toggle');
+        const navTitle = document.getElementById('nav-title');
+        const navItems = document.getElementById('nav-items');
+        const navPills = navItems?.querySelectorAll('.btn-pill');
+        const slider = navItems?.querySelector('.pill-selector-slider');
+
+        if (!headerNav || !navItems) return;
+
+        // Set up pill click handlers
+        navPills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                navPills.forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+
+                if (!headerNav.classList.contains('compact') && slider) {
+                    const pillRect = pill.getBoundingClientRect();
+                    const containerRect = navItems.getBoundingClientRect();
+                    slider.style.left = `${pillRect.left - containerRect.left}px`;
+                    slider.style.width = `${pillRect.width}px`;
+                    slider.style.height = `${pillRect.height}px`;
+                }
+
+                if (navTitle) navTitle.textContent = pill.textContent;
+                if (headerNav.classList.contains('compact')) navItems.classList.remove('is-visible');
+
+                const tabName = pill.dataset.tab;
+                if (tabName) {
+                    document.querySelectorAll('.tab-content-container').forEach(tab => tab.classList.remove('active'));
+                    const selectedTab = document.getElementById(tabName);
+                    if (selectedTab) selectedTab.classList.add('active');
+                }
+            });
+        });
+
+        if (navToggle) {
+            navToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navItems.classList.toggle('is-visible');
+                navToggle.setAttribute('aria-expanded', navItems.classList.contains('is-visible'));
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (headerNav.classList.contains('compact') && navItems.classList.contains('is-visible') &&
+                !navItems.contains(e.target) && !navToggle.contains(e.target)) {
+                navItems.classList.remove('is-visible');
+                navToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navItems.classList.contains('is-visible')) {
+                navItems.classList.remove('is-visible');
+                navToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        const checkOverflow = () => {
+            headerNav.classList.remove('compact');
+            navItems.classList.remove('is-visible');
+
+            const headerRect = headerNav.getBoundingClientRect();
+            const navItemsRect = navItems.getBoundingClientRect();
+            const headerActions = document.querySelector('.header-actions');
+            const actionsWidth = headerActions ? headerActions.getBoundingClientRect().width : 0;
+            const needsCompact = navItemsRect.width > (headerRect.width - actionsWidth - 32);
+
+            if (needsCompact) {
+                headerNav.classList.add('compact');
+                const activePill = navItems.querySelector('.btn-pill.active');
+                if (activePill && navTitle) navTitle.textContent = activePill.textContent;
+            } else {
+                const activePill = navItems.querySelector('.btn-pill.active');
+                if (activePill && slider) {
+                    setTimeout(() => {
+                        const pillRect = activePill.getBoundingClientRect();
+                        const containerRect = navItems.getBoundingClientRect();
+                        slider.style.left = `${pillRect.left - containerRect.left}px`;
+                        slider.style.width = `${pillRect.width}px`;
+                        slider.style.height = `${pillRect.height}px`;
+                    }, 0);
+                }
+            }
+        };
+
+        checkOverflow();
+        window.addEventListener('resize', checkOverflow);
+
+        const activePill = navItems.querySelector('.btn-pill.active');
+        if (activePill && slider) {
+            const pillRect = activePill.getBoundingClientRect();
+            const containerRect = navItems.getBoundingClientRect();
+            slider.style.left = `${pillRect.left - containerRect.left}px`;
+            slider.style.width = `${pillRect.width}px`;
+            slider.style.height = `${pillRect.height}px`;
+        }
     }
 }
 

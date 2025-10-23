@@ -6,26 +6,29 @@ const ASSETS = [
   './assets/icon/apple-touch-icon.png',
   './assets/icon/favicon.ico',
   './assets/icon/favicon.svg',
-  './assets/icon/icon-close.svg',
-  './assets/icon/icon-menu.svg',
-  './assets/icon/icon-hide-zeros.svg',
-  './assets/icon/icon-sun.svg',
-  './assets/icon/icon-moon.svg',
-  './assets/icon/icon-info.svg',
-  './assets/icon/icon-copy.svg',
-  './assets/icon/icon-layout-diagonal-a.svg',
-  './assets/icon/icon-layout-diagonal-b.svg',
-  './assets/icon/icon-check.svg',
-  './assets/icon/icon-refresh.svg',
-  './assets/icon/icon-trash.svg',
-  './assets/icon/icon-settings.svg',
+  // './assets/icon/icon-close.svg',
+  // './assets/icon/icon-menu.svg',
+  // './assets/icon/icon-hide-zeros.svg',
+  // './assets/icon/icon-sun.svg',
+  // './assets/icon/icon-moon.svg',
+  // './assets/icon/icon-info.svg',
+  // './assets/icon/icon-copy.svg',
+  // './assets/icon/icon-layout-diagonal-a.svg',
+  // './assets/icon/icon-layout-diagonal-b.svg',
+  // './assets/icon/icon-check.svg',
+  // './assets/icon/icon-refresh.svg',
+  // './assets/icon/icon-trash.svg',
+  // './assets/icon/icon-settings.svg',
   './assets/icon/mstile.png',
   './index.html',
   './kmap-interface.js',
   './kmap-solver.js',
   './manifest.json',
   './styles.css',
-  './sw.js'
+  './guidelines/tokens.css',
+  './guidelines/components.css',
+  './sw.js',
+  'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap'
 ];
 
 // Install event: Triggered when the service worker is installed
@@ -60,12 +63,21 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   // Only handle GET requests with http/https protocols
   if (e.request.method !== 'GET' || !['http:', 'https:'].includes(new URL(e.request.url).protocol)) return;
-  
+
+  // Special handling for Google Fonts to cache font files
+  const url = new URL(e.request.url);
+  const isGoogleFont = url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com';
+
   e.respondWith(
     // Check if the request is in our cache
     caches.match(e.request).then(cached => {
+      // For Google Fonts, use cache-first strategy
+      if (isGoogleFont && cached) {
+        return cached;
+      }
+
       // Make a network request regardless of cache status
-      const networked = fetch(e.request, {cache: 'no-store'})
+      const networked = fetch(e.request, isGoogleFont ? {} : {cache: 'no-store'})
         .then(r => {
           if (r && r.status === 200) {
             // Clone the response to cache it (streams can only be consumed once)
@@ -80,10 +92,10 @@ self.addEventListener('fetch', e => {
               Promise.all([compareClone.text(), cachedClone.text()]).then(([newContent, cachedContent]) => {
                 // If content has changed, notify clients on the pwa-check page
                 if (newContent !== cachedContent && clients) {
-                  clients.matchAll().then(clients => {
-                    clients.forEach(client => {
+                  clients.matchAll().then(clientsList => {
+                    clientsList.forEach(client => {
                       if (client.url.includes('pwa-check.html')) {
-                        client.postMessage({ 
+                        client.postMessage({
                           type: 'UPDATE_AVAILABLE',
                           url: e.request.url
                         });
@@ -91,14 +103,14 @@ self.addEventListener('fetch', e => {
                     });
                   });
                 }
-              });
+              }).catch(() => {});
             }
           }
           return r;
         })
         // If network request fails, fall back to cached version
         .catch(() => cached);
-      
+
       // Return cached response immediately if available, otherwise wait for network
       return cached || networked;
     })
