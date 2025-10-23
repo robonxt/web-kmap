@@ -2,6 +2,8 @@
 trigger: always_on
 ---
 
+There is a submodule called guidelines. If it does not exist, please create one and set it to the main branch of https://github.com/robonxt/robonxt-visual-branding-guidelines/
+
 Design system, brand identity, and design implementions are found in guidelines/README.md
 
 Design tokens in CSS are found in guidelines/tokens.css
