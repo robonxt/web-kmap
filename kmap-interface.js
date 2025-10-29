@@ -276,7 +276,7 @@ class KMapInterface {
                 }
 
                 if (overlineActive) {
-                    result += `<span style="text-decoration: overline">${term[i]}</span>`;
+                    result += `<span style="text-decoration: overline; margin: 0 1px;">${term[i]}</span>`;
                     overlineActive = false;
                 } else {
                     result += term[i];
