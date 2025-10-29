@@ -14,6 +14,7 @@ class KMapInterface {
             btnSetOnes: document.getElementById('btn-set-ones'),
             btnSetXs: document.getElementById('btn-set-xs'),
             btnSetZeros: document.getElementById('btn-set-zeros'),
+            kmapTab: document.getElementById('kmap'),
             dropdownVariablesToggle: document.getElementById('dropdown-variables-toggle'),
             dropdownVariablesLabel: document.getElementById('dropdown-variables-label'),
             dropdownVariablesMenu: document.getElementById('dropdown-variables-menu'),
