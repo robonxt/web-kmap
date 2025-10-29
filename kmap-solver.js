@@ -182,7 +182,7 @@ function extract(variables, group) {
     const result = bits.every(bit => bit === 'x') ? '1' :
         bits.reduce((acc, bit, i) =>
             bit === 'x' ? acc : acc + (bit === '0' ? '!' : '') + variables[i],
-        '');
+            '');
     return result.replace(/!!/g, ''); // Remove any double negations
 }
 

@@ -4,7 +4,10 @@
   "description": "A lightweight, dependency-free Karnaugh map solver with truth table visualization and 2-4 variable support.",
   "start_url": "./index.html",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "orientation": "portrait",
@@ -39,7 +42,10 @@
       "purpose": "any"
     }
   ],
-  "categories": ["education", "utilities"],
+  "categories": [
+    "education",
+    "utilities"
+  ],
   "screenshots": [],
   "shortcuts": []
 }

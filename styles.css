@@ -3,16 +3,6 @@
    This file contains K-map specific overrides and custom components
 */
 
-@font-face {
-    font-family: 'DejaVu Sans Book';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: local('DejaVu Sans Book'),
-         local('DejaVu Sans'),
-         url('https://cdn.jsdelivr.net/npm/@fontsource/dejavu-sans/files/dejavu-sans-all-400-normal.woff2') format('woff2');
-}
-
 /* Material Symbols support */
 .material-symbols-rounded {
     font-family: 'Material Symbols Rounded', sans-serif;
@@ -164,8 +154,8 @@ body {
     visibility: hidden;
     transform: translateY(-8px);
     transition: opacity var(--duration-quick) var(--easing),
-                transform var(--duration-quick) var(--easing),
-                visibility 0s var(--duration-quick);
+        transform var(--duration-quick) var(--easing),
+        visibility 0s var(--duration-quick);
 }
 
 .header-nav.compact .nav-items.is-visible {
@@ -242,7 +232,6 @@ body {
 .solution-text {
     flex: 1;
     text-align: left;
-    font-family: 'DejaVu Sans Book', var(--font-family);
     font-size: var(--font-size-h3);
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-high);
@@ -312,7 +301,8 @@ body {
     background-color: var(--cell-dont-care-color);
 }
 
-.binary-display, .decimal-display {
+.binary-display,
+.decimal-display {
     font-family: monospace;
     text-align: center;
     user-select: none;

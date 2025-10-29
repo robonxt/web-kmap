@@ -6,19 +6,6 @@ const ASSETS = [
   './assets/icon/apple-touch-icon.png',
   './assets/icon/favicon.ico',
   './assets/icon/favicon.svg',
-  // './assets/icon/icon-close.svg',
-  // './assets/icon/icon-menu.svg',
-  // './assets/icon/icon-hide-zeros.svg',
-  // './assets/icon/icon-sun.svg',
-  // './assets/icon/icon-moon.svg',
-  // './assets/icon/icon-info.svg',
-  // './assets/icon/icon-copy.svg',
-  // './assets/icon/icon-layout-diagonal-a.svg',
-  // './assets/icon/icon-layout-diagonal-b.svg',
-  // './assets/icon/icon-check.svg',
-  // './assets/icon/icon-refresh.svg',
-  // './assets/icon/icon-trash.svg',
-  // './assets/icon/icon-settings.svg',
   './assets/icon/mstile.png',
   './index.html',
   './kmap-interface.js',
@@ -53,7 +40,7 @@ self.addEventListener('activate', e => {
           }
         })
       );
-    // Take control of all clients/pages under this service worker's scope
+      // Take control of all clients/pages under this service worker's scope
     }).then(() => clients.claim())
   );
 });
@@ -77,7 +64,7 @@ self.addEventListener('fetch', e => {
       }
 
       // Make a network request regardless of cache status
-      const networked = fetch(e.request, isGoogleFont ? {} : {cache: 'no-store'})
+      const networked = fetch(e.request, isGoogleFont ? {} : { cache: 'no-store' })
         .then(r => {
           if (r && r.status === 200) {
             // Clone the response to cache it (streams can only be consumed once)
@@ -103,7 +90,7 @@ self.addEventListener('fetch', e => {
                     });
                   });
                 }
-              }).catch(() => {});
+              }).catch(() => { });
             }
           }
           return r;

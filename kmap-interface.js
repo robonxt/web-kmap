@@ -54,7 +54,7 @@ class KMapInterface {
         this.clear();
     }
 
-        initializeLayouts() {
+    initializeLayouts() {
         // Fetch all layouts from KMapSolver to centralize definitions
         return {
             2: {
@@ -581,7 +581,7 @@ class KMapInterface {
             if (matchingCells.length > 0) {
                 const groupCellRects = matchingCells.map(cellInfo => { // cellInfo is { decimal, row, col }
                     return allCellRects.get(String(cellInfo.decimal)); // Get from pre-calculated Map
-                                                                    // Ensure key type matches (string if dataset.index is string)
+                    // Ensure key type matches (string if dataset.index is string)
                 }).filter(rect => rect); // Filter out any undefined if a cell wasn't found (shouldn't happen)
 
                 if (groupCellRects.length === 0) return;
