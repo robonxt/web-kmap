@@ -38,6 +38,7 @@
 :root {
     --max-width: 800px;
     --button-min-width: 40px;
+    --space-xxs: 4px;
 }
 
 [data-theme="light"] {
@@ -66,8 +67,8 @@ body {
     flex: 1;
     width: 100%;
     max-width: var(--max-width);
-    margin: 0 auto var(--space-xs);
-    padding: 0 var(--space-xs) 0 var(--space-xs);
+    margin: 0 auto var(--space-xxs);
+    padding: 0 var(--space-xxs) 0 var(--space-xxs);
 }
 
 /* Header Navigation (following guidelines) */
@@ -75,13 +76,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-xs);
+    padding: var(--space-xxs);
     background-color: var(--kmap-primary);
     border-bottom: var(--stroke-sm) solid var(--color-border-default);
     border-radius: var(--radius-md);
     position: sticky;
     top: 0;
-    margin-bottom: var(--space-xs);
+    margin-bottom: var(--space-xxs);
     z-index: 10;
     overflow: visible;
     box-shadow: var(--shadow-sm);
@@ -101,7 +102,7 @@ body {
 .header-nav {
     display: flex;
     align-items: center;
-    gap: var(--space-xs);
+    gap: var(--space-xxs);
     flex: 1;
     min-width: 0;
     position: relative;
@@ -138,7 +139,7 @@ body {
 
 .header-nav.compact .nav-items {
     position: absolute;
-    top: calc(100% + var(--space-xs));
+    top: calc(100% + var(--space-xxs));
     left: 0;
     display: flex;
     flex-direction: column;
@@ -147,7 +148,7 @@ body {
     border: var(--stroke-sm) solid var(--color-border-default);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
-    padding: var(--space-xs);
+    padding: var(--space-xxs);
     min-width: 200px;
     z-index: 60;
     opacity: 0;
@@ -183,7 +184,7 @@ body {
     text-align: left;
     justify-content: flex-start;
     border-radius: var(--radius-md);
-    padding: var(--space-xs) var(--space-sm);
+    padding: var(--space-xxs) var(--space-sm);
 }
 
 .header-nav.compact .nav-items .btn-pill.active {
@@ -193,7 +194,7 @@ body {
 
 .header-actions {
     display: flex;
-    gap: var(--space-xs);
+    gap: var(--space-xxs);
     align-items: center;
     flex-shrink: 0;
 }
@@ -204,9 +205,9 @@ body {
 .tab-content-container {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    margin-bottom: var(--space-xs);
-    padding: var(--space-xs);
-    gap: var(--space-xs);
+    margin-bottom: var(--space-xxs);
+    padding: var(--space-xxs);
+    gap: var(--space-xxs);
 }
 
 .container-control {
@@ -222,11 +223,11 @@ body {
 .solution-toolbar {
     display: flex;
     align-items: center;
-    gap: var(--space-xs);
+    gap: var(--space-xxs);
     background-color: var(--color-surface);
     border: var(--stroke-sm) solid var(--color-border-default);
     border-radius: var(--radius-md);
-    padding: var(--space-xs);
+    padding: var(--space-xxs);
 }
 
 .solution-text {
@@ -290,7 +291,7 @@ body {
     background-color: var(--color-surface);
     color: var(--color-text-high);
     transition: all var(--duration-quick) var(--easing);
-    padding: var(--space-xs);
+    padding: var(--space-xxs);
 }
 
 .cell.selected {
@@ -338,7 +339,7 @@ body {
 
 .kmap-grid {
     display: grid;
-    gap: var(--space-xs);
+    gap: var(--space-xxs);
     margin: 0 auto;
     width: 100%;
     position: relative;
@@ -354,7 +355,7 @@ body {
 
 .truth-table th,
 .truth-table td {
-    padding: var(--space-xs);
+    padding: var(--space-xxs);
     text-align: center;
     user-select: none;
     background-color: var(--color-surface);
@@ -411,8 +412,8 @@ body {
     flex-direction: column;
     height: auto;
     min-width: var(--button-min-width);
-    padding: var(--space-xs);
-    gap: var(--space-xs);
+    padding: var(--space-xxs);
+    gap: var(--space-xxs);
 }
 
 .svg-button svg {
