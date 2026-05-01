@@ -188,6 +188,7 @@ function extract(variables, group) {
 
 function solve(variables, minterms, dontcares = []) {
     if (minterms.length === 0 && dontcares.length === 0) return { solutions: ["0"], groups: [] };
+    if (minterms.length === 0 && dontcares.length === (1 << variables.length)) return { solutions: ["X"], groups: [] };
     if (minterms.length === (1 << variables.length)) return { solutions: ["1"], groups: [] };
 
     // Special case for single minterm

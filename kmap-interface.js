@@ -255,7 +255,7 @@ class KMapInterface {
 
     addOverline(solution) {
         // Special cases
-        if (solution === "0" || solution === "1") {
+        if (solution === "0" || solution === "1" || solution === "X") {
             return `<span>${solution}</span>`;
         }
 
@@ -491,8 +491,8 @@ class KMapInterface {
         svg.innerHTML = 'ㅤ';
 
         // Handle special cases
-        if (!terms || terms.length === 0 || terms[0] === "0") {
-            return; // No groups for empty solution or "0"
+        if (!terms || terms.length === 0 || terms[0] === "0" || terms[0] === "X") {
+            return; // No groups for empty solution, "0", or "X"
         }
 
         const gridRect = this.elements.grid.getBoundingClientRect();
