@@ -1,122 +1,59 @@
 # Web K-Map Solver
-A lightweight, dependency-free Karnaugh map solver for 2–4 variables. Instantly visualize, edit, and minimize Boolean functions with color-coded groups, real-time solutions, and a modern, mobile-friendly UI.
 
-> For a quick start, see the in-app info popup. This document is the complete reference.
+A dependency-free, interactive Karnaugh map (K-map) solver for 2–4 variables. Instantly simplifies Boolean functions to minimal Sum-of-Products (SOP) expressions with real-time SVG group overlays, truth table synchronization, and a mobile-friendly PWA interface.
 
+---
 
-## What is a Karnaugh Map?
-A Karnaugh map (K-map) is a graphical method for Boolean function simplification that reduces the need for extensive computation. Developed by Maurice Karnaugh in 1953, it uses adjacent squares in a grid to represent Boolean variables arranged in Gray code order, where adjacent cells differ by only one bit. By identifying and grouping adjacent 1's in powers of 2, K-maps allow quick identification of the minimal Boolean expression in sum-of-products (SOP) form.
+## Technical Architecture
 
+The application is built using vanilla web technologies and adheres to a custom token-based design system via a Git submodule.
 
-## Features
+```mermaid
+graph TD
+    UI[index.html / styles.css] <--> INT[kmap-interface.js]
+    INT <--> SOLV[kmap-solver.js]
+    INT -.-> SUB[guidelines Submodule]
+    INT -.-> PWA[sw.js / manifest.json]
+```
 
-### Core Functionality
-- Interactive K-map grid with 2-4 variable support
-- Real-time Boolean expression minimization
-- Multiple solution display when available
-- Don't care (X) condition support
-- Synchronized truth table view
-- Progressive Web App (PWA) support for offline use
+* **Solver Engine (`kmap-solver.js`):** Custom implementation of the Quine-McCluskey algorithm to identify all prime implicants and calculate all minimal Boolean covers.
+* **Controller (`kmap-interface.js`):** Manages state synchronization between the grid and truth table, computes coordinates for dynamic SVG overlays, and handles tab switching.
+* **Styling & Assets:** Utilizes design tokens from the `guidelines` submodule, rendering layout elements responsively via CSS Grid and Flexbox.
+* **Offline Operations:** Service Worker (`sw.js`) provides full offline asset caching (cache-first policy).
 
-### Visualization
-- Color-coded term grouping
-- Dynamic SVG group visualization
-- Wraparound group highlighting
-- Gray code and binary layout options
-- Light/Dark theme support
+---
 
-### User Interface
-- Intuitive cell state cycling (0 → 1 → X)
-- Binary and decimal index display
-- Tab-based view switching (K-Map / Truth Table)
-- Mobile-responsive design
-- PWA installation support for app-like experience
-- One-click operations:
-  - Set all cells to 1 or 0 (Clear)
-  - Copy solution with proper notation
-  - Toggle between K-map and Truth Table views
-  - Toggle between Gray code and binary layouts
-  - Toggle between light and dark themes
-  - Toggle zero value visibility in cells (hide/show zeros)
+## Features & Usage
 
+* **State Cycling:** Click grid cells or truth table outputs to cycle: `0` → `1` → `X` (Don't Care).
+* **Alternative Solutions:** Dropdown menu appears when multiple minimal expressions exist.
+* **Layout Modes:** Toggle between Gray code ordering and traditional Binary ordering (for 3 and 4 variables).
+* **Clean View:** Toggle "Hide Zeros" to display only active and Don't Care states.
+* **Unicode Copy:** Copies solved expressions using notation like `A̅BC̅ + AD`.
 
-## Usage Guide
-1. **Variable Selection**
-   - Choose 2-4 variables from the dropdown
-   - Grid automatically adjusts to selected size
-   - Variables are labeled A, B, C, D from most to least significant
-
-2. **Cell Manipulation**
-   - Click cells to cycle states: 0 → 1 → X
-      > A blank cell (ㅤ) is also 0
-   - Use quick actions to set all cells or clear
-   - Use the "Hide Zeros" button to toggle whether zeros are shown or hidden in the grid and truth table
-   - Watch real-time solution updates
-
-3. **Solution Reading**
-   - Results shown in minimal SOP form
-   - Overlined variables (A̅) represent negation
-   - Multiple solutions shown when available
-   - Click copy button for formatted output
-
-4. **Layout Options**
-   - Toggle between Gray code and binary layouts
-   - Gray code optimizes for adjacency
-   - Binary shows traditional ordering
-
-
-## Technical Details
-- Built with vanilla HTML5, CSS3, and JavaScript
-- Uses [robonxt design system](https://github.com/robonxt/robonxt-visual-branding-guidelines) via Git submodule
-  - Consistent design tokens (colors, typography, spacing, motion)
-  - Reusable component implementations
-  - Light/dark theme support
-- Progressive Web App (PWA) capabilities:
-  - Offline functionality with service worker caching
-  - Installable on desktop and mobile devices
-  - App-like experience
-- Custom implementation of:
-  - Quine-McCluskey algorithm for Boolean minimization
-  - Gray code generation and handling
-  - Prime implicant identification
-  - Group visualization with SVG paths
-- Real-time synchronization between K-map and Truth Table
-- Vector-based UI elements for crisp display
-- Responsive layout with CSS Grid and Flexbox
-- Mobile-first design principles
-
-
-## Implementation Notes
-The solver follows this process:
-1. Generates optimal Gray code layouts for 2-4 variables
-2. Identifies all possible prime implicant groups
-3. Finds minimal solutions using Quine-McCluskey algorithm
-4. Extracts Boolean expressions from group patterns
-5. Visualizes groups using dynamic SVG paths
-6. Presents results in minimal SOP format
-
+---
 
 ## Variable Notation
-- Regular letter (A): Variable is 1 (TRUE)
-- Overlined letter (A̅): Variable is 0 (FALSE)
-- Blank cell (ㅤ): Also represents 0 (FALSE)
-- Example: A̅BC̅D means A=0, B=1, C=0, D=1
 
+* **A**, **B**, **C**, **D**: Active (1) states.
+* **A̅**, **B̅**, **C̅**, **D̅**: Negated (0) states.
+* **+** Operator: OR function.
+* **Juxtaposition** (e.g., `AB`): AND function.
+* **Example:** `A̅BC̅` represents `(NOT A) AND B AND (NOT C)`.
+
+---
+
+## Roadmap / TODO
+
+- [ ] Optimize K-map SVG pathing for edge and corner wraparounds.
+- [ ] Modularize `kmap-interface.js`.
+- [ ] Implement a logic circuit diagram generator tab.
+
+---
 
 ## Credits
-Created by [robonxt](https://github.com/robonxt).
 
-Assisted by [Claude Sonnet 3.5](https://www.anthropic.com) in [Windsurf IDE](https://www.windsurf.ai/).
-
-Logic inspired by [obsfx/kmap-solver-lib](https://github.com/obsfx/kmap-solver-lib)
-
-Icon generated by [Perchance](https://perchance.org/ai-icon-generator)
-
-
-## TODO:
-- Try to get it working on browsers as old as Chrome 104+, Safari 12+. [Compare working features here](https://caniuse.com/?compare=chrome+104,safari+12&compareCats=CSS,HTML5,JS,JS%20API,Other,Security,SVG)
-- ~~Get PWA working with a install button on mobile devices for a fullscreen, sandboxed webapp.~~
-- Build working circuit diagram tab.
-- ~~Toggle visibility of zero values in cells~~
-- Modularize kmap-interface.js (IN PROGRESS)
-- Fix K-map wraparound visualization for better edge and corner handling
+* **Author:** [robonxt](https://github.com/robonxt)
+* **Assistance:** Windsurf IDE / Claude
+* **Logic Reference:** Inspired by `obsfx/kmap-solver-lib`
+* **Icons:** Generated by Perchance
