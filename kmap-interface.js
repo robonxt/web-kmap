@@ -18,8 +18,8 @@ class KMapInterface {
             dropdownVariablesToggle: document.getElementById('dropdown-variables-toggle'),
             dropdownVariablesLabel: document.getElementById('dropdown-variables-label'),
             dropdownVariablesMenu: document.getElementById('dropdown-variables-menu'),
-            btnToggleZeros: document.getElementById('btn-toggle-zeros'),
-            btnToggleTheme: document.getElementById('btn-toggle-theme')
+            inputToggleZeros: document.getElementById('input-toggle-zeros'),
+            inputToggleTheme: document.getElementById('input-toggle-theme')
         };
 
         // Predefined distinct colors for groups
@@ -50,7 +50,6 @@ class KMapInterface {
         this.initializeUI();
         this.initializeTruthTable();
         this.setupEventListeners();
-        this.elements.btnToggleZeros?.classList.toggle('active', this.hideZeros);
         this.clear();
     }
 
@@ -749,12 +748,14 @@ class KMapInterface {
         this.setupNavigationHandlers();
 
         // Add event listener for hide zeros toggle
-        this.elements.btnToggleZeros?.addEventListener('click', () => {
-            this.hideZeros = !this.hideZeros;
-            localStorage.setItem('hideZeros', this.hideZeros);
-            this.updateAllCellDisplays();
-            this.elements.btnToggleZeros.classList.toggle('active', this.hideZeros);
-        });
+        if (this.elements.inputToggleZeros) {
+            this.elements.inputToggleZeros.checked = this.hideZeros;
+            this.elements.inputToggleZeros.addEventListener('change', () => {
+                this.hideZeros = this.elements.inputToggleZeros.checked;
+                localStorage.setItem('hideZeros', this.hideZeros);
+                this.updateAllCellDisplays();
+            });
+        }
     }
 
 
@@ -831,10 +832,14 @@ class KMapInterface {
     }
 
     setupThemeHandlers() {
-        const themeToggle = this.elements.btnToggleTheme;
+        const themeToggle = this.elements.inputToggleTheme;
         if (!themeToggle) return;
         const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
         const prefersLightScheme = window.matchMedia('(prefers-color-scheme: light)');
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            themeToggle.checked = theme === 'dark';
+        }
         function initializeTheme() {
             const storedTheme = localStorage.getItem('theme');
             let theme = 'light';
@@ -845,22 +850,17 @@ class KMapInterface {
             } else if (prefersDarkScheme.matches) {
                 theme = 'dark';
             }
-            document.documentElement.setAttribute('data-theme', theme);
-            themeToggle.setAttribute('data-theme', theme);
+            applyTheme(theme);
         }
         initializeTheme();
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            themeToggle.setAttribute('data-theme', newTheme);
+        themeToggle.addEventListener('change', () => {
+            const newTheme = themeToggle.checked ? 'dark' : 'light';
+            applyTheme(newTheme);
             localStorage.setItem('theme', newTheme);
         });
         prefersLightScheme.addEventListener('change', (e) => {
             if (!localStorage.getItem('theme')) {
-                const theme = e.matches ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', theme);
-                themeToggle.setAttribute('data-theme', theme);
+                applyTheme(e.matches ? 'light' : 'dark');
             }
         });
     }

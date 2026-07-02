@@ -410,10 +410,11 @@ body {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    height: auto;
+    height: var(--touch-target);
     min-width: var(--button-min-width);
-    padding: var(--space-xxs);
+    padding: var(--space-sm) var(--space-xxs);
     gap: var(--space-xxs);
+    font-weight: var(--font-weight-bold);
 }
 
 .svg-button svg {
@@ -702,49 +703,6 @@ body {
     }
 }
 
-/* Layout toggle button icons */
-.icon-layout-binary {
-    display: none;
-}
-
-.gray-layout .icon-layout-gray {
-    display: inline;
-}
-
-.gray-layout .icon-layout-binary {
-    display: none;
-}
-
-.binary-layout .icon-layout-gray {
-    display: none;
-}
-
-.binary-layout .icon-layout-binary {
-    display: inline;
-}
-
-/* Theme toggle button icons */
-.icon-theme-light,
-.icon-theme-dark {
-    display: none;
-}
-
-[data-theme="light"] .icon-theme-dark {
-    display: inline;
-}
-
-[data-theme="light"] .icon-theme-light {
-    display: none;
-}
-
-[data-theme="dark"] .icon-theme-dark {
-    display: none;
-}
-
-[data-theme="dark"] .icon-theme-light {
-    display: inline;
-}
-
 /* Settings Grid Layout (matching base-converter) */
 .settings-grid {
     display: grid;
@@ -770,6 +728,25 @@ body {
 .settings-grid .btn.active {
     background-color: var(--color-surface-hover);
     border-color: var(--color-primary);
+}
+
+.settings-grid .switch {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-sm);
+    min-height: 80px;
+    border: var(--stroke-sm) solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    transition: all var(--duration-quick) var(--easing);
+}
+
+.settings-grid .switch:hover {
+    background: var(--color-surface-hover);
+}
+
+.settings-grid .switch-label {
+    font-weight: var(--font-weight-medium);
 }
 
 /* Hover States */

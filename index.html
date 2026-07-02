@@ -70,15 +70,16 @@
                 </div>
                 <div class="modal-body" id="content-settings">
                     <div class="settings-grid">
-                        <button id="btn-toggle-theme" class="btn btn-outline">
-                            <span class="material-symbols-rounded icon-theme-light">light_mode</span>
-                            <span class="material-symbols-rounded icon-theme-dark">dark_mode</span>
-                            Toggle Theme
-                        </button>
-                        <button id="btn-toggle-zeros" class="btn btn-outline">
-                            <span class="material-symbols-rounded">visibility_off</span>
-                            Toggle Zeros
-                        </button>
+                        <label class="switch" id="btn-toggle-theme">
+                            <input type="checkbox" id="input-toggle-theme" aria-label="Toggle dark theme">
+                            <span class="switch-track"><span class="switch-thumb"></span></span>
+                            <span class="switch-label">Dark Theme</span>
+                        </label>
+                        <label class="switch" id="btn-toggle-zeros">
+                            <input type="checkbox" id="input-toggle-zeros" aria-label="Toggle hide zeros">
+                            <span class="switch-track"><span class="switch-thumb"></span></span>
+                            <span class="switch-label">Hide Zeros</span>
+                        </label>
                         <button id="btn-update-app" class="btn btn-danger">
                             <span class="material-symbols-rounded">refresh</span>
                             Update
@@ -173,20 +174,15 @@
             </div>
             <button id="btn-toggle-layout" class="svg-button gray-layout" aria-label="Toggle Layout"
                 title="Switch Layout">
-                <span class="material-symbols-rounded icon-layout-gray">grid_view</span>
-                <span class="material-symbols-rounded icon-layout-binary">view_module</span>
                 <span class="layout-text">CD/AB</span>
             </button>
             <button class="svg-button" id="btn-set-ones">
-                <span class="material-symbols-rounded">check</span>
                 All 1
             </button>
             <button class="svg-button" id="btn-set-xs">
-                <span class="material-symbols-rounded">close</span>
                 All X
             </button>
             <button class="svg-button" id="btn-set-zeros">
-                <span class="material-symbols-rounded">radio_button_unchecked</span>
                 All 0
             </button>
         </div>
