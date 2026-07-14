@@ -43,9 +43,6 @@ class KMapInterface {
         this.hideZeros = localStorage.getItem('hideZeros') !== null ? localStorage.getItem('hideZeros') === 'true' : true;
         this.layouts = this.initializeLayouts();
 
-        // Update variable count attribute
-        document.body.setAttribute('data-vars', numVars);
-
         // Initialize UI components
         this.initializeUI();
         this.initializeTruthTable();
@@ -598,16 +595,6 @@ class KMapInterface {
         });
     }
 
-    getCellElement(row, col) {
-        const layout = this.isGrayCodeLayout ?
-            window.KMapSolver.KMapGrayCodes.get(this.numVars) :
-            this.layouts[this.numVars].normal;
-
-        const colLength = this.isGrayCodeLayout ? layout.cols.length : layout[0].length;
-        const index = row * colLength + col;
-        return this.elements.grid.children[index];
-    }
-
     calculateGroupPath(cells, gridRect) {
         const padding = 5;
         const radius = 30;
@@ -704,11 +691,6 @@ class KMapInterface {
         this.isGrayCodeLayout = !this.isGrayCodeLayout;
         const states = this.grid.slice();
 
-        // Update layout icon using classes
-        const btn = this.elements.btnToggleLayout;
-        btn.classList.remove(this.isGrayCodeLayout ? 'binary-layout' : 'gray-layout');
-        btn.classList.add(this.isGrayCodeLayout ? 'gray-layout' : 'binary-layout');
-
         this.initializeUI();
 
         // Restore states
@@ -722,20 +704,6 @@ class KMapInterface {
 
         // Recalculate groups
         this.solve();
-    }
-
-    switchTab(tabName) {
-        // Show/hide content
-        document.querySelectorAll('.tab-content-container').forEach(content => {
-            content.classList.toggle('active', content.id === tabName);
-        });
-
-        // Show/hide layout button based on tab and variable count
-        const layoutBtn = this.elements.btnToggleLayout;
-        if (layoutBtn) {
-            // Only show layout button if we're in kmap tab AND not in 2-variable mode
-            layoutBtn.style.display = (tabName === 'kmap' && this.numVars !== 2) ? 'flex' : 'none';
-        }
     }
 
     setupEventListeners() {
@@ -952,9 +920,6 @@ class KMapInterface {
                 // Update variables array
                 this.variables = [...Array(this.numVars).keys()].map(i => String.fromCharCode(65 + i));
                 this.size = 1 << this.numVars;
-
-                // Update data-vars attribute
-                document.body.setAttribute('data-vars', this.numVars);
 
                 // Force Gray code layout for 2 variables
                 if (this.numVars === 2) {

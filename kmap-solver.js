@@ -57,25 +57,13 @@ function findPrimeImplicants(groups, minterms) {
         )
     );
 
-    // For each minterm, find all prime implicants that cover it
-    const mintermCoverage = new Map();
-    minterms.forEach(m => {
-        mintermCoverage.set(m, primeImplicants.filter(g => g.coveredMinterms.has(m)));
-    });
-
     const solutions = new Set();
-    let bestSize = Infinity;
 
-    // Helper function to check if two groups overlap in their minterms
-    function hasOverlap(group1, group2) {
-        return Array.from(group1.coveredMinterms).some(m => group2.coveredMinterms.has(m));
-    }
-
-    // Helper function to get all possible combinations of groups that cover remaining minterms
+    // Helper function to get all possible combinations of groups that cover all minterms
     function getCombinations(availableGroups, targetMinterms, maxSize) {
         const results = [];
 
-        function backtrack(current, remaining, start) {
+        function backtrack(current, start) {
             if (current.length > maxSize) return;
 
             // Check if current combination covers all target minterms
@@ -95,12 +83,12 @@ function findPrimeImplicants(groups, minterms) {
             for (let i = start; i < availableGroups.length; i++) {
                 const group = availableGroups[i];
                 current.push(group);
-                backtrack(current, remaining, i + 1);
+                backtrack(current, i + 1);
                 current.pop();
             }
         }
 
-        backtrack([], new Set(targetMinterms), 0);
+        backtrack([], 0);
         return results;
     }
 
@@ -109,7 +97,6 @@ function findPrimeImplicants(groups, minterms) {
     for (let size = 1; size <= primeImplicants.length; size++) {
         const combinations = getCombinations(primeImplicants, targetMinterms, size);
         if (combinations.length > 0) {
-            bestSize = size;
             combinations.forEach(groups => {
                 const expr = groups.map(g =>
                     g.cells.map(c => c.decimal).sort().join(',')
@@ -183,28 +170,13 @@ function extract(variables, group) {
         bits.reduce((acc, bit, i) =>
             bit === 'x' ? acc : acc + (bit === '0' ? '!' : '') + variables[i],
             '');
-    return result.replace(/!!/g, ''); // Remove any double negations
+    return result;
 }
 
 function solve(variables, minterms, dontcares = []) {
     if (minterms.length === 0 && dontcares.length === 0) return { solutions: ["0"], groups: [] };
     if (minterms.length === 0 && dontcares.length === (1 << variables.length)) return { solutions: ["X"], groups: [] };
     if (minterms.length === (1 << variables.length)) return { solutions: ["1"], groups: [] };
-
-    // Special case for single minterm
-    if (minterms.length === 1 && dontcares.length === 0) {
-        const binary = minterms[0].toString(2).padStart(variables.length, '0');
-        const term = binary.split('')
-            .map((bit, i) => bit === '1' ? variables[i] : `!${variables[i]}`)
-            .join('');
-        return {
-            solutions: [term],
-            groups: [{
-                cells: [{ decimal: minterms[0], binary }],
-                coveredMinterms: new Set([minterms[0]])
-            }]
-        };
-    }
 
     const terms = [...minterms, ...dontcares];
     const KMap = getKMap(variables);

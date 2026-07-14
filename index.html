@@ -172,7 +172,7 @@
                     <button class="dropdown-item" data-value="2">2 Vars</button>
                 </div>
             </div>
-            <button id="btn-toggle-layout" class="svg-button gray-layout" aria-label="Toggle Layout"
+            <button id="btn-toggle-layout" class="svg-button" aria-label="Toggle Layout"
                 title="Switch Layout">
                 <span class="layout-text">CD/AB</span>
             </button>
@@ -197,8 +197,8 @@
                         <th>#</th>
                         <th>A</th>
                         <th>B</th>
-                        <th class="var-c">C</th>
-                        <th class="var-d">D</th>
+                        <th>C</th>
+                        <th>D</th>
                         <th>Output</th>
                     </tr>
                 </thead>
@@ -228,10 +228,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             new KMapInterface();
-            const btnUpdateApp = document.getElementById('btn-update-app');
-            const btnConfirmUpdate = document.getElementById('btn-confirm-update');
-            const btnCancelUpdate = document.getElementById('btn-cancel-update');
-            const popupUpdateConfirm = document.getElementById('popup-update-confirm');
         });
     </script>
 </body>

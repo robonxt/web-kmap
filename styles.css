@@ -239,10 +239,6 @@ body {
     min-height: 1.5em;
 }
 
-.solution-dropdown {
-    display: none;
-}
-
 .tab-content-container {
     background-color: var(--color-surface);
     display: none;
@@ -415,11 +411,6 @@ body {
     padding: var(--space-sm) var(--space-xxs);
     gap: var(--space-xxs);
     font-weight: var(--font-weight-bold);
-}
-
-.svg-button svg {
-    width: 24px;
-    height: 24px;
 }
 
 .svg-button:disabled,
@@ -678,13 +669,11 @@ body {
     gap: var(--space-sm);
 }
 
-.footer-credit,
 .modal-credit {
     color: var(--color-text-medium);
     font: var(--font-caption);
 }
 
-.footer-credit a,
 .modal-credit a {
     color: inherit;
     text-decoration: underline;
@@ -719,15 +708,6 @@ body {
     padding: var(--space-sm);
     min-height: 80px;
     text-align: center;
-}
-
-.settings-grid .btn svg {
-    flex-shrink: 0;
-}
-
-.settings-grid .btn.active {
-    background-color: var(--color-surface-hover);
-    border-color: var(--color-primary);
 }
 
 .settings-grid .switch {
@@ -781,10 +761,6 @@ body {
         background-color: transparent;
     }
 
-    .btn-popup-close:hover {
-        border-color: var(--color-primary);
-    }
-
     #btn-set-ones:hover {
         background: var(--kmap-primary);
         border-color: var(--kmap-primary);
@@ -797,25 +773,16 @@ body {
         color: white;
     }
 
-
-    .content-popup a:hover {
-        text-decoration: underline;
-    }
-
     .btn-danger:hover {
         background-color: #c82333;
         border-color: #bd2130;
+        color: white;
     }
 }
 
 /* Ensure all buttons have borders */
-.btn,
-button {
+.btn {
     border: var(--stroke-sm) solid var(--color-border-default);
-}
-
-.btn-primary {
-    border-color: var(--color-primary);
 }
 
 .btn-secondary {
