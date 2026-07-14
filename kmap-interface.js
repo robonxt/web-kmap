@@ -307,11 +307,15 @@ class KMapInterface {
             };
 
             // Close on outside click
-            document.addEventListener('click', (e) => {
+            if (this._closeSolutionsDropdown) {
+                document.removeEventListener('click', this._closeSolutionsDropdown);
+            }
+            this._closeSolutionsDropdown = (e) => {
                 if (!menu.contains(e.target) && e.target !== toggle) {
                     menu.classList.remove('is-visible');
                 }
-            });
+            };
+            document.addEventListener('click', this._closeSolutionsDropdown);
 
             // Handle item clicks
             menu.querySelectorAll('.dropdown-item').forEach((item, index) => {
@@ -416,9 +420,9 @@ class KMapInterface {
 
     showCopySuccess() {
         const btnCopySolution = this.elements.btnCopySolution;
-        btnCopySolution.style.color = 'var(--primary-color)';
+        btnCopySolution.style.color = 'var(--kmap-primary)';
         setTimeout(() => {
-            btnCopySolution.style.color = 'var(--text-color)';
+            btnCopySolution.style.color = 'var(--color-text-medium)';
         }, 1000);
     }
 
@@ -989,6 +993,7 @@ class KMapInterface {
                     document.querySelectorAll('.tab-content-container').forEach(tab => tab.classList.remove('active'));
                     const selectedTab = document.getElementById(tabName);
                     if (selectedTab) selectedTab.classList.add('active');
+                    this.updateToggleButton();
                 }
             });
         });
