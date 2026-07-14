@@ -16,7 +16,7 @@ graph TD
     INT -.-> PWA[sw.js / manifest.json]
 ```
 
-* **Solver Engine (`kmap-solver.js`):** Custom implementation of the Quine-McCluskey algorithm to identify all prime implicants and calculate all minimal Boolean covers.
+* **Solver Engine (`kmap-solver.js`):** Custom K-map prime-implicant enumeration that scans all valid cell groups in the grid to identify prime implicants and calculate all minimal Boolean covers.
 * **Controller (`kmap-interface.js`):** Manages state synchronization between the grid and truth table, computes coordinates for dynamic SVG overlays, and handles tab switching.
 * **Styling & Assets:** Utilizes design tokens from the `guidelines` submodule, rendering layout elements responsively via CSS Grid and Flexbox.
 * **Offline Operations:** Service Worker (`sw.js`) provides full offline asset caching (cache-first policy).
@@ -48,6 +48,7 @@ graph TD
 - [ ] Optimize K-map SVG pathing for edge and corner wraparounds.
 - [ ] Modularize `kmap-interface.js`.
 - [ ] Implement a logic circuit diagram generator tab.
+- [ ] Replace the solver with a Quine-McCluskey implementation to support more than 4 variables.
 
 ---
 
