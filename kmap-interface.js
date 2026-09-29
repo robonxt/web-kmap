@@ -22,7 +22,10 @@ class KMapInterface {
             inputToggleTheme: document.getElementById('input-toggle-theme'),
             installPill: document.getElementById('install-pill'),
             btnInstallApp: document.getElementById('btn-install-app'),
-            btnCloseInstallPill: document.getElementById('btn-close-install-pill')
+            btnCloseInstallPill: document.getElementById('btn-close-install-pill'),
+            updatePill: document.getElementById('update-pill'),
+            btnApplyUpdate: document.getElementById('btn-apply-update'),
+            btnCloseUpdatePill: document.getElementById('btn-close-update-pill')
         };
 
         // Predefined distinct colors for groups
@@ -51,6 +54,7 @@ class KMapInterface {
         this.initializeTruthTable();
         this.setupEventListeners();
         this.setupInstallPrompt();
+        this.setupUpdatePrompt();
         this.clear();
     }
 
@@ -1085,12 +1089,14 @@ class KMapInterface {
         const hidePill = (persistDismiss = true) => {
             installPill.classList.remove('anim-in');
             installPill.classList.add('anim-out');
-            document.body.classList.remove('has-install-pill');
             if (persistDismiss) {
                 sessionStorage.setItem('dismissed_install_pill', 'true');
             }
             setTimeout(() => {
                 installPill.style.display = 'none';
+                if (!document.getElementById('update-pill')?.classList.contains('anim-in')) {
+                    document.body.classList.remove('has-bottom-pill');
+                }
             }, 300);
         };
 
@@ -1101,7 +1107,7 @@ class KMapInterface {
             installPill.style.display = 'inline-flex';
             installPill.classList.remove('anim-out');
             installPill.classList.add('anim-in');
-            document.body.classList.add('has-install-pill');
+            document.body.classList.add('has-bottom-pill');
         };
 
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -1152,6 +1158,113 @@ class KMapInterface {
         window.addEventListener('appinstalled', () => {
             deferredPrompt = null;
             hidePill(true);
+        });
+    }
+
+    setupUpdatePrompt() {
+        const { updatePill, btnApplyUpdate, btnCloseUpdatePill } = this.elements;
+        if (!updatePill || !btnApplyUpdate || !btnCloseUpdatePill || !('serviceWorker' in navigator)) return;
+
+        let waitingWorker = null;
+        let isRefreshing = false;
+        let startY = 0;
+        let currentTranslateY = 0;
+
+        const hidePill = (persistDismiss = true) => {
+            updatePill.classList.remove('anim-in');
+            updatePill.classList.add('anim-out');
+            if (persistDismiss) {
+                sessionStorage.setItem('dismissed_update_pill', 'true');
+            }
+            setTimeout(() => {
+                updatePill.style.display = 'none';
+                if (!document.getElementById('install-pill')?.classList.contains('anim-in')) {
+                    document.body.classList.remove('has-bottom-pill');
+                }
+            }, 300);
+        };
+
+        const showPill = () => {
+            if (sessionStorage.getItem('dismissed_update_pill') === 'true') {
+                return;
+            }
+            updatePill.style.display = 'inline-flex';
+            updatePill.classList.remove('anim-out');
+            updatePill.classList.add('anim-in');
+            document.body.classList.add('has-bottom-pill');
+        };
+
+        const onUpdateFound = (registration) => {
+            const newWorker = registration.installing;
+            if (!newWorker) return;
+
+            newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    waitingWorker = newWorker;
+                    showPill();
+                }
+            });
+        };
+
+        navigator.serviceWorker.getRegistration().then(reg => {
+            if (!reg) return;
+
+            if (reg.waiting && navigator.serviceWorker.controller) {
+                waitingWorker = reg.waiting;
+                showPill();
+            }
+
+            reg.addEventListener('updatefound', () => onUpdateFound(reg));
+
+            // Check for update on tab focus/visibility
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    reg.update().catch(() => {});
+                }
+            });
+        });
+
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (isRefreshing) return;
+            isRefreshing = true;
+            window.location.reload();
+        });
+
+        btnApplyUpdate.addEventListener('click', () => {
+            if (waitingWorker) {
+                waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+            } else {
+                window.location.reload();
+            }
+        });
+
+        btnCloseUpdatePill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hidePill(true);
+        });
+
+        // Swipe-down to dismiss gesture
+        updatePill.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+            currentTranslateY = 0;
+            updatePill.style.transition = 'none';
+        }, { passive: true });
+
+        updatePill.addEventListener('touchmove', (e) => {
+            const deltaY = e.touches[0].clientY - startY;
+            if (deltaY > 0) {
+                currentTranslateY = deltaY;
+                updatePill.style.transform = `translateX(-50%) translateY(${deltaY}px)`;
+            }
+        }, { passive: true });
+
+        updatePill.addEventListener('touchend', () => {
+            updatePill.style.transition = '';
+            if (currentTranslateY > 40) {
+                hidePill(true);
+            } else {
+                updatePill.style.transform = 'translateX(-50%) translateY(0)';
+            }
         });
     }
 }

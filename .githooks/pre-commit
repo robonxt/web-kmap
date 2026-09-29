@@ -1,0 +1,11 @@
+#!/bin/sh
+# Git pre-commit hook to update CACHE_VERSION in sw.js automatically
+# Generates a timestamp version (e.g. v-YYYYMMDD-HHMMSS)
+TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+SW_FILE="sw.js"
+
+if [ -f "$SW_FILE" ]; then
+    # Replace CACHE_VERSION in sw.js
+    sed -i "s/const CACHE_VERSION = '.*';/const CACHE_VERSION = 'v-${TIMESTAMP}';/" "$SW_FILE"
+    git add "$SW_FILE"
+fi

@@ -1,6 +1,7 @@
-const CACHE = 'kmap-solver-cache';
+const CACHE_VERSION = 'v-20260929-135907';
+const CACHE = `kmap-solver-${CACHE_VERSION}`;
 const ASSETS = [
-  '.',
+  './',
   './assets/icon/android-chrome-192.png',
   './assets/icon/android-chrome-512.png',
   './assets/icon/apple-touch-icon.png',
@@ -18,11 +19,16 @@ const ASSETS = [
   'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap'
 ];
 
+// Listen for message from client to skip waiting and activate immediately
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // Install event: Triggered when the service worker is installed
 // This caches all the assets defined in the ASSETS array
 self.addEventListener('install', e => {
-  // Skip waiting forces the waiting service worker to become the active service worker
-  self.skipWaiting();
   // Wait until all assets are cached before completing installation
   e.waitUntil(caches.open(CACHE).then(c => Promise.all(ASSETS.map(a => c.add(new Request(a))))));
 });

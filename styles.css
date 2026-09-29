@@ -797,12 +797,12 @@ body {
     border-color: var(--color-border-default);
 }
 
-/* Floating Install Pill */
-body.has-install-pill .container {
+/* Floating Bottom Pills (Install & Update) */
+body.has-bottom-pill .container {
     padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
 }
 
-.install-pill {
+.bottom-pill {
     position: fixed;
     bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
     left: 50%;
@@ -823,17 +823,17 @@ body.has-install-pill .container {
     transition: transform var(--duration-medium) var(--easing), opacity var(--duration-medium) var(--easing);
 }
 
-.install-pill.anim-in {
-    animation: installPillEnter var(--duration-medium) var(--easing-decelerate);
+.bottom-pill.anim-in {
+    animation: bottomPillEnter var(--duration-medium) var(--easing-decelerate);
 }
 
-.install-pill.anim-out {
+.bottom-pill.anim-out {
     transform: translateX(-50%) translateY(120%);
     opacity: 0;
     pointer-events: none;
 }
 
-@keyframes installPillEnter {
+@keyframes bottomPillEnter {
     from {
         transform: translateX(-50%) translateY(120%);
         opacity: 0;
@@ -844,7 +844,7 @@ body.has-install-pill .container {
     }
 }
 
-.install-pill-action {
+.bottom-pill-action {
     display: flex;
     align-items: center;
     gap: var(--space-xs);
@@ -859,21 +859,25 @@ body.has-install-pill .container {
     transition: background-color var(--duration-quick) var(--easing);
 }
 
-.install-pill-action:hover {
+.bottom-pill-action:hover {
     background-color: var(--color-surface-hover);
     color: var(--kmap-primary);
 }
 
-.install-pill-icon {
+.bottom-pill-icon {
     font-size: 20px;
     color: var(--kmap-primary);
 }
 
-.install-pill-text {
+.bottom-pill-icon.update-icon {
+    color: #3498db;
+}
+
+.bottom-pill-text {
     white-space: nowrap;
 }
 
-.install-pill-close {
+.bottom-pill-close {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -887,11 +891,11 @@ body.has-install-pill .container {
     transition: background-color var(--duration-quick) var(--easing), color var(--duration-quick) var(--easing);
 }
 
-.install-pill-close .material-symbols-rounded {
+.bottom-pill-close .material-symbols-rounded {
     font-size: 18px;
 }
 
-.install-pill-close:hover {
+.bottom-pill-close:hover {
     background-color: var(--color-surface-hover);
     color: var(--color-text-high);
 }
