@@ -617,75 +617,47 @@ class KMapInterface {
 
 
     setupPopupHandlers() {
-        const closeBtnInfo = document.getElementById('btn-popup-close-info');
-        const closeBtnSettings = document.getElementById('btn-popup-close-settings');
-        const infoBtn = document.getElementById('btn-show-info');
         const infoPopup = document.getElementById('popup-info');
-        const settingsBtn = document.getElementById('btn-show-settings');
         const settingsPopup = document.getElementById('popup-settings');
-        const btnUpdateApp = document.getElementById('btn-update-app');
         const popupUpdateConfirm = document.getElementById('popup-update-confirm');
-        const closeBtnUpdateConfirm = document.getElementById('btn-popup-close-update-confirm');
-        const btnCancelUpdate = document.getElementById('btn-cancel-update');
-        const btnConfirmUpdate = document.getElementById('btn-confirm-update');
 
-        if (infoBtn && infoPopup) {
-            infoBtn.addEventListener('click', () => infoPopup.classList.add('active'));
-        }
-        if (closeBtnInfo && infoPopup) {
-            closeBtnInfo.addEventListener('click', () => infoPopup.classList.remove('active'));
-            infoPopup.addEventListener('click', (e) => {
-                if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
-            });
-        }
-        if (settingsBtn && settingsPopup) {
-            settingsBtn.addEventListener('click', () => settingsPopup.classList.add('active'));
-        }
-        if (closeBtnSettings && settingsPopup) {
-            closeBtnSettings.addEventListener('click', () => settingsPopup.classList.remove('active'));
-            settingsPopup.addEventListener('click', (e) => {
-                if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
-            });
-        }
+        // Generic opener helper
+        const openModal = (modal) => modal?.classList.add('active');
+        const closeModal = (modal) => modal?.classList.remove('active');
 
-        if (btnUpdateApp && popupUpdateConfirm) {
-            btnUpdateApp.addEventListener('click', () => {
-                settingsPopup.classList.remove('active');
-                popupUpdateConfirm.classList.add('active');
-            });
-        }
+        // Open buttons
+        document.getElementById('btn-show-info')?.addEventListener('click', () => openModal(infoPopup));
+        document.getElementById('btn-show-settings')?.addEventListener('click', () => openModal(settingsPopup));
+        document.getElementById('btn-update-app')?.addEventListener('click', () => {
+            closeModal(settingsPopup);
+            openModal(popupUpdateConfirm);
+        });
 
-        if (closeBtnUpdateConfirm && popupUpdateConfirm) {
-            closeBtnUpdateConfirm.addEventListener('click', () => popupUpdateConfirm.classList.remove('active'));
-        }
-
-        if (btnCancelUpdate && popupUpdateConfirm) {
-            btnCancelUpdate.addEventListener('click', () => popupUpdateConfirm.classList.remove('active'));
-        }
-
-        if (popupUpdateConfirm) {
-            popupUpdateConfirm.addEventListener('click', (e) => {
-                if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
-            });
-        }
-
-        if (btnConfirmUpdate) {
-            btnConfirmUpdate.addEventListener('click', async () => {
-                try {
-                    localStorage.clear();
-                    const cacheNames = await caches.keys();
-                    await Promise.all(cacheNames.map(name => caches.delete(name)));
-
-                    const registration = await navigator.serviceWorker.getRegistration();
-                    if (registration) await registration.unregister();
-
-                    window.location.reload(true);
-                } catch (error) {
-                    console.error('Update failed:', error);
-                    alert('Update failed. Please check console for details.');
+        // Close triggers: backdrop click and close/cancel buttons
+        document.querySelectorAll('.overlay-popup').forEach(popup => {
+            popup.addEventListener('click', (e) => {
+                if (e.target === popup || e.target.closest('.btn-icon[id^="btn-popup-close-"], #btn-cancel-update')) {
+                    closeModal(popup);
                 }
             });
-        }
+        });
+
+        // Hard update action
+        document.getElementById('btn-confirm-update')?.addEventListener('click', async () => {
+            try {
+                localStorage.clear();
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) await registration.unregister();
+
+                window.location.reload(true);
+            } catch (error) {
+                console.error('Update failed:', error);
+                alert('Update failed. Please check console for details.');
+            }
+        });
     }
 
     setupThemeHandlers() {
