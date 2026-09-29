@@ -19,7 +19,10 @@ class KMapInterface {
             dropdownVariablesLabel: document.getElementById('dropdown-variables-label'),
             dropdownVariablesMenu: document.getElementById('dropdown-variables-menu'),
             inputToggleZeros: document.getElementById('input-toggle-zeros'),
-            inputToggleTheme: document.getElementById('input-toggle-theme')
+            inputToggleTheme: document.getElementById('input-toggle-theme'),
+            installPill: document.getElementById('install-pill'),
+            btnInstallApp: document.getElementById('btn-install-app'),
+            btnCloseInstallPill: document.getElementById('btn-close-install-pill')
         };
 
         // Predefined distinct colors for groups
@@ -47,6 +50,7 @@ class KMapInterface {
         this.initializeUI();
         this.initializeTruthTable();
         this.setupEventListeners();
+        this.setupInstallPrompt();
         this.clear();
     }
 
@@ -1061,6 +1065,94 @@ class KMapInterface {
             slider.style.width = `${pillRect.width}px`;
             slider.style.height = `${pillRect.height}px`;
         }
+    }
+
+    setupInstallPrompt() {
+        const { installPill, btnInstallApp, btnCloseInstallPill } = this.elements;
+        if (!installPill || !btnInstallApp || !btnCloseInstallPill) return;
+
+        let deferredPrompt = null;
+        let startY = 0;
+        let currentTranslateY = 0;
+
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone === true;
+
+        if (isStandalone) {
+            return;
+        }
+
+        const hidePill = (persistDismiss = true) => {
+            installPill.classList.remove('anim-in');
+            installPill.classList.add('anim-out');
+            document.body.classList.remove('has-install-pill');
+            if (persistDismiss) {
+                sessionStorage.setItem('dismissed_install_pill', 'true');
+            }
+            setTimeout(() => {
+                installPill.style.display = 'none';
+            }, 300);
+        };
+
+        const showPill = () => {
+            if (sessionStorage.getItem('dismissed_install_pill') === 'true') {
+                return;
+            }
+            installPill.style.display = 'inline-flex';
+            installPill.classList.remove('anim-out');
+            installPill.classList.add('anim-in');
+            document.body.classList.add('has-install-pill');
+        };
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showPill();
+        });
+
+        btnInstallApp.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            if (outcome === 'accepted') {
+                hidePill(true);
+            }
+        });
+
+        btnCloseInstallPill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hidePill(true);
+        });
+
+        // Swipe-down to dismiss gesture
+        installPill.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+            currentTranslateY = 0;
+            installPill.style.transition = 'none';
+        }, { passive: true });
+
+        installPill.addEventListener('touchmove', (e) => {
+            const deltaY = e.touches[0].clientY - startY;
+            if (deltaY > 0) {
+                currentTranslateY = deltaY;
+                installPill.style.transform = `translateX(-50%) translateY(${deltaY}px)`;
+            }
+        }, { passive: true });
+
+        installPill.addEventListener('touchend', () => {
+            installPill.style.transition = '';
+            if (currentTranslateY > 40) {
+                hidePill(true);
+            } else {
+                installPill.style.transform = 'translateX(-50%) translateY(0)';
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            hidePill(true);
+        });
     }
 }
 

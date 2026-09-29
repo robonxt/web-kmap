@@ -796,3 +796,102 @@ body {
 .btn-outline {
     border-color: var(--color-border-default);
 }
+
+/* Floating Install Pill */
+body.has-install-pill .container {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+
+.install-pill {
+    position: fixed;
+    bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-surface);
+    color: var(--color-text-high);
+    border: var(--stroke-sm) solid var(--color-border-default);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-lg);
+    padding: 4px 6px 4px 12px;
+    gap: var(--space-xs);
+    z-index: 100;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform var(--duration-medium) var(--easing), opacity var(--duration-medium) var(--easing);
+}
+
+.install-pill.anim-in {
+    animation: installPillEnter var(--duration-medium) var(--easing-decelerate);
+}
+
+.install-pill.anim-out {
+    transform: translateX(-50%) translateY(120%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+@keyframes installPillEnter {
+    from {
+        transform: translateX(-50%) translateY(120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+.install-pill-action {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: none;
+    border: none;
+    color: var(--color-text-high);
+    font: var(--font-label);
+    font-weight: var(--font-weight-semibold);
+    padding: 4px var(--space-xs);
+    cursor: pointer;
+    border-radius: var(--radius-full);
+    transition: background-color var(--duration-quick) var(--easing);
+}
+
+.install-pill-action:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--kmap-primary);
+}
+
+.install-pill-icon {
+    font-size: 20px;
+    color: var(--kmap-primary);
+}
+
+.install-pill-text {
+    white-space: nowrap;
+}
+
+.install-pill-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-full);
+    color: var(--color-text-low);
+    cursor: pointer;
+    transition: background-color var(--duration-quick) var(--easing), color var(--duration-quick) var(--easing);
+}
+
+.install-pill-close .material-symbols-rounded {
+    font-size: 18px;
+}
+
+.install-pill-close:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text-high);
+}
