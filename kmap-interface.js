@@ -72,16 +72,39 @@ class KMapInterface {
             });
         };
 
+        const createLayout = (matrix) => {
+            const decimalToPos = [];
+            for (let r = 0; r < matrix.length; r++) {
+                for (let c = 0; c < matrix[r].length; c++) {
+                    decimalToPos[matrix[r][c]] = { row: r, col: c };
+                }
+            }
+            return { matrix, decimalToPos };
+        };
+
         return {
-            2: { standard: toStandardMatrix(2), transposed: solver.KMapTransposedLayouts.get(2) },
-            3: { standard: toStandardMatrix(3), transposed: solver.KMapTransposedLayouts.get(3) },
-            4: { standard: toStandardMatrix(4), transposed: solver.KMapTransposedLayouts.get(4) }
+            2: {
+                standard: createLayout(toStandardMatrix(2)),
+                transposed: createLayout(solver.KMapTransposedLayouts.get(2))
+            },
+            3: {
+                standard: createLayout(toStandardMatrix(3)),
+                transposed: createLayout(solver.KMapTransposedLayouts.get(3))
+            },
+            4: {
+                standard: createLayout(toStandardMatrix(4)),
+                transposed: createLayout(solver.KMapTransposedLayouts.get(4))
+            }
         };
     }
 
-    getCurrentLayoutMatrix() {
+    getCurrentLayout() {
         const layoutObj = this.layouts[this.numVars];
         return this.isTransposedLayout ? layoutObj.transposed : layoutObj.standard;
+    }
+
+    getCurrentLayoutMatrix() {
+        return this.getCurrentLayout().matrix;
     }
 
     initializeUI() {
@@ -463,41 +486,33 @@ class KMapInterface {
             return;
         }
 
-        const matrix = this.getCurrentLayoutMatrix();
+        const { decimalToPos, matrix } = this.getCurrentLayout();
 
         // Process each term
         terms.forEach((term, index) => {
             if (term === "1") return;
 
-            // Parse variables in the term
-            const variables = {};
+            // Build careMask and matchMask directly using bit operations
+            let careMask = 0;
+            let matchMask = 0;
             for (let i = 0; i < term.length; i++) {
-                if (term[i] === '!') {
-                    variables[term[i + 1]] = false;
-                    i++;
-                } else {
-                    variables[term[i]] = true;
+                const isNeg = term[i] === '!';
+                const char = isNeg ? term[++i] : term[i];
+                const varIdx = this.variables.indexOf(char);
+                if (varIdx !== -1) {
+                    const shift = this.numVars - 1 - varIdx;
+                    careMask |= (1 << shift);
+                    if (!isNeg) matchMask |= (1 << shift);
                 }
             }
 
-            // Find matching cells
+            // Find matching cells using bitwise comparison
             const matchingCells = [];
-            for (let r = 0; r < matrix.length; r++) {
-                for (let c = 0; c < matrix[r].length; c++) {
-                    const dec = matrix[r][c];
-                    const binary = dec.toString(2).padStart(this.numVars, '0');
-                    let matches = true;
-
-                    for (const [v, val] of Object.entries(variables)) {
-                        const varIdx = this.variables.indexOf(v);
-                        if (varIdx !== -1 && (binary[varIdx] === '1') !== val) {
-                            matches = false;
-                            break;
-                        }
-                    }
-
-                    if (matches) {
-                        matchingCells.push({ decimal: dec, row: r, col: c });
+            for (let dec = 0; dec < this.size; dec++) {
+                if ((dec & careMask) === matchMask) {
+                    const pos = decimalToPos[dec];
+                    if (pos) {
+                        matchingCells.push({ decimal: dec, row: pos.row, col: pos.col });
                     }
                 }
             }
