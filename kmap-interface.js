@@ -44,7 +44,9 @@ class KMapInterface {
         this.variables = [...Array(numVars).keys()].map(i => String.fromCharCode(65 + i));
         this.numVars = numVars;
         this.size = 1 << numVars; // 2^numVars
-        this.grid = Array(this.size).fill(0);
+        this.grid = Array(this.size).fill('0');
+        this.kmapCells = [];
+        this.truthCells = [];
         this.isTransposedLayout = true; // true = AB/CD, false = CD/AB
         this.hideZeros = localStorage.getItem('hideZeros') !== null ? localStorage.getItem('hideZeros') === 'true' : true;
         this.layouts = this.initializeLayouts();
@@ -59,37 +61,47 @@ class KMapInterface {
     }
 
     initializeLayouts() {
-        // Fetch all layouts from KMapSolver to centralize definitions
-        return {
-            2: {
-                standard: window.KMapSolver.KMapGrayCodes.get(2),
-                transposed: window.KMapSolver.KMapTransposedLayouts.get(2)
-            },
-            3: {
-                standard: window.KMapSolver.KMapGrayCodes.get(3),
-                transposed: window.KMapSolver.KMapTransposedLayouts.get(3)
-            },
-            4: {
-                standard: window.KMapSolver.KMapGrayCodes.get(4),
-                transposed: window.KMapSolver.KMapTransposedLayouts.get(4)
-            }
+        const solver = window.KMapSolver;
+        const toStandardMatrix = (vars) => {
+            const gray = solver.KMapGrayCodes.get(vars);
+            const colsLen = gray.cols.length;
+            const shift = Math.log2(colsLen);
+            return gray.rows.map(row => {
+                const rBits = parseInt(row, 2);
+                return gray.cols.map(col => (rBits << shift) | parseInt(col, 2));
+            });
         };
+
+        return {
+            2: { standard: toStandardMatrix(2), transposed: solver.KMapTransposedLayouts.get(2) },
+            3: { standard: toStandardMatrix(3), transposed: solver.KMapTransposedLayouts.get(3) },
+            4: { standard: toStandardMatrix(4), transposed: solver.KMapTransposedLayouts.get(4) }
+        };
+    }
+
+    getCurrentLayoutMatrix() {
+        const layoutObj = this.layouts[this.numVars];
+        return this.isTransposedLayout ? layoutObj.transposed : layoutObj.standard;
     }
 
     initializeUI() {
         const grid = this.elements.grid;
         grid.innerHTML = '';
-        const layout = this.isTransposedLayout ?
-            this.layouts[this.numVars].transposed :
-            this.layouts[this.numVars].standard;
+        this.kmapCells = Array(this.size);
 
-        grid.style.gridTemplateColumns = `repeat(${this.isTransposedLayout ? layout[0].length : layout.cols.length}, minmax(10px, 1fr))`;
+        const matrix = this.getCurrentLayoutMatrix();
+        grid.style.gridTemplateColumns = `repeat(${matrix[0].length}, minmax(10px, 1fr))`;
 
-        if (this.isTransposedLayout) {
-            this.createTransposedGrid(layout);
-        } else {
-            this.createStandardGrid(layout);
+        const fragment = document.createDocumentFragment();
+        for (let r = 0; r < matrix.length; r++) {
+            for (let c = 0; c < matrix[r].length; c++) {
+                const cellIndex = matrix[r][c];
+                const cell = this.createCell(cellIndex);
+                this.kmapCells[cellIndex] = cell;
+                fragment.appendChild(cell);
+            }
         }
+        grid.appendChild(fragment);
 
         // Add SVG after grid is populated
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -116,7 +128,7 @@ class KMapInterface {
         const state = this.grid[index] || '0';
         cell.dataset.state = state;
 
-        // Extract binary representation from binaryDisplay
+        // Binary representation
         const binaryPart = index.toString(2).padStart(this.numVars, '0');
 
         // Create decimal display
@@ -127,56 +139,29 @@ class KMapInterface {
         // Create value display (center)
         const valDiv = document.createElement('div');
         valDiv.className = 'value-display';
-        valDiv.textContent = (state === '1' || state === 'X') ? state :
-            (this.hideZeros ? 'ㅤ' : '0');
+        valDiv.textContent = (state === '1' || state === 'X') ? state : (this.hideZeros ? 'ㅤ' : '0');
+
         // Create binary display
         const binDiv = document.createElement('div');
         binDiv.className = 'binary-display';
         binDiv.textContent = binaryPart;
 
-        // Add appropriate classes based on state
-        if (state === '1') {
-            cell.classList.add('selected');
-        } else if (state === 'X') {
-            cell.classList.add('dont-care');
-        }
+        if (state === '1') cell.classList.add('selected');
+        else if (state === 'X') cell.classList.add('dont-care');
 
-        // Create a wrapper for the value display to center it
         const centerWrapper = document.createElement('div');
         centerWrapper.className = 'center-wrapper';
         centerWrapper.appendChild(valDiv);
 
         cell.append(decDiv, centerWrapper, binDiv);
-        cell.addEventListener('click', () => this.toggleKMap(cell));
+        cell.addEventListener('click', () => this.toggleCell(index));
         return cell;
-    }
-
-    createStandardGrid(layout) {
-        const fragment = document.createDocumentFragment();
-        layout.rows.forEach(row => {
-            layout.cols.forEach(col => {
-                const rowBits = parseInt(row, 2);
-                const colBits = parseInt(col, 2);
-                const index = (rowBits << Math.log2(layout.cols.length)) | colBits;
-                fragment.appendChild(this.createCell(index));
-            });
-        });
-        this.elements.grid.appendChild(fragment);
-    }
-
-    createTransposedGrid(layout) {
-        const fragment = document.createDocumentFragment();
-        layout.forEach(row => {
-            row.forEach(index => {
-                fragment.appendChild(this.createCell(index));
-            });
-        });
-        this.elements.grid.appendChild(fragment);
     }
 
     initializeTruthTable() {
         const tbody = this.elements.truthTableBody;
         tbody.innerHTML = '';
+        this.truthCells = Array(this.size);
 
         // Update variable column visibility in header
         const varCols = document.querySelectorAll('.truth-table thead tr th:not(:first-child):not(:last-child)');
@@ -188,11 +173,15 @@ class KMapInterface {
             row.dataset.rowIndex = i;
 
             const binary = i.toString(2).padStart(this.numVars, '0');
+            const state = this.grid[i] || '0';
+            const valueCell = this.createTableCell((state === '1' || state === 'X') ? state : (this.hideZeros ? 'ㅤ' : '0'), '', true, i);
+            this.truthCells[i] = valueCell;
+
             const cells = [
                 this.createTableCell(i, 'row-id'),
                 ...Array.from({ length: 4 }, (_, j) =>
                     this.createTableCell(j < this.numVars ? binary[j] : '', '', j < this.numVars)),
-                this.createTableCell(this.hideZeros ? 'ㅤ' : '0', '', true, i)
+                valueCell
             ];
 
             row.append(...cells);
@@ -208,53 +197,53 @@ class KMapInterface {
         if (!show) td.style.display = 'none';
         if (index !== null) {
             td.dataset.index = index;
-            td.dataset.state = '0';
-            td.addEventListener('click', () => this.toggleTruth(td));
+            td.dataset.state = this.grid[index] || '0';
+            td.addEventListener('click', () => this.toggleCell(index));
         }
         return td;
     }
 
-    toggleKMap(cell) {
-        this.syncViews(cell, true);
-    }
+    toggleCell(index) {
+        const currentState = this.grid[index] || '0';
+        const newState = this.cycleState(currentState);
+        this.setCellState(index, newState);
 
-    toggleTruth(cell) {
-        this.syncViews(cell, false);
-    }
-
-    syncViews(cell, isKMapCell) {
-        const newState = this.cycleState(cell.dataset.state);
-        this.applyState(cell, newState, isKMapCell);
-
-        const index = parseInt(cell.dataset.index);
-        const linkedSelector = isKMapCell ?
-            `td[data-index="${index}"]` :
-            `.cell[data-index="${index}"]`;
-        const linkedCell = isKMapCell ?
-            this.elements.truthTableBody.querySelector(linkedSelector) :
-            this.elements.grid.querySelector(linkedSelector);
-
-        if (linkedCell) {
-            this.applyState(linkedCell, newState, !isKMapCell);
-        }
-
-        this.grid[index] = newState;
-
-        // Clear any pending solve operation
         clearTimeout(this._solveTimer);
-        // Schedule a new solve operation
         this._solveTimer = setTimeout(() => this.solve(), 100);
     }
 
+    setCellState(index, newState) {
+        this.grid[index] = newState;
+
+        const kmapCell = this.kmapCells[index];
+        if (kmapCell) {
+            kmapCell.dataset.state = newState;
+            const valDiv = kmapCell.querySelector('.value-display');
+            if (valDiv) {
+                valDiv.textContent = (newState === '1' || newState === 'X') ? newState : (this.hideZeros ? 'ㅤ' : '0');
+            }
+            kmapCell.classList.toggle('selected', newState === '1');
+            kmapCell.classList.toggle('dont-care', newState === 'X');
+        }
+
+        const truthCell = this.truthCells[index];
+        if (truthCell) {
+            truthCell.dataset.state = newState;
+            truthCell.textContent = (newState === '1' || newState === 'X') ? newState : (this.hideZeros ? 'ㅤ' : '0');
+            truthCell.classList.toggle('selected', newState === '1');
+            truthCell.classList.toggle('dont-care', newState === 'X');
+        }
+    }
+
     getMintermsAndDontCares() {
-        const cells = this.elements.grid.querySelectorAll('.cell');
-        return Array.from(cells).reduce((acc, cell) => {
-            const index = parseInt(cell.dataset.index);
-            const state = cell.dataset.state;
-            if (state === '1') acc.minterms.push(index);
-            else if (state === 'X') acc.dontcares.push(index);
-            return acc;
-        }, { minterms: [], dontcares: [] });
+        const minterms = [];
+        const dontcares = [];
+        for (let i = 0; i < this.size; i++) {
+            const st = this.grid[i];
+            if (st === '1') minterms.push(i);
+            else if (st === 'X') dontcares.push(i);
+        }
+        return { minterms, dontcares };
     }
 
     addOverline(solution) {
@@ -355,66 +344,21 @@ class KMapInterface {
     }
 
     clear() {
-        // Clear K-map cells
-        this.elements.grid.querySelectorAll('.cell').forEach(cell => {
-            this.applyState(cell, '0', true);
-        });
-
-        // Clear truth table cells
-        this.elements.truthTableBody.querySelectorAll('td[data-index]').forEach(cell => {
-            this.applyState(cell, '0', false);
-        });
-
-        // Reset grid state
-        this.grid.fill(0);
+        for (let i = 0; i < this.size; i++) {
+            this.setCellState(i, '0');
+        }
         this.elements.solution.innerHTML = '';
         this.elements.dropdownSolutionsContainer.style.display = 'none';
 
-        // Clear group circles by removing all path elements from the SVG
         const svg = this.elements.grid.querySelector('.kmap-groups-svg');
-        if (svg) {
-            const paths = svg.querySelectorAll('path');
-            paths.forEach(path => path.remove());
-        }
+        if (svg) svg.innerHTML = '';
     }
 
     setAllStates(value) {
-        // Update K-Map and Truth Table cells
-        this.elements.grid.querySelectorAll('.cell').forEach(cell =>
-            this.applyState(cell, value, true));
-
-        this.elements.truthTableBody.querySelectorAll('td[data-index]').forEach(cell =>
-            this.applyState(cell, value, false));
-
-        // Update grid state and solve
-        this.grid = Array(this.size).fill(value);
+        for (let i = 0; i < this.size; i++) {
+            this.setCellState(i, value);
+        }
         this.solve();
-    }
-
-    applyState(cell, newState, isKMapCell = true) {
-        if (isKMapCell) {
-            const valueDisplay = cell.querySelector('.value-display');
-            if (valueDisplay) {
-                valueDisplay.textContent = (newState === '1' || newState === 'X') ? newState :
-                    (this.hideZeros ? 'ㅤ' : '0');
-            }
-        } else {
-            cell.textContent = (newState === '1' || newState === 'X') ? newState :
-                (this.hideZeros ? 'ㅤ' : '0');
-        }
-
-        cell.dataset.state = newState;
-
-        // Update classes
-        if (newState === '1') {
-            cell.classList.add('selected');
-            cell.classList.remove('dont-care');
-        } else if (newState === 'X') {
-            cell.classList.remove('selected');
-            cell.classList.add('dont-care');
-        } else {
-            cell.classList.remove('selected', 'dont-care');
-        }
     }
 
     cycleState(currentState) {
@@ -506,215 +450,133 @@ class KMapInterface {
         const gridRect = this.elements.grid.getBoundingClientRect();
         if (gridRect.width === 0 || gridRect.height === 0) return;
 
-        const allCellElements = this.elements.grid.querySelectorAll('.cell');
-        const allCellRects = new Map();
-        allCellElements.forEach(cellEl => {
-            allCellRects.set(cellEl.dataset.index, cellEl.getBoundingClientRect());
-        });
-
         // Special case for "1" - group all cells
         if (terms.length === 1 && terms[0] === "1") {
-            const allCellsForGroup1 = Array.from(allCellElements) // Use already queried elements
-                .map(cellEl => allCellRects.get(cellEl.dataset.index)) // Get pre-calculated rects
-                .filter(rect => rect);
-
-            if (allCellsForGroup1.length > 0) {
+            const allRects = this.kmapCells.map(c => c?.getBoundingClientRect()).filter(Boolean);
+            if (allRects.length > 0) {
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.classList.add('kmap-group-path');
                 path.style.stroke = this.groupColors[0];
-
-                const pathData = this.calculateGroupPath(allCellsForGroup1, gridRect);
-                path.setAttribute('d', pathData);
+                path.setAttribute('d', this.calculateGroupPath(allRects, gridRect));
                 svg.appendChild(path);
             }
             return;
         }
 
-        // Get current layout
-        const layout = this.isTransposedLayout ?
-            this.layouts[this.numVars].transposed :
-            this.layouts[this.numVars].standard;
+        const matrix = this.getCurrentLayoutMatrix();
 
         // Process each term
         terms.forEach((term, index) => {
-            // Skip if term is just "1"
             if (term === "1") return;
 
             // Parse variables in the term
             const variables = {};
-            let currentVar = '';
             for (let i = 0; i < term.length; i++) {
                 if (term[i] === '!') {
-                    currentVar = term[i + 1];
-                    variables[currentVar] = false;
-                    i++; // Skip next character
+                    variables[term[i + 1]] = false;
+                    i++;
                 } else {
-                    currentVar = term[i];
-                    variables[currentVar] = true;
+                    variables[term[i]] = true;
                 }
             }
 
-            // Find cells that match this term
+            // Find matching cells
             const matchingCells = [];
-            const rows = this.isTransposedLayout ? layout : layout.rows;
-            const cols = this.isTransposedLayout ? layout[0] : layout.cols;
-
-            for (let row = 0; row < rows.length; row++) {
-                for (let col = 0; col < cols.length; col++) {
-                    const cellValue = this.isTransposedLayout ?
-                        layout[row][col] :
-                        parseInt(`${rows[row]}${cols[col]}`, 2);
-                    const binary = cellValue.toString(2).padStart(this.numVars, '0');
+            for (let r = 0; r < matrix.length; r++) {
+                for (let c = 0; c < matrix[r].length; c++) {
+                    const dec = matrix[r][c];
+                    const binary = dec.toString(2).padStart(this.numVars, '0');
                     let matches = true;
 
-                    // Check if cell matches all variables in term
-                    for (const [variable, value] of Object.entries(variables)) {
-                        const varIndex = this.variables.indexOf(variable);
-                        if (varIndex === -1) continue;
-
-                        const cellValue = binary[varIndex] === '1';
-                        if (cellValue !== value) {
+                    for (const [v, val] of Object.entries(variables)) {
+                        const varIdx = this.variables.indexOf(v);
+                        if (varIdx !== -1 && (binary[varIdx] === '1') !== val) {
                             matches = false;
                             break;
                         }
                     }
 
                     if (matches) {
-                        matchingCells.push({ decimal: cellValue, row, col });
+                        matchingCells.push({ decimal: dec, row: r, col: c });
                     }
                 }
             }
 
-            // Create path for matching cells
             if (matchingCells.length > 0) {
-                const groupCellRects = matchingCells.map(cellInfo => { // cellInfo is { decimal, row, col }
-                    return allCellRects.get(String(cellInfo.decimal)); // Get from pre-calculated Map
-                    // Ensure key type matches (string if dataset.index is string)
-                }).filter(rect => rect); // Filter out any undefined if a cell wasn't found (shouldn't happen)
-
-                if (groupCellRects.length === 0) return;
+                const rects = matchingCells.map(m => this.kmapCells[m.decimal]?.getBoundingClientRect()).filter(Boolean);
+                if (rects.length === 0) return;
 
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.classList.add('kmap-group-path');
-                path.dataset.wrap = this.isWrapped(matchingCells) ? 'true' : 'false';
+                path.dataset.wrap = this.isWrapped(matchingCells, matrix) ? 'true' : 'false';
                 path.style.stroke = this.groupColors[index % this.groupColors.length];
-
-                const pathData = this.calculateGroupPath(groupCellRects, gridRect); // Pass the rects
-                path.setAttribute('d', pathData);
-
+                path.setAttribute('d', this.calculateGroupPath(rects, gridRect));
                 svg.appendChild(path);
             }
         });
     }
 
-    calculateGroupPath(cells, gridRect) {
+    calculateGroupPath(rects, gridRect) {
         const padding = 5;
         const radius = 30;
 
-        // Convert cell rects to relative coordinates
-        const rects = cells.map(rect => ({
-            left: rect.left - gridRect.left - padding,
-            top: rect.top - gridRect.top - padding,
-            right: rect.right - gridRect.left + padding,
-            bottom: rect.bottom - gridRect.top + padding
-        }));
+        let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+        for (let i = 0; i < rects.length; i++) {
+            const r = rects[i];
+            const rLeft = r.left - gridRect.left - padding;
+            const rTop = r.top - gridRect.top - padding;
+            const rRight = r.right - gridRect.left + padding;
+            const rBottom = r.bottom - gridRect.top + padding;
 
-        // Find bounds
-        const bounds = {
-            left: Math.min(...rects.map(r => r.left)),
-            top: Math.min(...rects.map(r => r.top)),
-            right: Math.max(...rects.map(r => r.right)),
-            bottom: Math.max(...rects.map(r => r.bottom))
-        };
+            if (rLeft < left) left = rLeft;
+            if (rTop < top) top = rTop;
+            if (rRight > right) right = rRight;
+            if (rBottom > bottom) bottom = rBottom;
+        }
 
-        // Create rounded rectangle path
-        return `M ${bounds.left + radius} ${bounds.top}
-            L ${bounds.right - radius} ${bounds.top}
-            Q ${bounds.right} ${bounds.top} ${bounds.right} ${bounds.top + radius}
-            L ${bounds.right} ${bounds.bottom - radius}
-            Q ${bounds.right} ${bounds.bottom} ${bounds.right - radius} ${bounds.bottom}
-            L ${bounds.left + radius} ${bounds.bottom}
-            Q ${bounds.left} ${bounds.bottom} ${bounds.left} ${bounds.bottom - radius}
-            L ${bounds.left} ${bounds.top + radius}
-            Q ${bounds.left} ${bounds.top} ${bounds.left + radius} ${bounds.top}`;
+        return `M ${left + radius} ${top}
+            L ${right - radius} ${top}
+            Q ${right} ${top} ${right} ${top + radius}
+            L ${right} ${bottom - radius}
+            Q ${right} ${bottom} ${right - radius} ${bottom}
+            L ${left + radius} ${bottom}
+            Q ${left} ${bottom} ${left} ${bottom - radius}
+            L ${left} ${top + radius}
+            Q ${left} ${top} ${left + radius} ${top}`;
     }
 
-    isWrapped(cells) {
-        // Get current layout and convert Gray code to 2D array if needed
-        let layoutArray;
-        if (this.isTransposedLayout) {
-            layoutArray = this.layouts[this.numVars].transposed;
-        } else {
-            const layout = this.layouts[this.numVars].standard;
-            layoutArray = layout.rows.map(row =>
-                layout.cols.map(col => parseInt(row + col, 2))
-            );
-        }
+    isWrapped(cells, matrix) {
+        const rowCount = matrix.length;
+        const colCount = matrix[0].length;
 
-        // Find positions of cells in layout array
-        const positions = [];
-        const decimals = cells.map(cell => cell.decimal);
+        // Sort by row, then col
+        cells.sort((a, b) => a.row - b.row || a.col - b.col);
 
-        for (let r = 0; r < layoutArray.length; r++) {
-            for (let c = 0; c < layoutArray[r].length; c++) {
-                if (decimals.includes(layoutArray[r][c])) {
-                    positions.push({ row: r, col: c });
-                }
+        for (let i = 1; i < cells.length; i++) {
+            const prev = cells[i - 1];
+            const curr = cells[i];
+
+            if (Math.abs(curr.row - prev.row) > 1 || Math.abs(curr.col - prev.col) > 1) {
+                const wrapRow = Math.min(
+                    Math.abs(curr.row - prev.row + rowCount),
+                    Math.abs(curr.row - prev.row - rowCount)
+                );
+                const wrapCol = Math.min(
+                    Math.abs(curr.col - prev.col + colCount),
+                    Math.abs(curr.col - prev.col - colCount)
+                );
+                if (wrapRow <= 1 || wrapCol <= 1) return true;
             }
         }
-
-        // Sort positions by row and column
-        positions.sort((a, b) => a.row - b.row || a.col - b.col);
-
-        // Check for wraparound in rows or columns
-        for (let i = 1; i < positions.length; i++) {
-            const prev = positions[i - 1];
-            const curr = positions[i];
-
-            // Check if cells are adjacent in the grid
-            const rowDiff = Math.abs(curr.row - prev.row);
-            const colDiff = Math.abs(curr.col - prev.col);
-
-            // If cells aren't directly adjacent in either direction
-            if (rowDiff > 1 || colDiff > 1) {
-                // Check if they're adjacent through wraparound
-                const wrapRowDiff = Math.min(
-                    Math.abs(curr.row - prev.row + layoutArray.length),
-                    Math.abs(curr.row - prev.row - layoutArray.length)
-                );
-                const wrapColDiff = Math.min(
-                    Math.abs(curr.col - prev.col + layoutArray[0].length),
-                    Math.abs(curr.col - prev.col - layoutArray[0].length)
-                );
-
-                // If cells are adjacent through wraparound
-                if (wrapRowDiff <= 1 || wrapColDiff <= 1) {
-                    return true;
-                }
-            }
-        }
-
         return false;
     }
 
     toggleLayout() {
-        if (this.numVars === 2) return; // Disable for 2 variables
+        if (this.numVars === 2) return;
 
         this.isTransposedLayout = !this.isTransposedLayout;
-        const states = this.grid.slice();
-
         this.initializeUI();
-
-        // Restore states
-        states.forEach((state, index) => {
-            const cell = this.elements.grid.querySelector(`.cell[data-index="${index}"]`);
-            if (cell) this.applyState(cell, state, true);
-        });
-
-        // Update layout text
         this.updateLayoutText();
-
-        // Recalculate groups
         this.solve();
     }
 
@@ -846,24 +708,22 @@ class KMapInterface {
     }
 
     updateAllCellDisplays() {
-        // Update K-Map cells
-        const kmapCells = this.elements.grid.querySelectorAll('.cell');
-        kmapCells.forEach(cell => {
-            const valDiv = cell.querySelector('.value-display');
-            if (valDiv) {
-                const state = cell.dataset.state || '0';
-                valDiv.textContent = (state === '1' || state === 'X') ? state :
-                    (this.hideZeros ? 'ㅤ' : '0');
-            }
-        });
+        const zeroChar = this.hideZeros ? 'ㅤ' : '0';
+        for (let i = 0; i < this.size; i++) {
+            const st = this.grid[i] || '0';
+            const text = (st === '1' || st === 'X') ? st : zeroChar;
 
-        // Update Truth Table cells
-        const truthTableCells = this.elements.truthTableBody?.querySelectorAll('td[data-index]');
-        truthTableCells?.forEach(cell => {
-            const state = cell.dataset.state || '0';
-            cell.textContent = (state === '1' || state === 'X') ? state :
-                (this.hideZeros ? 'ㅤ' : '0');
-        });
+            const kCell = this.kmapCells[i];
+            if (kCell) {
+                const valDiv = kCell.querySelector('.value-display');
+                if (valDiv) valDiv.textContent = text;
+            }
+
+            const tCell = this.truthCells[i];
+            if (tCell) {
+                tCell.textContent = text;
+            }
+        }
     }
 
 

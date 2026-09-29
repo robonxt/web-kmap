@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v-20260929-151034';
+const CACHE_VERSION = 'v-20260929-152853';
 const CACHE = `kmap-solver-${CACHE_VERSION}`;
 const ASSETS = [
   './',
@@ -16,8 +16,7 @@ const ASSETS = [
   './manifest.json',
   './styles.css',
   './guidelines/tokens.css',
-  './guidelines/components.css',
-  './sw.js'
+  './guidelines/components.css'
 ];
 
 // Listen for message from client to skip waiting and activate immediately
