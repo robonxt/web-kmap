@@ -27,14 +27,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="manifest" href="manifest.json">
+    <link rel="preload" href="assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="guidelines/tokens.css">
     <link rel="stylesheet" href="guidelines/components.css">
     <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
-        rel="stylesheet">
     <!-- Prevent Theme Flash -->
     <script>
         (function () {
@@ -59,13 +55,48 @@
 </head>
 
 <body>
+    <!-- Inline SVG Icon Sprite -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="icon-close" viewBox="0 0 24 24">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-settings" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-refresh" viewBox="0 0 24 24">
+            <path d="M23 4v6h-6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-info" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="16" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="8" r="1" fill="currentColor"/>
+        </symbol>
+        <symbol id="icon-menu" viewBox="0 0 24 24">
+            <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-copy" viewBox="0 0 24 24">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-download" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="7 10 12 15 17 10" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="icon-update" viewBox="0 0 24 24">
+            <path d="M1 4v6h6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+    </svg>
     <div class="container">
         <div class="overlay-popup" id="popup-settings">
             <div class="wrapper-popup">
                 <div class="modal-header">
                     <h2>Settings</h2>
                     <button class="btn btn-icon" id="btn-popup-close-settings" aria-label="Close">
-                        <span class="material-symbols-rounded">close</span>
+                        <svg class="ui-icon"><use href="#icon-close"></use></svg>
                     </button>
                 </div>
                 <div class="modal-body" id="content-settings">
@@ -81,7 +112,7 @@
                             <span class="switch-label">Hide Zeros</span>
                         </label>
                         <button id="btn-update-app" class="btn btn-danger">
-                            <span class="material-symbols-rounded">refresh</span>
+                            <svg class="ui-icon"><use href="#icon-refresh"></use></svg>
                             Update
                         </button>
                     </div>
@@ -96,7 +127,7 @@
                         <h2>K-Map Solver</h2>
                     </div>
                     <button class="btn btn-icon" id="btn-popup-close-info" aria-label="Close">
-                        <span class="material-symbols-rounded">close</span>
+                        <svg class="ui-icon"><use href="#icon-close"></use></svg>
                     </button>
                 </div>
                 <div class="modal-body" id="content-info">
@@ -120,7 +151,7 @@
                     <span class="modal-credit">Created by <a href="https://robonxt.xyz"
                             target="_blank">robonxt</a></span>
                     <a href="https://github.com/robonxt/web-kmap" target="_blank" class="btn btn-outline">
-                        <span class="material-symbols-rounded">info</span>
+                        <svg class="ui-icon"><use href="#icon-info"></use></svg>
                         View on GitHub
                     </a>
                 </div>
@@ -129,7 +160,7 @@
         <header class="kmap-header">
             <nav class="header-nav" id="header-nav">
                 <button class="nav-toggle btn btn-icon" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
-                    <span class="material-symbols-rounded">menu</span>
+                    <svg class="ui-icon"><use href="#icon-menu"></use></svg>
                 </button>
                 <span class="nav-title" id="nav-title">K-Map</span>
                 <div class="nav-items pill-selector-group" id="nav-items">
@@ -140,10 +171,10 @@
             </nav>
             <div class="header-actions">
                 <button class="btn btn-icon" id="btn-show-settings" aria-label="Settings">
-                    <span class="material-symbols-rounded">settings</span>
+                    <svg class="ui-icon"><use href="#icon-settings"></use></svg>
                 </button>
                 <button class="btn btn-icon" id="btn-show-info" aria-label="Information">
-                    <span class="material-symbols-rounded">info</span>
+                    <svg class="ui-icon"><use href="#icon-info"></use></svg>
                 </button>
             </div>
         </header>
@@ -157,7 +188,7 @@
                     <div class="dropdown-menu" id="dropdown-solutions-menu"></div>
                 </div>
                 <button id="btn-copy-solution" class="btn btn-icon" title="Copy to clipboard">
-                    <span class="material-symbols-rounded">content_copy</span>
+                    <svg class="ui-icon"><use href="#icon-copy"></use></svg>
                 </button>
             </div>
         </div>
@@ -208,20 +239,20 @@
     </div>
     <div id="install-pill" class="bottom-pill install-pill" style="display: none;" role="region" aria-label="Install app banner">
         <button id="btn-install-app" class="bottom-pill-action" aria-label="Install K-Map Solver">
-            <span class="material-symbols-rounded bottom-pill-icon">download</span>
+            <svg class="ui-icon bottom-pill-icon"><use href="#icon-download"></use></svg>
             <span class="bottom-pill-text">Install App</span>
         </button>
         <button id="btn-close-install-pill" class="bottom-pill-close" aria-label="Dismiss install banner">
-            <span class="material-symbols-rounded">close</span>
+            <svg class="ui-icon"><use href="#icon-close"></use></svg>
         </button>
     </div>
     <div id="update-pill" class="bottom-pill update-pill" style="display: none;" role="region" aria-label="Update available banner">
         <button id="btn-apply-update" class="bottom-pill-action" aria-label="Apply app update">
-            <span class="material-symbols-rounded bottom-pill-icon update-icon">update</span>
+            <svg class="ui-icon bottom-pill-icon update-icon"><use href="#icon-update"></use></svg>
             <span class="bottom-pill-text">Update Available</span>
         </button>
         <button id="btn-close-update-pill" class="bottom-pill-close" aria-label="Dismiss update banner">
-            <span class="material-symbols-rounded">close</span>
+            <svg class="ui-icon"><use href="#icon-close"></use></svg>
         </button>
     </div>
     <div class="overlay-popup" id="popup-update-confirm">
@@ -229,7 +260,7 @@
             <div class="modal-header">
                 <h2>Confirm update</h2>
                 <button class="btn btn-icon" id="btn-popup-close-update-confirm" aria-label="Close">
-                    <span class="material-symbols-rounded">close</span>
+                    <svg class="ui-icon"><use href="#icon-close"></use></svg>
                 </button>
             </div>
             <div class="modal-body" id="content-update-confirm">

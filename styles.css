@@ -3,7 +3,50 @@
    This file contains K-map specific overrides and custom components
 */
 
-/* Material Symbols support */
+/* Local Typography: Inter Variable Font */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url('assets/fonts/inter.woff2') format('woff2');
+}
+
+/* Iconography - Inline SVG */
+.ui-icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    fill: currentColor;
+    flex-shrink: 0;
+}
+
+.btn-icon .ui-icon,
+.svg-button .ui-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.modal-footer .ui-icon {
+    margin-right: var(--space-xs);
+}
+
+#btn-update-app .ui-icon {
+    margin-right: var(--space-xs);
+}
+
+.bottom-pill-icon.ui-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.bottom-pill-close .ui-icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* Material Symbols support (fallback) */
 .material-symbols-rounded {
     font-family: 'Material Symbols Rounded', sans-serif;
     font-weight: normal;
@@ -16,7 +59,6 @@
     white-space: nowrap;
     word-wrap: normal;
     direction: ltr;
-    font-feature-settings: 'liga';
     -webkit-font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
     vertical-align: middle;

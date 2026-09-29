@@ -1,7 +1,8 @@
-const CACHE_VERSION = 'v-20260929-141410';
+const CACHE_VERSION = 'v-20260929-141730';
 const CACHE = `kmap-solver-${CACHE_VERSION}`;
 const ASSETS = [
   './',
+  './assets/fonts/inter.woff2',
   './assets/icon/android-chrome-192.png',
   './assets/icon/android-chrome-512.png',
   './assets/icon/apple-touch-icon.png',
@@ -15,8 +16,7 @@ const ASSETS = [
   './styles.css',
   './guidelines/tokens.css',
   './guidelines/components.css',
-  './sw.js',
-  'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap'
+  './sw.js'
 ];
 
 // Listen for message from client to skip waiting and activate immediately
