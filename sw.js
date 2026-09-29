@@ -1,8 +1,9 @@
-const CACHE_VERSION = 'v-20260929-141730';
+const CACHE_VERSION = 'v-20260929-150556';
 const CACHE = `kmap-solver-${CACHE_VERSION}`;
 const ASSETS = [
   './',
   './assets/fonts/inter.woff2',
+  './assets/fonts/jetbrains-mono.woff2',
   './assets/icon/android-chrome-192.png',
   './assets/icon/android-chrome-512.png',
   './assets/icon/apple-touch-icon.png',

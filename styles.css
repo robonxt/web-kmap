@@ -3,13 +3,25 @@
    This file contains K-map specific overrides and custom components
 */
 
-/* Local Typography: Inter Variable Font */
+/* Local Typography: Inter & JetBrains Mono Fonts */
 @font-face {
     font-family: 'Inter';
     font-style: normal;
     font-weight: 400 700;
     font-display: swap;
     src: url('assets/fonts/inter.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 400 600;
+    font-display: swap;
+    src: url('assets/fonts/jetbrains-mono.woff2') format('woff2');
+}
+
+:root {
+    --font-family-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
 
 /* Iconography - Inline SVG */
@@ -342,7 +354,8 @@ body {
 
 .binary-display,
 .decimal-display {
-    font-family: monospace;
+    font-family: var(--font-family-mono);
+    font-variant-numeric: tabular-nums;
     text-align: center;
     user-select: none;
 }
@@ -370,6 +383,7 @@ body {
 }
 
 .value-display {
+    font-family: var(--font-family-mono);
     font-size: var(--font-size-h3);
     font-weight: var(--font-weight-bold);
     user-select: none;
@@ -389,6 +403,8 @@ body {
     border-collapse: separate;
     border-spacing: 2px;
     background-color: var(--color-surface);
+    font-family: var(--font-family-mono);
+    font-variant-numeric: tabular-nums;
 }
 
 .truth-table th,
