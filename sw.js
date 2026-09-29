@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v-20260929-135907';
+const CACHE_VERSION = 'v-20260929-141410';
 const CACHE = `kmap-solver-${CACHE_VERSION}`;
 const ASSETS = [
   './',
