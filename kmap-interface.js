@@ -39,7 +39,7 @@ class KMapInterface {
         this.numVars = numVars;
         this.size = 1 << numVars; // 2^numVars
         this.grid = Array(this.size).fill(0);
-        this.isGrayCodeLayout = true;
+        this.isTransposedLayout = true; // true = AB/CD, false = CD/AB
         this.hideZeros = localStorage.getItem('hideZeros') !== null ? localStorage.getItem('hideZeros') === 'true' : true;
         this.layouts = this.initializeLayouts();
 
@@ -54,16 +54,16 @@ class KMapInterface {
         // Fetch all layouts from KMapSolver to centralize definitions
         return {
             2: {
-                gray: window.KMapSolver.KMapGrayCodes.get(2),
-                normal: window.KMapSolver.KMapBinaryLayouts.get(2)
+                standard: window.KMapSolver.KMapGrayCodes.get(2),
+                transposed: window.KMapSolver.KMapTransposedLayouts.get(2)
             },
             3: {
-                gray: window.KMapSolver.KMapGrayCodes.get(3),
-                normal: window.KMapSolver.KMapBinaryLayouts.get(3)
+                standard: window.KMapSolver.KMapGrayCodes.get(3),
+                transposed: window.KMapSolver.KMapTransposedLayouts.get(3)
             },
             4: {
-                gray: window.KMapSolver.KMapGrayCodes.get(4),
-                normal: window.KMapSolver.KMapBinaryLayouts.get(4)
+                standard: window.KMapSolver.KMapGrayCodes.get(4),
+                transposed: window.KMapSolver.KMapTransposedLayouts.get(4)
             }
         };
     }
@@ -71,16 +71,16 @@ class KMapInterface {
     initializeUI() {
         const grid = this.elements.grid;
         grid.innerHTML = '';
-        const layout = this.isGrayCodeLayout ?
-            this.layouts[this.numVars].gray :
-            this.layouts[this.numVars].normal;
+        const layout = this.isTransposedLayout ?
+            this.layouts[this.numVars].transposed :
+            this.layouts[this.numVars].standard;
 
-        grid.style.gridTemplateColumns = `repeat(${this.isGrayCodeLayout ? layout.cols.length : layout[0].length}, minmax(10px, 1fr))`;
+        grid.style.gridTemplateColumns = `repeat(${this.isTransposedLayout ? layout[0].length : layout.cols.length}, minmax(10px, 1fr))`;
 
-        if (this.isGrayCodeLayout) {
-            this.createGrayCodeGrid(layout);
+        if (this.isTransposedLayout) {
+            this.createTransposedGrid(layout);
         } else {
-            this.createBinaryGrid(layout);
+            this.createStandardGrid(layout);
         }
 
         // Add SVG after grid is populated
@@ -143,7 +143,7 @@ class KMapInterface {
         return cell;
     }
 
-    createGrayCodeGrid(layout) {
+    createStandardGrid(layout) {
         const fragment = document.createDocumentFragment();
         layout.rows.forEach(row => {
             layout.cols.forEach(col => {
@@ -156,7 +156,7 @@ class KMapInterface {
         this.elements.grid.appendChild(fragment);
     }
 
-    createBinaryGrid(layout) {
+    createTransposedGrid(layout) {
         const fragment = document.createDocumentFragment();
         layout.forEach(row => {
             row.forEach(index => {
@@ -523,9 +523,9 @@ class KMapInterface {
         }
 
         // Get current layout
-        const layout = this.isGrayCodeLayout ?
-            window.KMapSolver.KMapGrayCodes.get(this.numVars) :
-            this.layouts[this.numVars].normal;
+        const layout = this.isTransposedLayout ?
+            this.layouts[this.numVars].transposed :
+            this.layouts[this.numVars].standard;
 
         // Process each term
         terms.forEach((term, index) => {
@@ -548,14 +548,14 @@ class KMapInterface {
 
             // Find cells that match this term
             const matchingCells = [];
-            const rows = this.isGrayCodeLayout ? layout.rows : layout;
-            const cols = this.isGrayCodeLayout ? layout.cols : layout[0];
+            const rows = this.isTransposedLayout ? layout : layout.rows;
+            const cols = this.isTransposedLayout ? layout[0] : layout.cols;
 
             for (let row = 0; row < rows.length; row++) {
                 for (let col = 0; col < cols.length; col++) {
-                    const cellValue = this.isGrayCodeLayout ?
-                        parseInt(`${rows[row]}${cols[col]}`, 2) :
-                        layout[row][col];
+                    const cellValue = this.isTransposedLayout ?
+                        layout[row][col] :
+                        parseInt(`${rows[row]}${cols[col]}`, 2);
                     const binary = cellValue.toString(2).padStart(this.numVars, '0');
                     let matches = true;
 
@@ -634,13 +634,13 @@ class KMapInterface {
     isWrapped(cells) {
         // Get current layout and convert Gray code to 2D array if needed
         let layoutArray;
-        if (this.isGrayCodeLayout) {
-            const layout = this.layouts[this.numVars].gray;
+        if (this.isTransposedLayout) {
+            layoutArray = this.layouts[this.numVars].transposed;
+        } else {
+            const layout = this.layouts[this.numVars].standard;
             layoutArray = layout.rows.map(row =>
                 layout.cols.map(col => parseInt(row + col, 2))
             );
-        } else {
-            layoutArray = this.layouts[this.numVars].normal;
         }
 
         // Find positions of cells in layout array
@@ -692,7 +692,7 @@ class KMapInterface {
     toggleLayout() {
         if (this.numVars === 2) return; // Disable for 2 variables
 
-        this.isGrayCodeLayout = !this.isGrayCodeLayout;
+        this.isTransposedLayout = !this.isTransposedLayout;
         const states = this.grid.slice();
 
         this.initializeUI();
@@ -884,9 +884,9 @@ class KMapInterface {
         if (this.numVars === 2) {
             layoutText.textContent = 'AB';
         } else if (this.numVars === 3) {
-            layoutText.textContent = this.isGrayCodeLayout ? 'C/AB' : 'AB/C';
+            layoutText.textContent = this.isTransposedLayout ? 'AB/C' : 'C/AB';
         } else {
-            layoutText.textContent = this.isGrayCodeLayout ? 'CD/AB' : 'AB/CD';
+            layoutText.textContent = this.isTransposedLayout ? 'AB/CD' : 'CD/AB';
         }
     }
 
@@ -925,9 +925,9 @@ class KMapInterface {
                 this.variables = [...Array(this.numVars).keys()].map(i => String.fromCharCode(65 + i));
                 this.size = 1 << this.numVars;
 
-                // Force Gray code layout for 2 variables
+                // Force transposed layout for 2 variables
                 if (this.numVars === 2) {
-                    this.isGrayCodeLayout = true;
+                    this.isTransposedLayout = false;
                 }
 
                 // Reinitialize UI with new variable count
@@ -948,6 +948,7 @@ class KMapInterface {
         const btnToggleLayout = this.elements.btnToggleLayout;
         if (btnToggleLayout) {
             btnToggleLayout.addEventListener('click', () => this.toggleLayout());
+            this.updateToggleButton();
         }
 
         // Add resize observer for SVG updates

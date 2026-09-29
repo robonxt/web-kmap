@@ -27,7 +27,7 @@ graph TD
 
 * **State Cycling:** Click grid cells or truth table outputs to cycle: `0` → `1` → `X` (Don't Care).
 * **Alternative Solutions:** Dropdown menu appears when multiple minimal expressions exist.
-* **Layout Modes:** Toggle between Gray code ordering and traditional Binary ordering (for 3 and 4 variables).
+* **Layout Modes:** Toggle between AB/CD and CD/AB row/column variable orientations (for 3 and 4 variables).
 * **Clean View:** Toggle "Hide Zeros" to display only active and Don't Care states.
 * **Unicode Copy:** Copies solved expressions using notation like `A̅BC̅ + AD`.
 
