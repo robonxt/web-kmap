@@ -50,84 +50,65 @@ function generateRegions(rowCount, colCount) {
 }
 
 function findPrimeImplicants(groups, minterms) {
-    // Find all prime implicants (not just essential ones)
-    const primeImplicants = groups.filter(group =>
-        !groups.some(other => group !== other &&
-            group.cells.every(cell => other.cells.some(c => c.decimal === cell.decimal))
-        )
+    // A group is prime if it is not a strict subset of another group
+    const primeImplicants = groups.filter(g =>
+        !groups.some(other => other !== g && (g.mask & other.mask) === g.mask)
     );
 
-    const solutions = new Set();
+    const targetMask = minterms.reduce((acc, m) => acc | (1 << m), 0);
+    const validCombinations = [];
+    let minSize = Infinity;
 
-    // Helper function to get all possible combinations of groups that cover all minterms
-    function getCombinations(availableGroups, targetMinterms, maxSize) {
-        const results = [];
-
-        function backtrack(current, start) {
-            if (current.length > maxSize) return;
-
-            // Check if current combination covers all target minterms
-            const covered = new Set();
-            current.forEach(g => {
-                Array.from(g.coveredMinterms).forEach(m => {
-                    if (targetMinterms.has(m)) covered.add(m);
-                });
-            });
-
-            if (covered.size === targetMinterms.size) {
-                results.push([...current]);
-                return;
+    function backtrack(current, currentMask, start) {
+        if ((currentMask & targetMask) === targetMask) {
+            if (current.length < minSize) {
+                minSize = current.length;
+                validCombinations.length = 0;
             }
-
-            // Try adding each remaining group
-            for (let i = start; i < availableGroups.length; i++) {
-                const group = availableGroups[i];
-                current.push(group);
-                backtrack(current, i + 1);
-                current.pop();
-            }
+            validCombinations.push([...current]);
+            return;
         }
 
-        backtrack([], 0);
-        return results;
-    }
+        if (current.length + 1 > minSize) return;
 
-    // Find all minimal combinations that cover all minterms
-    const targetMinterms = new Set(minterms);
-    for (let size = 1; size <= primeImplicants.length; size++) {
-        const combinations = getCombinations(primeImplicants, targetMinterms, size);
-        if (combinations.length > 0) {
-            combinations.forEach(groups => {
-                const expr = groups.map(g =>
-                    g.cells.map(c => c.decimal).sort().join(',')
-                ).sort().join('|');
-                solutions.add(expr);
-            });
-            break;
+        for (let i = start; i < primeImplicants.length; i++) {
+            const group = primeImplicants[i];
+            // Only consider if this group covers any remaining uncovered minterms
+            if ((group.coveredMask & ~currentMask) === 0) continue;
+
+            current.push(group);
+            backtrack(current, currentMask | group.coveredMask, i + 1);
+            current.pop();
         }
     }
 
-    return Array.from(solutions).map(expr =>
-        expr.split('|').map(indices => {
-            const decimals = new Set(indices.split(',').map(Number));
-            return primeImplicants.find(g =>
-                g.cells.length === decimals.size &&
-                g.cells.every(c => decimals.has(c.decimal))
-            );
-        })
-    );
+    backtrack([], 0, 0);
+
+    // Deduplicate solutions using sorted group masks
+    const seen = new Set();
+    const uniqueSolutions = [];
+    for (const combo of validCombinations) {
+        const key = combo.map(g => g.mask).sort((a, b) => a - b).join('-');
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniqueSolutions.push(combo);
+        }
+    }
+
+    return uniqueSolutions;
 }
 
-function group(decimal, terms, KMap) {
+function group(decimal, termsSet, KMap) {
     const { row, col } = findDecimalPos(decimal, KMap);
     const regions = generateRegions(KMap.length, KMap[0].length);
     const validGroups = [];
+    const seenMasks = new Set();
 
-    // Find all valid groups that include this decimal
     for (const { w, h } of regions) {
         const cells = [];
         let valid = true;
         let includesRequiredTerm = false;
+        let mask = 0;
 
         for (let r = 0; r < Math.abs(h) && valid; r++) {
             for (let c = 0; c < Math.abs(w) && valid; c++) {
@@ -135,42 +116,36 @@ function group(decimal, terms, KMap) {
                 const cellCol = (col + (w < 0 ? -c : c) + KMap[0].length) % KMap[0].length;
                 const cell = KMap[cellRow][cellCol];
 
-                if (!terms.includes(cell.decimal)) {
+                if (!termsSet.has(cell.decimal)) {
                     valid = false;
                     break;
                 }
-                if (cell.decimal === decimal) {
-                    includesRequiredTerm = true;
-                }
+                if (cell.decimal === decimal) includesRequiredTerm = true;
+                mask |= (1 << cell.decimal);
                 cells.push(cell);
             }
         }
 
-        if (valid && includesRequiredTerm) {
-            // Add this group if it's not already included
-            const groupKey = JSON.stringify(cells.map(c => c.decimal).sort());
-            if (!validGroups.some(g =>
-                JSON.stringify(g.map(c => c.decimal).sort()) === groupKey
-            )) {
-                validGroups.push(cells);
-            }
+        if (valid && includesRequiredTerm && !seenMasks.has(mask)) {
+            seenMasks.add(mask);
+            validGroups.push({ cells, mask });
         }
     }
 
-    // Return all valid groups found
     return validGroups;
 }
 
-function extract(variables, group) {
-    const bits = group.reduce((acc, cell) =>
-        acc.map((bit, i) => bit === cell.binary[i] ? bit : 'x'),
-        group[0].binary.split('')
-    );
-    const result = bits.every(bit => bit === 'x') ? '1' :
-        bits.reduce((acc, bit, i) =>
-            bit === 'x' ? acc : acc + (bit === '0' ? '!' : '') + variables[i],
-            '');
-    return result;
+function extract(variables, cells) {
+    const numVars = variables.length;
+    let term = '';
+    for (let i = 0; i < numVars; i++) {
+        const firstBit = cells[0].binary[i];
+        const isConstant = cells.every(c => c.binary[i] === firstBit);
+        if (isConstant) {
+            term += (firstBit === '0' ? '!' : '') + variables[i];
+        }
+    }
+    return term || '1';
 }
 
 function solve(variables, minterms, dontcares = []) {
@@ -178,21 +153,24 @@ function solve(variables, minterms, dontcares = []) {
     if (minterms.length === 0 && dontcares.length === (1 << variables.length)) return { solutions: ["X"], groups: [] };
     if (minterms.length === (1 << variables.length)) return { solutions: ["1"], groups: [] };
 
-    const terms = [...minterms, ...dontcares];
+    const termsSet = new Set([...minterms, ...dontcares]);
+    const mintermsSet = new Set(minterms);
     const KMap = getKMap(variables);
     const allGroups = [];
-    const usedGroups = new Set();
+    const usedMasks = new Set();
 
     // First pass: collect all possible prime implicant groups
     for (const decimal of minterms) {
-        const groupsForDecimal = group(decimal, terms, KMap);
-        for (const cells of groupsForDecimal) {
-            const groupKey = JSON.stringify(cells.map(c => c.decimal).sort());
-            if (!usedGroups.has(groupKey)) {
-                usedGroups.add(groupKey);
-                const coveredMinterms = cells.filter(c => minterms.includes(c.decimal)).map(c => c.decimal);
-                if (coveredMinterms.length > 0) {
-                    allGroups.push({ cells, coveredMinterms: new Set(coveredMinterms) });
+        const groupsForDecimal = group(decimal, termsSet, KMap);
+        for (const { cells, mask } of groupsForDecimal) {
+            if (!usedMasks.has(mask)) {
+                usedMasks.add(mask);
+                let coveredMask = 0;
+                for (const c of cells) {
+                    if (mintermsSet.has(c.decimal)) coveredMask |= (1 << c.decimal);
+                }
+                if (coveredMask > 0) {
+                    allGroups.push({ cells, mask, coveredMask });
                 }
             }
         }
@@ -200,18 +178,17 @@ function solve(variables, minterms, dontcares = []) {
 
     if (allGroups.length === 0) return { solutions: ["0"], groups: [] };
 
-    // Find all possible minimal solutions
+    // Find all minimal solutions
     const solutions = findPrimeImplicants(allGroups, minterms);
 
     // Convert solutions to expressions
     const expressions = solutions.map(groups =>
         groups.map(g => extract(variables, g.cells))
-            .filter(term => term !== '1')
+            .filter(t => t !== '1')
             .sort()
             .join(' + ') || '1'
     );
 
-    // Remove duplicates and sort for consistent output
     return {
         solutions: [...new Set(expressions)].sort(),
         groups: allGroups
