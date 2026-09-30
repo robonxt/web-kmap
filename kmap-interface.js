@@ -19,13 +19,7 @@ class KMapInterface {
             dropdownVariablesLabel: document.getElementById('dropdown-variables-label'),
             dropdownVariablesMenu: document.getElementById('dropdown-variables-menu'),
             inputToggleZeros: document.getElementById('input-toggle-zeros'),
-            inputToggleTheme: document.getElementById('input-toggle-theme'),
-            installPill: document.getElementById('install-pill'),
-            btnInstallApp: document.getElementById('btn-install-app'),
-            btnCloseInstallPill: document.getElementById('btn-close-install-pill'),
-            updatePill: document.getElementById('update-pill'),
-            btnApplyUpdate: document.getElementById('btn-apply-update'),
-            btnCloseUpdatePill: document.getElementById('btn-close-update-pill')
+            inputToggleTheme: document.getElementById('input-toggle-theme')
         };
 
         // Predefined distinct colors for groups
@@ -953,67 +947,62 @@ class KMapInterface {
         }
     }
 
-    setupFloatingPill({ pillElement, closeBtn, storageKey }) {
-        if (!pillElement) return { show: () => {}, hide: () => {} };
+    setupFloatingPill({ id, closeId, storageKey }) {
+        const pill = document.getElementById(id);
+        const closeBtn = document.getElementById(closeId);
+        if (!pill) return { show: () => {}, hide: () => {} };
 
         let startY = 0;
         let currentTranslateY = 0;
 
         const updateBodyInset = () => {
-            const hasVisiblePill = document.querySelector('.bottom-pill.anim-in') !== null;
-            document.body.classList.toggle('has-bottom-pill', hasVisiblePill);
+            document.body.classList.toggle('has-bottom-pill', !!document.querySelector('.bottom-pill.anim-in'));
         };
 
         const hide = (persistDismiss = true) => {
-            pillElement.classList.remove('anim-in');
-            pillElement.classList.add('anim-out');
-            if (persistDismiss && storageKey) {
-                sessionStorage.setItem(storageKey, 'true');
-            }
+            pill.classList.remove('anim-in');
+            pill.classList.add('anim-out');
+            if (persistDismiss && storageKey) sessionStorage.setItem(storageKey, 'true');
             setTimeout(() => {
-                pillElement.style.display = 'none';
+                pill.style.display = 'none';
                 updateBodyInset();
             }, 300);
         };
 
         const show = () => {
-            if (storageKey && sessionStorage.getItem(storageKey) === 'true') {
-                return;
-            }
-            pillElement.style.display = 'inline-flex';
-            pillElement.classList.remove('anim-out');
-            pillElement.classList.add('anim-in');
+            if (storageKey && sessionStorage.getItem(storageKey) === 'true') return;
+            pill.style.display = 'inline-flex';
+            pill.classList.remove('anim-out');
+            pill.classList.add('anim-in');
             updateBodyInset();
         };
 
-        if (closeBtn) {
-            closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                hide(true);
-            });
-        }
+        closeBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hide(true);
+        });
 
         // Swipe-down to dismiss gesture
-        pillElement.addEventListener('touchstart', (e) => {
+        pill.addEventListener('touchstart', (e) => {
             startY = e.touches[0].clientY;
             currentTranslateY = 0;
-            pillElement.style.transition = 'none';
+            pill.style.transition = 'none';
         }, { passive: true });
 
-        pillElement.addEventListener('touchmove', (e) => {
+        pill.addEventListener('touchmove', (e) => {
             const deltaY = e.touches[0].clientY - startY;
             if (deltaY > 0) {
                 currentTranslateY = deltaY;
-                pillElement.style.transform = `translateX(-50%) translateY(${deltaY}px)`;
+                pill.style.transform = `translateX(-50%) translateY(${deltaY}px)`;
             }
         }, { passive: true });
 
-        pillElement.addEventListener('touchend', () => {
-            pillElement.style.transition = '';
+        pill.addEventListener('touchend', () => {
+            pill.style.transition = '';
             if (currentTranslateY > 40) {
                 hide(true);
             } else {
-                pillElement.style.transform = 'translateX(-50%) translateY(0)';
+                pill.style.transform = 'translateX(-50%) translateY(0)';
             }
         });
 
@@ -1021,36 +1010,28 @@ class KMapInterface {
     }
 
     setupInstallPrompt() {
-        const { installPill, btnInstallApp, btnCloseInstallPill } = this.elements;
-        if (!installPill || !btnInstallApp) return;
-
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-            window.navigator.standalone === true;
-
-        if (isStandalone) return;
+        const btnInstall = document.getElementById('btn-install-app');
+        if (!btnInstall || window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) return;
 
         const pill = this.setupFloatingPill({
-            pillElement: installPill,
-            closeBtn: btnCloseInstallPill,
+            id: 'install-pill',
+            closeId: 'btn-close-install-pill',
             storageKey: 'dismissed_install_pill'
         });
 
         let deferredPrompt = null;
-
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             pill.show();
         });
 
-        btnInstallApp.addEventListener('click', async () => {
+        btnInstall.addEventListener('click', async () => {
             if (!deferredPrompt) return;
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
             deferredPrompt = null;
-            if (outcome === 'accepted') {
-                pill.hide(true);
-            }
+            if (outcome === 'accepted') pill.hide(true);
         });
 
         window.addEventListener('appinstalled', () => {
@@ -1060,44 +1041,40 @@ class KMapInterface {
     }
 
     setupUpdatePrompt() {
-        const { updatePill, btnApplyUpdate, btnCloseUpdatePill } = this.elements;
-        if (!updatePill || !btnApplyUpdate || !('serviceWorker' in navigator)) return;
+        const btnApply = document.getElementById('btn-apply-update');
+        if (!btnApply || !('serviceWorker' in navigator)) return;
 
         const pill = this.setupFloatingPill({
-            pillElement: updatePill,
-            closeBtn: btnCloseUpdatePill,
+            id: 'update-pill',
+            closeId: 'btn-close-update-pill',
             storageKey: 'dismissed_update_pill'
         });
 
         let waitingWorker = null;
         let isRefreshing = false;
 
-        const onUpdateFound = (registration) => {
-            const newWorker = registration.installing;
-            if (!newWorker) return;
-
-            newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    waitingWorker = newWorker;
-                    pill.show();
-                }
-            });
-        };
-
         navigator.serviceWorker.getRegistration().then(reg => {
             if (!reg) return;
+
+            const checkWorker = (w) => {
+                if (w && w.state === 'installed' && navigator.serviceWorker.controller) {
+                    waitingWorker = w;
+                    pill.show();
+                }
+            };
 
             if (reg.waiting && navigator.serviceWorker.controller) {
                 waitingWorker = reg.waiting;
                 pill.show();
             }
 
-            reg.addEventListener('updatefound', () => onUpdateFound(reg));
+            reg.addEventListener('updatefound', () => {
+                const w = reg.installing;
+                w?.addEventListener('statechange', () => checkWorker(w));
+            });
 
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
-                    reg.update().catch(() => {});
-                }
+                if (document.visibilityState === 'visible') reg.update().catch(() => {});
             });
         });
 
@@ -1107,7 +1084,7 @@ class KMapInterface {
             window.location.reload();
         });
 
-        btnApplyUpdate.addEventListener('click', () => {
+        btnApply.addEventListener('click', () => {
             if (waitingWorker) {
                 waitingWorker.postMessage({ type: 'SKIP_WAITING' });
             } else {
