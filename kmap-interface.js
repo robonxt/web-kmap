@@ -269,39 +269,33 @@ class KMapInterface {
         return { minterms, dontcares };
     }
 
-    addOverline(solution) {
-        // Special cases
-        if (solution === "0" || solution === "1" || solution === "X") {
-            return `<span>${solution}</span>`;
-        }
-
-        // Split into terms
-        const terms = solution.split(' + ');
-
-        return terms.map((term, index) => {
-            const color = this.groupColors[index % this.groupColors.length];
-
-            // Process each character for overline
-            let result = '';
-            let overlineActive = false;
-
-            for (let i = 0; i < term.length; i++) {
-                if (term[i] === '!') {
-                    overlineActive = true;
-                    continue;
-                }
-
-                if (overlineActive) {
-                    result += `<span style="text-decoration: overline; margin: 0 1px;">${term[i]}</span>`;
-                    overlineActive = false;
-                } else {
-                    result += term[i];
-                }
+    formatTerm(term, isHtml = false, color = '') {
+        let res = '';
+        for (let i = 0; i < term.length; i++) {
+            if (term[i] === '!') {
+                const char = term[++i];
+                res += isHtml ? `<span style="text-decoration: overline; margin: 0 1px;">${char}</span>` : `${char}\u0305`;
+            } else {
+                res += term[i];
             }
+        }
+        return isHtml && color ? `<span style="color: ${color}">${res}</span>` : res;
+    }
 
-            // Wrap term in colored span
-            return `<span style="color: ${color}">${result}</span>`;
-        }).join(' + ');
+    formatSolutionHTML(solution) {
+        if (!solution || solution === "0" || solution === "1" || solution === "X") {
+            return `<span>${solution || ''}</span>`;
+        }
+        return solution.split(' + ').map((term, i) =>
+            this.formatTerm(term, true, this.groupColors[i % this.groupColors.length])
+        ).join(' + ');
+    }
+
+    formatSolutionUnicode(solution) {
+        if (!solution || solution === "0" || solution === "1" || solution === "X") {
+            return solution || '';
+        }
+        return solution.split(' + ').map(term => this.formatTerm(term, false)).join(' + ');
     }
 
     updateSolution(result) {
@@ -341,7 +335,8 @@ class KMapInterface {
             menu.querySelectorAll('.dropdown-item').forEach((item, index) => {
                 item.onclick = () => {
                     const sol = item.dataset.solution;
-                    solution.innerHTML = this.addOverline(sol);
+                    this.currentSolution = sol;
+                    solution.innerHTML = this.formatSolutionHTML(sol);
                     dropdownSolutionsLabel.textContent = `#${index + 1} of ${solutions.length}`;
                     menu.classList.remove('is-visible');
                     const terms = sol.split(' + ');
@@ -352,8 +347,8 @@ class KMapInterface {
             dropdownSolutionsContainer.style.display = 'none';
         }
 
-        // Use innerHTML since we're adding styled spans
-        solution.innerHTML = this.addOverline(solutions[0]);
+        this.currentSolution = solutions[0];
+        solution.innerHTML = this.formatSolutionHTML(solutions[0]);
 
         // Update groups based on solution terms
         const terms = solutions[0].split(' + ');
@@ -370,6 +365,7 @@ class KMapInterface {
         for (let i = 0; i < this.size; i++) {
             this.setCellState(i, '0');
         }
+        this.currentSolution = '';
         this.elements.solution.innerHTML = '';
         this.elements.dropdownSolutionsContainer.style.display = 'none';
 
@@ -402,25 +398,7 @@ class KMapInterface {
     }
 
     getSolutionTextWithOverlines() {
-        const solutionDiv = this.elements.solution;
-        // If there's only text content (no spans), return it directly
-        if (solutionDiv.children.length === 0) {
-            return solutionDiv.textContent;
-        }
-        const terms = Array.from(solutionDiv.children).map(span => {
-            // Process each term's characters
-            const chars = Array.from(span.childNodes).map(node => {
-                if (node.nodeType === Node.TEXT_NODE) {
-                    return node.textContent;
-                } else if (node.nodeType === Node.ELEMENT_NODE && node.style.textDecoration === 'overline') {
-                    // Use Unicode combining overline character (U+0305)
-                    return node.textContent + '\u0305';
-                }
-                return '';
-            }).join('');
-            return chars;
-        });
-        return terms.join(' + ');
+        return this.formatSolutionUnicode(this.currentSolution);
     }
 
     copyTextFallback(text) {
