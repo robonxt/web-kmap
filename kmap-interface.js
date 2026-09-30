@@ -583,81 +583,14 @@ class KMapInterface {
             if (rBottom > bottom) bottom = rBottom;
         }
 
-        const pTop = openEdges.top ? top - loopOverflow : top;
-        const pBottom = openEdges.bottom ? bottom + loopOverflow : bottom;
-        const pLeft = openEdges.left ? left - loopOverflow : left;
-        const pRight = openEdges.right ? right + loopOverflow : right;
-
-        const radTL = (openEdges.top || openEdges.left) ? 0 : radius;
-        const radTR = (openEdges.top || openEdges.right) ? 0 : radius;
-        const radBR = (openEdges.bottom || openEdges.right) ? 0 : radius;
-        const radBL = (openEdges.bottom || openEdges.left) ? 0 : radius;
-
-        if (openEdges.top && !openEdges.bottom && !openEdges.left && !openEdges.right) {
-            return `M ${pLeft} ${pTop}
-                L ${pLeft} ${pBottom - radBL}
-                Q ${pLeft} ${pBottom} ${pLeft + radBL} ${pBottom}
-                L ${pRight - radBR} ${pBottom}
-                Q ${pRight} ${pBottom} ${pRight} ${pBottom - radBR}
-                L ${pRight} ${pTop}`;
-        }
-
-        if (openEdges.bottom && !openEdges.top && !openEdges.left && !openEdges.right) {
-            return `M ${pLeft} ${pBottom}
-                L ${pLeft} ${pTop + radTL}
-                Q ${pLeft} ${pTop} ${pLeft + radTL} ${pTop}
-                L ${pRight - radTR} ${pTop}
-                Q ${pRight} ${pTop} ${pRight} ${pTop + radTR}
-                L ${pRight} ${pBottom}`;
-        }
-
-        if (openEdges.left && !openEdges.right && !openEdges.top && !openEdges.bottom) {
-            return `M ${pLeft} ${pTop}
-                L ${pRight - radTR} ${pTop}
-                Q ${pRight} ${pTop} ${pRight} ${pTop + radTR}
-                L ${pRight} ${pBottom - radBR}
-                Q ${pRight} ${pBottom} ${pRight - radBR} ${pBottom}
-                L ${pLeft} ${pBottom}`;
-        }
-
-        if (openEdges.right && !openEdges.left && !openEdges.top && !openEdges.bottom) {
-            return `M ${pRight} ${pTop}
-                L ${pLeft + radTL} ${pTop}
-                Q ${pLeft} ${pTop} ${pLeft} ${pTop + radTL}
-                L ${pLeft} ${pBottom - radBL}
-                Q ${pLeft} ${pBottom} ${pLeft + radBL} ${pBottom}
-                L ${pRight} ${pBottom}`;
-        }
-
-        if (openEdges.top && openEdges.left) {
-            return `M ${pLeft} ${pBottom}
-                L ${pRight - radBR} ${pBottom}
-                Q ${pRight} ${pBottom} ${pRight} ${pBottom - radBR}
-                L ${pRight} ${pTop}`;
-        }
-
-        if (openEdges.top && openEdges.right) {
-            return `M ${pRight} ${pBottom}
-                L ${pLeft + radBL} ${pBottom}
-                Q ${pLeft} ${pBottom} ${pLeft} ${pBottom - radBL}
-                L ${pLeft} ${pTop}`;
-        }
-
-        if (openEdges.bottom && openEdges.left) {
-            return `M ${pLeft} ${pTop}
-                L ${pRight - radTR} ${pTop}
-                Q ${pRight} ${pTop} ${pRight} ${pTop + radTR}
-                L ${pRight} ${pBottom}`;
-        }
-
-        if (openEdges.bottom && openEdges.right) {
-            return `M ${pRight} ${pTop}
-                L ${pLeft + radTL} ${pTop}
-                Q ${pLeft} ${pTop} ${pLeft} ${pTop + radTL}
-                L ${pLeft} ${pBottom}`;
-        }
-
-        return this.calculateGroupPath(rects, gridRect);
+        return this.buildRoundedRectPath(
+            openEdges.left ? left - loopOverflow : left,
+            openEdges.top ? top - loopOverflow : top,
+            openEdges.right ? right + loopOverflow : right,
+            openEdges.bottom ? bottom + loopOverflow : bottom,
+            radius,
+            openEdges
+        );
     }
 
     calculateGroupPath(rects, gridRect) {
@@ -678,15 +611,42 @@ class KMapInterface {
             if (rBottom > bottom) bottom = rBottom;
         }
 
-        return `M ${left + radius} ${top}
-            L ${right - radius} ${top}
-            Q ${right} ${top} ${right} ${top + radius}
-            L ${right} ${bottom - radius}
-            Q ${right} ${bottom} ${right - radius} ${bottom}
-            L ${left + radius} ${bottom}
-            Q ${left} ${bottom} ${left} ${bottom - radius}
-            L ${left} ${top + radius}
-            Q ${left} ${top} ${left + radius} ${top}`;
+        return this.buildRoundedRectPath(left, top, right, bottom, radius, {});
+    }
+
+    buildRoundedRectPath(left, top, right, bottom, radius, openEdges) {
+        const rTL = (openEdges.top || openEdges.left) ? 0 : radius;
+        const rTR = (openEdges.top || openEdges.right) ? 0 : radius;
+        const rBR = (openEdges.bottom || openEdges.right) ? 0 : radius;
+        const rBL = (openEdges.bottom || openEdges.left) ? 0 : radius;
+
+        if (openEdges.top && !openEdges.bottom && !openEdges.left && !openEdges.right) {
+            return `M ${left} ${top} L ${left} ${bottom - rBL} Q ${left} ${bottom} ${left + rBL} ${bottom} L ${right - rBR} ${bottom} Q ${right} ${bottom} ${right} ${bottom - rBR} L ${right} ${top}`;
+        }
+        if (openEdges.bottom && !openEdges.top && !openEdges.left && !openEdges.right) {
+            return `M ${left} ${bottom} L ${left} ${top + rTL} Q ${left} ${top} ${left + rTL} ${top} L ${right - rTR} ${top} Q ${right} ${top} ${right} ${top + rTR} L ${right} ${bottom}`;
+        }
+        if (openEdges.left && !openEdges.right && !openEdges.top && !openEdges.bottom) {
+            return `M ${left} ${top} L ${right - rTR} ${top} Q ${right} ${top} ${right} ${top + rTR} L ${right} ${bottom - rBR} Q ${right} ${bottom} ${right - rBR} ${bottom} L ${left} ${bottom}`;
+        }
+        if (openEdges.right && !openEdges.left && !openEdges.top && !openEdges.bottom) {
+            return `M ${right} ${top} L ${left + rTL} ${top} Q ${left} ${top} ${left} ${top + rTL} L ${left} ${bottom - rBL} Q ${left} ${bottom} ${left + rBL} ${bottom} L ${right} ${bottom}`;
+        }
+        if (openEdges.top && openEdges.left) {
+            return `M ${left} ${bottom} L ${right - rBR} ${bottom} Q ${right} ${bottom} ${right} ${bottom - rBR} L ${right} ${top}`;
+        }
+        if (openEdges.top && openEdges.right) {
+            return `M ${right} ${bottom} L ${left + rBL} ${bottom} Q ${left} ${bottom} ${left} ${bottom - rBL} L ${left} ${top}`;
+        }
+        if (openEdges.bottom && openEdges.left) {
+            return `M ${left} ${top} L ${right - rTR} ${top} Q ${right} ${top} ${right} ${top + rTR} L ${right} ${bottom}`;
+        }
+        if (openEdges.bottom && openEdges.right) {
+            return `M ${right} ${top} L ${left + rTL} ${top} Q ${left} ${top} ${left} ${top + rTL} L ${left} ${bottom}`;
+        }
+
+        // Full closed rounded rect
+        return `M ${left + radius} ${top} L ${right - radius} ${top} Q ${right} ${top} ${right} ${top + radius} L ${right} ${bottom - radius} Q ${right} ${bottom} ${right - radius} ${bottom} L ${left + radius} ${bottom} Q ${left} ${bottom} ${left} ${bottom - radius} L ${left} ${top + radius} Q ${left} ${top} ${left + radius} ${top} Z`;
     }
 
     isWrapped(cells, matrix) {
