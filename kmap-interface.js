@@ -495,12 +495,169 @@ class KMapInterface {
 
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.classList.add('kmap-group-path');
-                path.dataset.wrap = this.isWrapped(matchingCells, matrix) ? 'true' : 'false';
+                const isWrap = this.isWrapped(matchingCells, matrix);
+                path.dataset.wrap = isWrap ? 'true' : 'false';
                 path.style.stroke = this.groupColors[index % this.groupColors.length];
-                path.setAttribute('d', this.calculateGroupPath(rects, gridRect));
+                path.setAttribute('d', this.calculateTermPaths(matchingCells, gridRect, matrix));
                 svg.appendChild(path);
             }
         });
+    }
+
+    calculateTermPaths(matchingCells, gridRect, matrix) {
+        const rowCount = matrix.length;
+        const colCount = matrix[0].length;
+        const rows = [...new Set(matchingCells.map(c => c.row))].sort((a, b) => a - b);
+        const cols = [...new Set(matchingCells.map(c => c.col))].sort((a, b) => a - b);
+
+        const wrapRow = rows.length > 1 && rows.length < rowCount && (rows[rows.length - 1] - rows[0] === rowCount - 1);
+        const wrapCol = cols.length > 1 && cols.length < colCount && (cols[cols.length - 1] - cols[0] === colCount - 1);
+
+        if (!wrapRow && !wrapCol) {
+            const rects = matchingCells.map(m => this.kmapCells[m.decimal]?.getBoundingClientRect()).filter(Boolean);
+            return this.calculateGroupPath(rects, gridRect);
+        }
+
+        const rowClusters = [];
+        if (wrapRow) {
+            rowClusters.push(rows.filter(r => r < rowCount / 2));
+            rowClusters.push(rows.filter(r => r >= rowCount / 2));
+        } else {
+            rowClusters.push(rows);
+        }
+
+        const colClusters = [];
+        if (wrapCol) {
+            colClusters.push(cols.filter(c => c < colCount / 2));
+            colClusters.push(cols.filter(c => c >= colCount / 2));
+        } else {
+            colClusters.push(cols);
+        }
+
+        const dParts = [];
+        for (const rGroup of rowClusters) {
+            const openTop = wrapRow && rGroup === rowClusters[0];
+            const openBottom = wrapRow && rGroup === rowClusters[1];
+
+            for (const cGroup of colClusters) {
+                const openLeft = wrapCol && cGroup === colClusters[0];
+                const openRight = wrapCol && cGroup === colClusters[1];
+
+                const clusterDecimals = [];
+                for (const r of rGroup) {
+                    for (const c of cGroup) {
+                        clusterDecimals.push(matrix[r][c]);
+                    }
+                }
+                const rects = clusterDecimals.map(dec => this.kmapCells[dec]?.getBoundingClientRect()).filter(Boolean);
+                if (rects.length > 0) {
+                    dParts.push(this.calculateClusterPath(rects, gridRect, {
+                        top: openTop,
+                        bottom: openBottom,
+                        left: openLeft,
+                        right: openRight
+                    }));
+                }
+            }
+        }
+
+        return dParts.join(' ');
+    }
+
+    calculateClusterPath(rects, gridRect, openEdges) {
+        const padding = 5;
+        const loopOverflow = 22;
+        const radius = 24;
+
+        let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+        for (let i = 0; i < rects.length; i++) {
+            const r = rects[i];
+            const rLeft = r.left - gridRect.left - padding;
+            const rTop = r.top - gridRect.top - padding;
+            const rRight = r.right - gridRect.left + padding;
+            const rBottom = r.bottom - gridRect.top + padding;
+
+            if (rLeft < left) left = rLeft;
+            if (rTop < top) top = rTop;
+            if (rRight > right) right = rRight;
+            if (rBottom > bottom) bottom = rBottom;
+        }
+
+        const pTop = openEdges.top ? top - loopOverflow : top;
+        const pBottom = openEdges.bottom ? bottom + loopOverflow : bottom;
+        const pLeft = openEdges.left ? left - loopOverflow : left;
+        const pRight = openEdges.right ? right + loopOverflow : right;
+
+        const radTL = (openEdges.top || openEdges.left) ? 0 : radius;
+        const radTR = (openEdges.top || openEdges.right) ? 0 : radius;
+        const radBR = (openEdges.bottom || openEdges.right) ? 0 : radius;
+        const radBL = (openEdges.bottom || openEdges.left) ? 0 : radius;
+
+        if (openEdges.top && !openEdges.bottom && !openEdges.left && !openEdges.right) {
+            return `M ${pLeft} ${pTop}
+                L ${pLeft} ${pBottom - radBL}
+                Q ${pLeft} ${pBottom} ${pLeft + radBL} ${pBottom}
+                L ${pRight - radBR} ${pBottom}
+                Q ${pRight} ${pBottom} ${pRight} ${pBottom - radBR}
+                L ${pRight} ${pTop}`;
+        }
+
+        if (openEdges.bottom && !openEdges.top && !openEdges.left && !openEdges.right) {
+            return `M ${pLeft} ${pBottom}
+                L ${pLeft} ${pTop + radTL}
+                Q ${pLeft} ${pTop} ${pLeft + radTL} ${pTop}
+                L ${pRight - radTR} ${pTop}
+                Q ${pRight} ${pTop} ${pRight} ${pTop + radTR}
+                L ${pRight} ${pBottom}`;
+        }
+
+        if (openEdges.left && !openEdges.right && !openEdges.top && !openEdges.bottom) {
+            return `M ${pLeft} ${pTop}
+                L ${pRight - radTR} ${pTop}
+                Q ${pRight} ${pTop} ${pRight} ${pTop + radTR}
+                L ${pRight} ${pBottom - radBR}
+                Q ${pRight} ${pBottom} ${pRight - radBR} ${pBottom}
+                L ${pLeft} ${pBottom}`;
+        }
+
+        if (openEdges.right && !openEdges.left && !openEdges.top && !openEdges.bottom) {
+            return `M ${pRight} ${pTop}
+                L ${pLeft + radTL} ${pTop}
+                Q ${pLeft} ${pTop} ${pLeft} ${pTop + radTL}
+                L ${pLeft} ${pBottom - radBL}
+                Q ${pLeft} ${pBottom} ${pLeft + radBL} ${pBottom}
+                L ${pRight} ${pBottom}`;
+        }
+
+        if (openEdges.top && openEdges.left) {
+            return `M ${pLeft} ${pBottom}
+                L ${pRight - radBR} ${pBottom}
+                Q ${pRight} ${pBottom} ${pRight} ${pBottom - radBR}
+                L ${pRight} ${pTop}`;
+        }
+
+        if (openEdges.top && openEdges.right) {
+            return `M ${pRight} ${pBottom}
+                L ${pLeft + radBL} ${pBottom}
+                Q ${pLeft} ${pBottom} ${pLeft} ${pBottom - radBL}
+                L ${pLeft} ${pTop}`;
+        }
+
+        if (openEdges.bottom && openEdges.left) {
+            return `M ${pLeft} ${pTop}
+                L ${pRight - radTR} ${pTop}
+                Q ${pRight} ${pTop} ${pRight} ${pTop + radTR}
+                L ${pRight} ${pBottom}`;
+        }
+
+        if (openEdges.bottom && openEdges.right) {
+            return `M ${pRight} ${pTop}
+                L ${pLeft + radTL} ${pTop}
+                Q ${pLeft} ${pTop} ${pLeft} ${pTop + radTL}
+                L ${pLeft} ${pBottom}`;
+        }
+
+        return this.calculateGroupPath(rects, gridRect);
     }
 
     calculateGroupPath(rects, gridRect) {
@@ -535,27 +692,13 @@ class KMapInterface {
     isWrapped(cells, matrix) {
         const rowCount = matrix.length;
         const colCount = matrix[0].length;
+        const rows = [...new Set(cells.map(c => c.row))].sort((a, b) => a - b);
+        const cols = [...new Set(cells.map(c => c.col))].sort((a, b) => a - b);
 
-        // Sort by row, then col
-        cells.sort((a, b) => a.row - b.row || a.col - b.col);
+        const wrapRow = rows.length > 1 && rows.length < rowCount && (rows[rows.length - 1] - rows[0] === rowCount - 1);
+        const wrapCol = cols.length > 1 && cols.length < colCount && (cols[cols.length - 1] - cols[0] === colCount - 1);
 
-        for (let i = 1; i < cells.length; i++) {
-            const prev = cells[i - 1];
-            const curr = cells[i];
-
-            if (Math.abs(curr.row - prev.row) > 1 || Math.abs(curr.col - prev.col) > 1) {
-                const wrapRow = Math.min(
-                    Math.abs(curr.row - prev.row + rowCount),
-                    Math.abs(curr.row - prev.row - rowCount)
-                );
-                const wrapCol = Math.min(
-                    Math.abs(curr.col - prev.col + colCount),
-                    Math.abs(curr.col - prev.col - colCount)
-                );
-                if (wrapRow <= 1 || wrapCol <= 1) return true;
-            }
-        }
-        return false;
+        return wrapRow || wrapCol;
     }
 
     toggleLayout() {
