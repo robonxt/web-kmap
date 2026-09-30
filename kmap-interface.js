@@ -627,7 +627,10 @@ class KMapInterface {
 
         // Open buttons
         document.getElementById('btn-show-info')?.addEventListener('click', () => openModal(infoPopup));
-        document.getElementById('btn-show-settings')?.addEventListener('click', () => openModal(settingsPopup));
+        document.getElementById('btn-show-settings')?.addEventListener('click', () => {
+            openModal(settingsPopup);
+            this.updateVersionDisplay();
+        });
         document.getElementById('btn-update-app')?.addEventListener('click', () => {
             closeModal(settingsPopup);
             openModal(popupUpdateConfirm);
@@ -658,6 +661,62 @@ class KMapInterface {
                 alert('Update failed. Please check console for details.');
             }
         });
+    }
+
+    async updateVersionDisplay() {
+        const elInstalled = document.getElementById('installed-cache-ver');
+        const elLatest = document.getElementById('latest-cache-ver');
+        if (!elInstalled || !elLatest) return;
+
+        elInstalled.textContent = 'Checking...';
+        elInstalled.className = 'version-val';
+        elLatest.textContent = 'Checking...';
+        elLatest.className = 'version-val';
+
+        let installedVer = 'None';
+        let latestVer = 'Unknown';
+
+        // 1. Get installed cache version from caches API
+        if ('caches' in window) {
+            try {
+                const keys = await caches.keys();
+                const kmapCache = keys.find(k => k.startsWith('kmap-solver-'));
+                if (kmapCache) {
+                    installedVer = kmapCache.replace('kmap-solver-', '');
+                }
+            } catch (e) {
+                console.warn('Failed to read cache keys:', e);
+            }
+        }
+        elInstalled.textContent = installedVer;
+
+        // 2. Fetch latest sw.js from server to extract CACHE_VERSION
+        try {
+            const res = await fetch(`sw.js?_t=${Date.now()}`, { cache: 'no-store' });
+            if (res.ok) {
+                const text = await res.text();
+                const match = text.match(/const\s+CACHE_VERSION\s*=\s*['"]([^'"]+)['"]/);
+                if (match && match[1]) {
+                    latestVer = match[1];
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to fetch latest sw.js:', e);
+            latestVer = 'Offline / Error';
+        }
+
+        elLatest.textContent = latestVer;
+
+        // Visual status indicator
+        if (installedVer !== 'None' && latestVer !== 'Unknown' && latestVer !== 'Offline / Error') {
+            if (installedVer === latestVer) {
+                elInstalled.classList.add('is-latest');
+                elLatest.classList.add('is-latest');
+            } else {
+                elInstalled.classList.add('has-update');
+                elLatest.classList.add('has-update');
+            }
+        }
     }
 
     setupThemeHandlers() {
