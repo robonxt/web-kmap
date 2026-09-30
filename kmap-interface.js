@@ -918,11 +918,9 @@ class KMapInterface {
             headerNav.classList.remove('compact');
             navItems.classList.remove('is-visible');
 
-            const headerRect = headerNav.getBoundingClientRect();
-            const navItemsRect = navItems.getBoundingClientRect();
-            const headerActions = document.querySelector('.header-actions');
-            const actionsWidth = headerActions ? headerActions.getBoundingClientRect().width : 0;
-            const needsCompact = navItemsRect.width > (headerRect.width - actionsWidth - 32);
+            const availableWidth = headerNav.getBoundingClientRect().width;
+            const tabsWidth = navItems.scrollWidth;
+            const needsCompact = tabsWidth > availableWidth;
 
             if (needsCompact) {
                 headerNav.classList.add('compact');
