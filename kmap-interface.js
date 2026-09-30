@@ -565,8 +565,7 @@ class KMapInterface {
     }
 
     calculateClusterPath(rects, gridRect, openEdges) {
-        const padding = 5;
-        const loopOverflow = 22;
+        const padding = 4;
         const radius = 24;
 
         let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
@@ -583,19 +582,25 @@ class KMapInterface {
             if (rBottom > bottom) bottom = rBottom;
         }
 
+        // Clamp open edges to grid boundary (0 to gridRect.width/height) so they never invade toolbars
+        const extLeft = openEdges.left ? 0 : left;
+        const extTop = openEdges.top ? 0 : top;
+        const extRight = openEdges.right ? gridRect.width : right;
+        const extBottom = openEdges.bottom ? gridRect.height : bottom;
+
         return this.buildRoundedRectPath(
-            openEdges.left ? left - loopOverflow : left,
-            openEdges.top ? top - loopOverflow : top,
-            openEdges.right ? right + loopOverflow : right,
-            openEdges.bottom ? bottom + loopOverflow : bottom,
+            extLeft,
+            extTop,
+            extRight,
+            extBottom,
             radius,
             openEdges
         );
     }
 
     calculateGroupPath(rects, gridRect) {
-        const padding = 5;
-        const radius = 30;
+        const padding = 4;
+        const radius = 26;
 
         let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
         for (let i = 0; i < rects.length; i++) {
