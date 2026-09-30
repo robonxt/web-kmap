@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>web-kmap Architecture & Findings</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    .tab-btn.active {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+    }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-4 md:p-8 font-sans">
+  <div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- Header Banner -->
+    <header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Verified</span>
+          <span class="text-xs text-[var(--muted-foreground)]">4 Specialists Consensus</span>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight">web-kmap: Final Audit & Roadmap Report</h1>
+        <p class="text-sm text-[var(--muted-foreground)] mt-1">Interactive review of codebase stability, SVG logic gates, and multi-tab feature expansion.</p>
+      </div>
+      <div class="flex gap-2">
+        <span class="text-xs px-3 py-1.5 rounded-lg bg-[var(--content)] border border-[var(--border)] font-mono">8+ Vars Dropped</span>
+        <span class="text-xs px-3 py-1.5 rounded-lg bg-[var(--content)] border border-[var(--border)] font-mono">SVG Gates Ready</span>
+      </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="flex flex-wrap gap-2 border-b border-[var(--border)] pb-2" id="nav-tabs">
+      <button onclick="switchTab('summary')" class="tab-btn active px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--content)]" data-target="summary">Executive Summary</button>
+      <button onclick="switchTab('council')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--content)]" data-target="council">4-Specialist Council</button>
+      <button onclick="switchTab('gates')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--content)]" data-target="gates">Logic Gate SVG Pipeline</button>
+      <button onclick="switchTab('tabs')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--content)]" data-target="tabs">Multi-Tab Architecture</button>
+      <button onclick="switchTab('cleanup')" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--content)]" data-target="cleanup">Cleanup Action Plan</button>
+    </nav>
+
+    <!-- Tab 1: Executive Summary -->
+    <section id="tab-summary" class="tab-content space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-sm">
+          <h3 class="text-xs uppercase font-semibold text-[var(--muted-foreground)] tracking-wider">Appearance & Logic</h3>
+          <p class="text-xl font-bold text-emerald-500 mt-2">Zero Visual Regression</p>
+          <p class="text-xs text-[var(--muted-foreground)] mt-2">No existing colors, SVG contours, cell cycling (0 &rarr; 1 &rarr; X), or logic minimizations change under the proposed cleanups.</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-sm">
+          <h3 class="text-xs uppercase font-semibold text-[var(--muted-foreground)] tracking-wider">Scope Alignment</h3>
+          <p class="text-xl font-bold text-sky-500 mt-2">8+ Vars Removed</p>
+          <p class="text-xs text-[var(--muted-foreground)] mt-2">Focus locked to 2, 3, and 4 variables. Avoids NP-hard recursive explosion, 32-bit shift wrap, and 65k row DOM freeze.</p>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-sm">
+          <h3 class="text-xs uppercase font-semibold text-[var(--muted-foreground)] tracking-wider">Future Features</h3>
+          <p class="text-xl font-bold text-purple-500 mt-2">SVG Circuits + Tabs</p>
+          <p class="text-xs text-[var(--muted-foreground)] mt-2">AST pipeline for AND/OR and NAND gates ready. Multi-tab navigation prepared for new feature tabs.</p>
+        </div>
+      </div>
+
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-4">
+        <h2 class="text-lg font-bold">Key Architectural Decision Points</h2>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3 p-3 rounded-lg bg-[var(--content)] border border-[var(--border)]">
+            <span class="text-base font-bold text-amber-500">&bull;</span>
+            <div class="text-sm">
+              <span class="font-semibold">Keep 2-4 Variables Max:</span> Aligns directly with Karnaugh map theory. K-maps are visual teaching tools for 2-4 variables. Real hardware engineering uses Espresso/HDL synthesis for higher dimensions.
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-3 rounded-lg bg-[var(--content)] border border-[var(--border)]">
+            <span class="text-base font-bold text-blue-500">&bull;</span>
+            <div class="text-sm">
+              <span class="font-semibold">Pure SVG Circuit Generation:</span> Zero raster canvas. Uses declarative SVG markup inheriting existing CSS tokens (`--stroke-sm`, `--stroke-md`, `--text-primary`) for crisp rendering at any DPI.
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-3 rounded-lg bg-[var(--content)] border border-[var(--border)]">
+            <span class="text-base font-bold text-emerald-500">&bull;</span>
+            <div class="text-sm">
+              <span class="font-semibold">Clean Tab Controller Pattern:</span> Extend the current pill-slider navigation to easily mount new view containers (`#tab-circuit`, `#tab-nand`) without touching core solver state.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: 4-Specialist Council -->
+    <section id="tab-council" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- UI Designer -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-base flex items-center gap-2">🎨 UI Designer</h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 font-semibold">Visual Aesthetics</span>
+          </div>
+          <ul class="text-sm text-[var(--muted-foreground)] space-y-2 list-disc pl-4">
+            <li><strong>Design System:</strong> Clean token system in <code class="text-xs font-mono">tokens.css</code>. High visual quality.</li>
+            <li><strong>SVG Cluster Contours:</strong> Absolute SVG overlay with clamped bezier corners is elegant and non-destructive.</li>
+            <li><strong>Color Separation:</strong> Move hardcoded <code class="text-xs font-mono">hsla</code> strings in <code class="text-xs font-mono">groupColors</code> to CSS variables (<code class="text-xs font-mono">var(--group-1)</code>) for easier theme tweaking.</li>
+          </ul>
+        </div>
+
+        <!-- UX Designer -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-base flex items-center gap-2">📱 UX Designer</h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-purple-500/10 text-purple-500 font-semibold">Interaction Flow</span>
+          </div>
+          <ul class="text-sm text-[var(--muted-foreground)] space-y-2 list-disc pl-4">
+            <li><strong>Cell Cycling:</strong> 0 &rarr; 1 &rarr; X &rarr; 0 click interaction has low friction and great responsiveness.</li>
+            <li><strong>Hide Zeros:</strong> Replacing '0' with Hangul blank filler reduces cognitive clutter significantly.</li>
+            <li><strong>Future Tabs:</strong> Need a clean horizontal tab bar or responsive dropdown on mobile when tabs expand from 2 to 4+.</li>
+          </ul>
+        </div>
+
+        <!-- Logic Designer -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-base flex items-center gap-2">📐 Logic Designer</h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 font-semibold">Switching Theory</span>
+          </div>
+          <ul class="text-sm text-[var(--muted-foreground)] space-y-2 list-disc pl-4">
+            <li><strong>2-4 Variables Rigor:</strong> Exact prime implicant extraction and minimal SOP cover algorithm is verified correct for 2-4 variables.</li>
+            <li><strong>Ties / Multiple Solutions:</strong> Handled properly via dropdown selector.</li>
+            <li><strong>Simplification AST:</strong> Recommends solver return an AST tree alongside the solution string to drive circuit generation cleanly.</li>
+          </ul>
+        </div>
+
+        <!-- Electronics Engineer -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-base flex items-center gap-2">⚡ Electronics Engineer</h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 font-semibold">Hardware Mapping</span>
+          </div>
+          <ul class="text-sm text-[var(--muted-foreground)] space-y-2 list-disc pl-4">
+            <li><strong>Universal NAND Gates:</strong> Two-level SOP (&Sigma; of products) maps to 2-level NAND-NAND via De Morgan's Law. Inverted literals require input inverter NANDs.</li>
+            <li><strong>Fan-In Constraints:</strong> 4-variable map terms have at most 4 inputs, which fits standard 74xx TTL / CMOS gate packages (e.g. 74HC20 dual 4-input NAND).</li>
+            <li><strong>Interactive Highlighting:</strong> Hovering over a gate in the schematic should highlight its corresponding product term in the equation.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Logic Gate SVG Pipeline -->
+    <section id="tab-gates" class="tab-content hidden space-y-6">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+          <div>
+            <h2 class="text-lg font-bold">Automatic SVG Circuit Generator Architecture</h2>
+            <p class="text-sm text-[var(--muted-foreground)]">How simplified SOP expressions convert to standard and NAND-only SVG schematics.</p>
+          </div>
+          <div class="flex gap-2">
+            <button id="btn-gate-demo-sop" onclick="renderDemoCircuit('sop')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]">AND-OR Demo</button>
+            <button id="btn-gate-demo-nand" onclick="renderDemoCircuit('nand')" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] bg-[var(--content)] hover:bg-[var(--border)]">NAND-only Demo</button>
+          </div>
+        </div>
+
+        <!-- Circuit Canvas Preview -->
+        <div class="border border-[var(--border)] rounded-xl p-4 bg-[var(--content)] flex flex-col items-center justify-center min-h-[220px]">
+          <div id="circuit-container" class="w-full flex items-center justify-center">
+            <!-- Dynamic SVG injected here -->
+          </div>
+          <p id="circuit-caption" class="text-xs text-[var(--muted-foreground)] mt-3 font-mono">Expression: !A!B + CD &rarr; Two 2-input AND gates into one 2-input OR gate</p>
+        </div>
+
+        <!-- Architecture Flow -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+            <span class="font-bold text-[var(--foreground)] block mb-1">Step 1: AST Parser</span>
+            Split SOP string into Product Terms and Literals. Identify input inversions (!A &rarr; NOT).
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+            <span class="font-bold text-[var(--foreground)] block mb-1">Step 2: Gate Placement</span>
+            Calculate column coordinates: Column 1 = Inputs/Inverters, Column 2 = Product AND/NAND gates, Column 3 = Output OR/NAND gate.
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+            <span class="font-bold text-[var(--foreground)] block mb-1">Step 3: SVG Wire Routing</span>
+            Draw orthogonal polyline bus lines connecting inputs, gates, and output pins cleanly.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 4: Multi-Tab Architecture -->
+    <section id="tab-tabs" class="tab-content hidden space-y-6">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-4">
+        <h2 class="text-lg font-bold">Scaling Navigation for Future Feature Tabs</h2>
+        <p class="text-sm text-[var(--muted-foreground)]">The current header uses a 2-tab pill selector (<code class="text-xs font-mono">#btn-tab-kmap</code> and <code class="text-xs font-mono">#btn-tab-truthtable</code>). Here is the recommended extensible layout for 4+ tabs.</p>
+
+        <!-- Interactive Tab Bar Demo -->
+        <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--content)] space-y-4">
+          <label class="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider block">Interactive Feature Tab Bar Prototype</label>
+          <div class="inline-flex p-1 rounded-xl bg-[var(--card)] border border-[var(--border)] gap-1 flex-wrap" id="proto-tabs">
+            <button onclick="setProtoTab(this, 'K-Map View: Interactive 2D Grid with SVG overlays')" class="proto-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] transition-colors">K-Map</button>
+            <button onclick="setProtoTab(this, 'Truth Table View: 2^n binary combinations with live toggle')" class="proto-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">Truth Table</button>
+            <button onclick="setProtoTab(this, 'Basic Logic Gates View: Standard AND-OR-NOT Schematic')" class="proto-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">Logic Gates</button>
+            <button onclick="setProtoTab(this, 'NAND Circuit View: Universal NAND-only Hardware Netlist')" class="proto-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">NAND Circuit</button>
+          </div>
+          <div id="proto-output" class="p-4 rounded-lg bg-[var(--card)] border border-[var(--border)] text-sm font-medium">
+            K-Map View: Interactive 2D Grid with SVG overlays
+          </div>
+        </div>
+
+        <!-- Implementation Pattern -->
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+          <h3 class="text-sm font-bold">DRY Implementation Pattern for <code class="text-xs font-mono">kmap-interface.js</code></h3>
+          <p class="text-xs text-[var(--muted-foreground)]">Replace individual tab toggle bindings with a declarative data attribute loop:</p>
+          <pre class="p-3 rounded-lg bg-[var(--content)] border border-[var(--border)] text-xs font-mono overflow-x-auto"><code>// Generic Tab Switcher
+this.elements.tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        this.switchActiveTab(target);
+    });
+});
+
+switchActiveTab(targetTabId) {
+    document.querySelectorAll('.tab-content-container').forEach(c => {
+        c.classList.toggle('active', c.id === targetTabId);
+    });
+    // Trigger redraw for SVG circuit when its tab becomes visible
+    if (targetTabId === 'circuit') this.renderCircuit();
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 5: Cleanup Action Plan -->
+    <section id="tab-cleanup" class="tab-content hidden space-y-6">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-4">
+        <h2 class="text-lg font-bold">Actionable Code Cleanup Checklist</h2>
+        <p class="text-sm text-[var(--muted-foreground)]">Refactorings that improve maintainability and prepare for logic gate circuits without touching appearance or behavior.</p>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border border-[var(--border)] rounded-lg">
+            <thead class="bg-[var(--content)] text-[var(--muted-foreground)] border-b border-[var(--border)]">
+              <tr>
+                <th class="p-3">Component</th>
+                <th class="p-3">Location</th>
+                <th class="p-3">Current Issue</th>
+                <th class="p-3">Action</th>
+                <th class="p-3">Benefit</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--border)]">
+              <tr>
+                <td class="p-3 font-semibold">Group Colors</td>
+                <td class="p-3 font-mono">kmap-interface.js:26</td>
+                <td class="p-3">Hardcoded HSLA strings in JS</td>
+                <td class="p-3">Reference CSS variables</td>
+                <td class="p-3">Consistent theming</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-semibold">AST Generation</td>
+                <td class="p-3 font-mono">kmap-solver.js:151</td>
+                <td class="p-3">Solver returns string only</td>
+                <td class="p-3">Add AST { terms: [literals] }</td>
+                <td class="p-3">Enables direct circuit generation</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-semibold">Tab Router</td>
+                <td class="p-3 font-mono">kmap-interface.js:964</td>
+                <td class="p-3">Hardcoded 2-tab pill slider</td>
+                <td class="p-3">Generic declarative tab switcher</td>
+                <td class="p-3">Enables adding feature tabs cleanly</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-semibold">Keyboard Nav</td>
+                <td class="p-3 font-mono">kmap-interface.js:1014</td>
+                <td class="p-3">Cells lack tabindex & keydown</td>
+                <td class="p-3">Add tabindex & Enter/Space cycle</td>
+                <td class="p-3">Full accessibility compliance</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.target === tabId);
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('hidden', content.id !== 'tab-' + tabId);
+      });
+      if (tabId === 'gates') {
+        renderDemoCircuit('sop');
+      }
+    }
+
+    function setProtoTab(btn, description) {
+      document.querySelectorAll('.proto-btn').forEach(b => {
+        b.className = 'proto-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors';
+      });
+      btn.className = 'proto-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] transition-colors';
+      document.getElementById('proto-output').textContent = description;
+    }
+
+    function renderDemoCircuit(mode) {
+      const container = document.getElementById('circuit-container');
+      const caption = document.getElementById('circuit-caption');
+      const btnSop = document.getElementById('btn-gate-demo-sop');
+      const btnNand = document.getElementById('btn-gate-demo-nand');
+
+      if (mode === 'sop') {
+        btnSop.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]";
+        btnNand.className = "px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] bg-[var(--content)] hover:bg-[var(--border)]";
+        caption.textContent = "Expression: !A!B + CD → Two 2-input AND gates driving one 2-input OR gate";
+
+        container.innerHTML = `
+          <svg viewBox="0 0 460 140" class="w-full max-w-[460px] h-auto stroke-current text-[var(--foreground)] fill-none font-mono text-[11px]">
+            <!-- AND Gate 1 (Top) -->
+            <path d="M 120 20 h 20 a 20 20 0 0 1 20 20 a 20 20 0 0 1 -20 20 h -20 z" stroke="currentColor" stroke-width="2" class="fill-[var(--card)]"/>
+            <text x="135" y="44" stroke="none" fill="currentColor" font-weight="bold">AND</text>
+            <!-- Inverter bubbles on inputs -->
+            <circle cx="116" cy="30" r="3" stroke="currentColor" stroke-width="1.5" class="fill-[var(--card)]"/>
+            <circle cx="116" cy="50" r="3" stroke="currentColor" stroke-width="1.5" class="fill-[var(--card)]"/>
+            <!-- Inputs to AND 1 -->
+            <line x1="70" y1="30" x2="113" y2="30" stroke="currentColor" stroke-width="2"/>
+            <line x1="70" y1="50" x2="113" y2="50" stroke="currentColor" stroke-width="2"/>
+            <text x="50" y="34" stroke="none" fill="currentColor">A</text>
+            <text x="50" y="54" stroke="none" fill="currentColor">B</text>
+
+            <!-- AND Gate 2 (Bottom) -->
+            <path d="M 120 80 h 20 a 20 20 0 0 1 20 20 a 20 20 0 0 1 -20 20 h -20 z" stroke="currentColor" stroke-width="2" class="fill-[var(--card)]"/>
+            <text x="135" y="104" stroke="none" fill="currentColor" font-weight="bold">AND</text>
+            <!-- Inputs to AND 2 -->
+            <line x1="70" y1="90" x2="120" y2="90" stroke="currentColor" stroke-width="2"/>
+            <line x1="70" y1="110" x2="120" y2="110" stroke="currentColor" stroke-width="2"/>
+            <text x="50" y="94" stroke="none" fill="currentColor">C</text>
+            <text x="50" y="114" stroke="none" fill="currentColor">D</text>
+
+            <!-- OR Gate (Output) -->
+            <path d="M 280 40 q 15 30 0 60 q 30 -5 50 -30 q -20 -25 -50 -30 z" stroke="currentColor" stroke-width="2" class="fill-[var(--card)]"/>
+            <text x="295" y="74" stroke="none" fill="currentColor" font-weight="bold">OR</text>
+
+            <!-- Interconnecting Wires -->
+            <path d="M 160 40 h 60 v 15 h 60" stroke="currentColor" stroke-width="2"/>
+            <path d="M 160 100 h 60 v -15 h 60" stroke="currentColor" stroke-width="2"/>
+
+            <!-- Output Wire -->
+            <line x1="330" y1="70" x2="390" y2="70" stroke="currentColor" stroke-width="2"/>
+            <circle cx="390" cy="70" r="3" fill="currentColor"/>
+            <text x="400" y="74" stroke="none" fill="currentColor" font-weight="bold">Y (Output)</text>
+          </svg>
+        `;
+      } else {
+        btnNand.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)]";
+        btnSop.className = "px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] bg-[var(--content)] hover:bg-[var(--border)]";
+        caption.textContent = "Universal De Morgan Form: NAND-NAND logic with inverter gates for negated inputs";
+
+        container.innerHTML = `
+          <svg viewBox="0 0 460 140" class="w-full max-w-[460px] h-auto stroke-current text-[var(--foreground)] fill-none font-mono text-[11px]">
+            <!-- NAND Gate 1 (Top) -->
+            <path d="M 120 20 h 20 a 20 20 0 0 1 20 20 a 20 20 0 0 1 -20 20 h -20 z" stroke="currentColor" stroke-width="2" class="fill-[var(--card)]"/>
+            <circle cx="164" cy="40" r="4" stroke="currentColor" stroke-width="2" class="fill-[var(--card)]"/>
+            <text x="127" y="44" stroke="none" fill="currentColor" font-weight="bold">NAND</text>
+            <!-- Inversion input bubbles -->
+            <circle cx="116" cy="30" r="3" stroke="currentColor" stroke-width="1.5" class="fill-[var(--card)]"/>
+            <circle cx="116" cy="50" r="3" stroke="currentColor" stroke-width="1.5" class="fill-[var(--card)]"/>
+            <line x1="70" y1="30" x2="113" y2="30" stroke="currentColor" stroke-width="2"/>
+            <line x1="70" y1="50" x2="113" y2="50" stroke="currentColor" stroke-width="2"/>
+            <text x="50" y="34" stroke="none" fill="currentColor">A</text>
+            <text x="50" y="54" stroke="none" fill="currentColor">B</text>
+
+            <!-- NAND Gate 2 (Bottom) -->
+            <path d="M 120 80 h 20 a 20 20 0 0 1 20 20 a 20 20 0 0 1 -20 20 h -20 z" stroke="currentColor" stroke-width="2" class="fill-[var(--card)]"/>
+            <circle cx="164" cy="100" r="4" stroke="currentColor" stroke-width="2" class="fill-[var(--card)]"/>
+            <text x="127" y="104" stroke="none" fill="currentColor" font-weight="bold">NAND</text>
+            <line x1="70" y1="90" x2="120" y2="90" stroke="currentColor" stroke-width="2"/>
+            <line x1="70" y1="110" x2="120" y2="110" stroke="currentColor" stroke-width="2"/>
+            <text x="50" y="94" stroke="none" fill="currentColor">C</text>
+            <text x="50" y="114" stroke="none" fill="currentColor">D</text>
+
+            <!-- Output NAND Gate -->
+            <path d="M 280 50 h 20 a 20 20 0 0 1 20 20 a 20 20 0 0 1 -20 20 h -20 z" stroke="currentColor" stroke-width="2" class="fill-[var(--card)]"/>
+            <circle cx="324" cy="70" r="4" stroke="currentColor" stroke-width="2" class="fill-[var(--card)]"/>
+            <text x="287" y="74" stroke="none" fill="currentColor" font-weight="bold">NAND</text>
+
+            <!-- Interconnecting Wires -->
+            <path d="M 168 40 h 52 v 20 h 60" stroke="currentColor" stroke-width="2"/>
+            <path d="M 168 100 h 52 v -20 h 60" stroke="currentColor" stroke-width="2"/>
+
+            <!-- Output Wire -->
+            <line x1="328" y1="70" x2="390" y2="70" stroke="currentColor" stroke-width="2"/>
+            <circle cx="390" cy="70" r="3" fill="currentColor"/>
+            <text x="400" y="74" stroke="none" fill="currentColor" font-weight="bold">Y (Output)</text>
+          </svg>
+        `;
+      }
+    }
+
+    // Default init
+    renderDemoCircuit('sop');
+  </script>
+</body>
+</html>
