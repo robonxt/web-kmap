@@ -22,16 +22,16 @@ class KMapInterface {
             inputToggleTheme: document.getElementById('input-toggle-theme')
         };
 
-        // Predefined distinct colors for groups
+        // Predefined distinct colors for groups (mapped to CSS variables)
         this.groupColors = [
-            'hsla(0, 100%, 60%, 0.8)',    // Red
-            'hsla(210, 100%, 60%, 0.8)',  // Blue
-            'hsla(120, 100%, 60%, 0.8)',  // Green
-            'hsla(45, 100%, 60%, 0.8)',   // Orange
-            'hsla(280, 100%, 60%, 0.8)',  // Purple
-            'hsla(180, 100%, 60%, 0.8)',  // Cyan
-            'hsla(330, 100%, 60%, 0.8)',  // Pink
-            'hsla(150, 100%, 60%, 0.8)'   // Teal
+            'var(--group-color-1)',
+            'var(--group-color-2)',
+            'var(--group-color-3)',
+            'var(--group-color-4)',
+            'var(--group-color-5)',
+            'var(--group-color-6)',
+            'var(--group-color-7)',
+            'var(--group-color-8)'
         ];
 
         // Initialize state
@@ -171,7 +171,16 @@ class KMapInterface {
         centerWrapper.appendChild(valDiv);
 
         cell.append(decDiv, centerWrapper, binDiv);
+        cell.setAttribute('tabindex', '0');
+        cell.setAttribute('role', 'gridcell');
+        cell.setAttribute('aria-label', `Cell ${index}, binary ${binaryPart}, value ${state}`);
         cell.addEventListener('click', () => this.toggleCell(index));
+        cell.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.toggleCell(index);
+            }
+        });
         return cell;
     }
 
@@ -215,7 +224,16 @@ class KMapInterface {
         if (index !== null) {
             td.dataset.index = index;
             td.dataset.state = this.grid[index] || '0';
+            td.setAttribute('tabindex', '0');
+            td.setAttribute('role', 'button');
+            td.setAttribute('aria-label', `Row ${index} output`);
             td.addEventListener('click', () => this.toggleCell(index));
+            td.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.toggleCell(index);
+                }
+            });
         }
         return td;
     }
@@ -235,6 +253,8 @@ class KMapInterface {
         const kmapCell = this.kmapCells[index];
         if (kmapCell) {
             kmapCell.dataset.state = newState;
+            const binaryPart = index.toString(2).padStart(this.numVars, '0');
+            kmapCell.setAttribute('aria-label', `Cell ${index}, binary ${binaryPart}, value ${newState}`);
             const valDiv = kmapCell.querySelector('.value-display');
             if (valDiv) {
                 valDiv.textContent = (newState === '1' || newState === 'X') ? newState : (this.hideZeros ? 'ㅤ' : '0');

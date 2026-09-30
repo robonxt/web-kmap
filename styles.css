@@ -93,6 +93,16 @@
     --max-width: 800px;
     --button-min-width: 40px;
     --space-xxs: 4px;
+
+    /* Group outline and term colors */
+    --group-color-1: hsla(0, 100%, 60%, 0.8);
+    --group-color-2: hsla(210, 100%, 60%, 0.8);
+    --group-color-3: hsla(120, 100%, 60%, 0.8);
+    --group-color-4: hsla(45, 100%, 60%, 0.8);
+    --group-color-5: hsla(280, 100%, 60%, 0.8);
+    --group-color-6: hsla(180, 100%, 60%, 0.8);
+    --group-color-7: hsla(330, 100%, 60%, 0.8);
+    --group-color-8: hsla(150, 100%, 60%, 0.8);
 }
 
 [data-theme="light"] {
@@ -350,6 +360,12 @@ body {
 
 .cell.dont-care {
     background-color: var(--cell-dont-care-color);
+}
+
+.cell:focus-visible,
+.truth-table td:focus-visible {
+    outline: var(--stroke-md) solid var(--kmap-primary);
+    outline-offset: -2px;
 }
 
 .binary-display,
