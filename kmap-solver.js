@@ -219,7 +219,7 @@ function solve(variables, minterms, dontcares = []) {
 }
 
 if (typeof window !== 'undefined') {
-    window.KMapSolver = { solve, KMapGrayCodes, getKMap, findDecimalPos, KMapTransposedLayouts, KMapBinaryLayouts: KMapTransposedLayouts };
+    window.KMapSolver = { solve, KMapGrayCodes, getKMap, findDecimalPos, KMapTransposedLayouts };
 } else {
-    module.exports = { solve, KMapGrayCodes, getKMap, findDecimalPos, KMapTransposedLayouts, KMapBinaryLayouts: KMapTransposedLayouts };
+    module.exports = { solve, KMapGrayCodes, getKMap, findDecimalPos, KMapTransposedLayouts };
 }

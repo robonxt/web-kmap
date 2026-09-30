@@ -858,19 +858,21 @@ class KMapInterface {
 
         if (!headerNav || !navItems) return;
 
+        const updateSlider = (pill = navItems?.querySelector('.btn-pill.active')) => {
+            if (!pill || !slider || headerNav.classList.contains('compact')) return;
+            const pillRect = pill.getBoundingClientRect();
+            const containerRect = navItems.getBoundingClientRect();
+            slider.style.left = `${pillRect.left - containerRect.left}px`;
+            slider.style.width = `${pillRect.width}px`;
+            slider.style.height = `${pillRect.height}px`;
+        };
+
         // Set up pill click handlers
         navPills.forEach(pill => {
             pill.addEventListener('click', () => {
                 navPills.forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
-
-                if (!headerNav.classList.contains('compact') && slider) {
-                    const pillRect = pill.getBoundingClientRect();
-                    const containerRect = navItems.getBoundingClientRect();
-                    slider.style.left = `${pillRect.left - containerRect.left}px`;
-                    slider.style.width = `${pillRect.width}px`;
-                    slider.style.height = `${pillRect.height}px`;
-                }
+                updateSlider(pill);
 
                 if (navTitle) navTitle.textContent = pill.textContent;
                 if (headerNav.classList.contains('compact')) navItems.classList.remove('is-visible');
@@ -921,30 +923,13 @@ class KMapInterface {
                 const activePill = navItems.querySelector('.btn-pill.active');
                 if (activePill && navTitle) navTitle.textContent = activePill.textContent;
             } else {
-                const activePill = navItems.querySelector('.btn-pill.active');
-                if (activePill && slider) {
-                    setTimeout(() => {
-                        const pillRect = activePill.getBoundingClientRect();
-                        const containerRect = navItems.getBoundingClientRect();
-                        slider.style.left = `${pillRect.left - containerRect.left}px`;
-                        slider.style.width = `${pillRect.width}px`;
-                        slider.style.height = `${pillRect.height}px`;
-                    }, 0);
-                }
+                setTimeout(updateSlider, 0);
             }
         };
 
         checkOverflow();
         window.addEventListener('resize', checkOverflow);
-
-        const activePill = navItems.querySelector('.btn-pill.active');
-        if (activePill && slider) {
-            const pillRect = activePill.getBoundingClientRect();
-            const containerRect = navItems.getBoundingClientRect();
-            slider.style.left = `${pillRect.left - containerRect.left}px`;
-            slider.style.width = `${pillRect.width}px`;
-            slider.style.height = `${pillRect.height}px`;
-        }
+        updateSlider();
     }
 
     setupFloatingPill({ id, closeId, storageKey }) {
